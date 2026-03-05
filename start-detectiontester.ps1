@@ -222,6 +222,7 @@ if ($script:Prefs.DarkMode) {
 # ---------------------------------------------------------------------------
 
 function Show-PreferencesDialog {
+    $scriptFile = Join-Path $PSScriptRoot "start-detectiontester.ps1"
     $dlg = New-Object System.Windows.Forms.Form
     $dlg.Text = "Preferences"; $dlg.Size = New-Object System.Drawing.Size(440, 200)
     $dlg.MinimumSize = $dlg.Size; $dlg.MaximumSize = $dlg.Size
@@ -260,7 +261,7 @@ function Show-PreferencesDialog {
             $result = [System.Windows.Forms.MessageBox]::Show("Theme change requires a restart. Restart now?", "Restart Required", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Question)
             if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
                 Save-WindowState
-                Start-Process powershell.exe -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', "`"$($MyInvocation.ScriptName)`"")
+                Start-Process powershell.exe -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', "`"$scriptFile`"")
                 $form.Close()
             }
         }
