@@ -21,8 +21,8 @@
 
     ScriptName : start-detectiontester.ps1
     Purpose    : Test MECM detection methods locally
-    Version    : 1.0.0
-    Updated    : 2026-03-04
+    Version    : 1.0.2
+    Updated    : 2026-03-17
 #>
 
 param()
@@ -319,7 +319,7 @@ $menuHelpAbout = New-Object System.Windows.Forms.ToolStripMenuItem("&About Detec
 $menuHelpAbout.ForeColor = $clrText
 $menuHelpAbout.Add_Click({
     $aboutText = @(
-        "Detection Method Tester v1.0.0", "",
+        "Detection Method Tester v1.0.2", "",
         "Test MECM application detection methods against the local machine",
         "without deploying through MECM.", "",
         "Supports: RegistryKeyValue, RegistryKey, File, Script, Compound", "",
@@ -977,6 +977,10 @@ $script:AppsTable = New-Object System.Data.DataTable
 [void]$script:AppsTable.Columns.Add("DisplayVersion", [string])
 [void]$script:AppsTable.Columns.Add("Architecture", [string])
 [void]$script:AppsTable.Columns.Add("RegistryKey", [string])
+[void]$script:AppsTable.Columns.Add("UninstallString", [string])
+[void]$script:AppsTable.Columns.Add("QuietUninstallString", [string])
+[void]$script:AppsTable.Columns.Add("InstallLocation", [string])
+[void]$script:AppsTable.Columns.Add("InstallDate", [string])
 
 $script:AppsView = New-Object System.Data.DataView($script:AppsTable)
 $script:AppsLoaded = $false
@@ -1018,6 +1022,18 @@ $sepApps = New-Object System.Windows.Forms.Panel
 $sepApps.Dock = [System.Windows.Forms.DockStyle]::Top; $sepApps.Height = 1; $sepApps.BackColor = $clrSepLine
 $tabApps.Controls.Add($sepApps)
 
+# -- SplitContainer: grid (top) + detail panel (bottom) --
+$splitApps = New-Object System.Windows.Forms.SplitContainer
+$splitApps.Dock = [System.Windows.Forms.DockStyle]::Fill
+$splitApps.Orientation = [System.Windows.Forms.Orientation]::Horizontal
+$splitApps.SplitterDistance = 350
+$splitApps.SplitterWidth = 6
+$splitApps.BackColor = $clrSepLine
+$splitApps.Panel1.BackColor = $clrPanelBg
+$splitApps.Panel2.BackColor = $clrPanelBg
+$splitApps.Panel1MinSize = 100
+$splitApps.Panel2MinSize = 80
+
 # -- Apps grid --
 $dgvApps = New-ThemedGrid
 $dgvApps.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -1031,12 +1047,41 @@ $colAppRegKey  = New-Object System.Windows.Forms.DataGridViewTextBoxColumn; $col
 [void]$dgvApps.Columns.AddRange([System.Windows.Forms.DataGridViewColumn[]]@($colAppName, $colAppPub, $colAppVer, $colAppArch, $colAppRegKey))
 $dgvApps.DataSource = $script:AppsView
 
-$tabApps.Controls.Add($dgvApps)
+$splitApps.Panel1.Controls.Add($dgvApps)
+
+# -- Detail panel (bottom) --
+$pnlAppDetail = New-Object System.Windows.Forms.Panel
+$pnlAppDetail.Dock = [System.Windows.Forms.DockStyle]::Fill
+$pnlAppDetail.BackColor = $clrDetailBg
+$pnlAppDetail.Padding = New-Object System.Windows.Forms.Padding(8, 4, 8, 4)
+
+$btnCopyDetails = New-Object System.Windows.Forms.Button
+$btnCopyDetails.Text = "Copy Details"
+$btnCopyDetails.Dock = [System.Windows.Forms.DockStyle]::Top
+$btnCopyDetails.Height = 28
+$btnCopyDetails.Font = New-Object System.Drawing.Font("Segoe UI", 8.5, [System.Drawing.FontStyle]::Bold)
+Set-ModernButtonStyle -Button $btnCopyDetails -BackColor ([System.Drawing.Color]::FromArgb(34, 139, 34))
+$pnlAppDetail.Controls.Add($btnCopyDetails)
+
+$rtbAppDetail = New-Object System.Windows.Forms.RichTextBox
+$rtbAppDetail.Dock = [System.Windows.Forms.DockStyle]::Fill
+$rtbAppDetail.ReadOnly = $true
+$rtbAppDetail.BorderStyle = [System.Windows.Forms.BorderStyle]::None
+$rtbAppDetail.Font = New-Object System.Drawing.Font("Consolas", 9.5)
+$rtbAppDetail.BackColor = $clrDetailBg
+$rtbAppDetail.ForeColor = $clrText
+$rtbAppDetail.Text = "Select an application above to see details."
+$pnlAppDetail.Controls.Add($rtbAppDetail)
+$rtbAppDetail.BringToFront()
+
+$splitApps.Panel2.Controls.Add($pnlAppDetail)
+
+$tabApps.Controls.Add($splitApps)
 
 # Dock order
 $pnlAppsFilter.BringToFront()
 $sepApps.BringToFront()
-$dgvApps.BringToFront()
+$splitApps.BringToFront()
 
 # -- Filter debounce timer --
 $script:FilterTimer = New-Object System.Windows.Forms.Timer
@@ -1059,6 +1104,76 @@ $txtAppsFilter.Add_TextChanged({
     $script:FilterTimer.Start()
 }.GetNewClosure())
 
+# -- Detail panel: populate on selection change --
+$script:FormatAppDetail = {
+    if ($dgvApps.SelectedRows.Count -eq 0) {
+        $rtbAppDetail.Text = "Select an application above to see details."
+        return
+    }
+
+    $row = $dgvApps.SelectedRows[0]
+    $dn = [string]$row.Cells["DisplayName"].Value
+    $pub = [string]$row.Cells["Publisher"].Value
+    $ver = [string]$row.Cells["Version"].Value
+    $arch = [string]$row.Cells["Arch"].Value
+    $regKey = [string]$row.Cells["Registry Key"].Value
+
+    # Read hidden DataTable columns via the underlying DataRowView
+    $rowIdx = $row.Index
+    $drv = $script:AppsView[$rowIdx]
+    $uninstall = [string]$drv["UninstallString"]
+    $quietUninstall = [string]$drv["QuietUninstallString"]
+    $installLoc = [string]$drv["InstallLocation"]
+    $installDate = [string]$drv["InstallDate"]
+
+    $rtbAppDetail.Clear()
+
+    $rtbAppDetail.SelectionFont = New-Object System.Drawing.Font("Consolas", 10, [System.Drawing.FontStyle]::Bold)
+    $rtbAppDetail.SelectionColor = $clrAccent
+    $rtbAppDetail.AppendText("$dn`r`n")
+
+    $rtbAppDetail.SelectionFont = New-Object System.Drawing.Font("Consolas", 9.5)
+    $rtbAppDetail.SelectionColor = $clrText
+
+    $lines = @(
+        "DisplayName:          $dn"
+        "Publisher:            $pub"
+        "DisplayVersion:       $ver"
+        "Architecture:         $arch"
+        "RegistryKey:          HKLM\$regKey"
+        "UninstallString:      $uninstall"
+        "QuietUninstallString: $quietUninstall"
+        "InstallLocation:      $installLoc"
+        "InstallDate:          $installDate"
+    )
+    $rtbAppDetail.AppendText(($lines -join "`r`n"))
+}.GetNewClosure()
+
+$dgvApps.Add_SelectionChanged({ & $script:FormatAppDetail })
+
+# -- Copy Details button --
+$btnCopyDetails.Add_Click({
+    if ($dgvApps.SelectedRows.Count -eq 0) { return }
+
+    $row = $dgvApps.SelectedRows[0]
+    $rowIdx = $row.Index
+    $drv = $script:AppsView[$rowIdx]
+
+    $lines = @(
+        "DisplayName:          $([string]$drv['DisplayName'])"
+        "Publisher:            $([string]$drv['Publisher'])"
+        "DisplayVersion:       $([string]$drv['DisplayVersion'])"
+        "Architecture:         $([string]$drv['Architecture'])"
+        "RegistryKey:          HKLM\$([string]$drv['RegistryKey'])"
+        "UninstallString:      $([string]$drv['UninstallString'])"
+        "QuietUninstallString: $([string]$drv['QuietUninstallString'])"
+        "InstallLocation:      $([string]$drv['InstallLocation'])"
+        "InstallDate:          $([string]$drv['InstallDate'])"
+    )
+    [System.Windows.Forms.Clipboard]::SetText($lines -join "`r`n")
+    $statusLabel.Text = "Copied details for: $([string]$drv['DisplayName'])"
+}.GetNewClosure())
+
 # -- Lazy-load apps on tab activation --
 $tabMain.Add_SelectedIndexChanged({
     if ($tabMain.SelectedIndex -eq 1 -and -not $script:AppsLoaded) {
@@ -1073,7 +1188,11 @@ $tabMain.Add_SelectedIndexChanged({
                     $app.Publisher,
                     $app.DisplayVersion,
                     $app.Architecture,
-                    $app.RegistryKey
+                    $app.RegistryKey,
+                    $app.UninstallString,
+                    $app.QuietUninstallString,
+                    $app.InstallLocation,
+                    $app.InstallDate
                 )
             }
             $script:AppsTable.EndLoadData()
