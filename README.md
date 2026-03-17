@@ -33,6 +33,8 @@ Select a detection type, fill in the parameters, and click **Test Detection**. T
 
 Enumerates all installed applications from both ARP registry hives (x64 + WOW6432Node). Filter by name, then double-click or click **Use for Detection** to switch to the Detection Tester tab with the registry key and version pre-filled.
 
+Select any application to see full ARP details in the panel below the grid: DisplayName, Publisher, DisplayVersion, Architecture, RegistryKey, UninstallString, QuietUninstallString, InstallLocation, and InstallDate. Click **Copy Details** to copy all fields to clipboard for pasting into packager scripts or documentation.
+
 ## Prerequisites
 
 | Requirement | Details |

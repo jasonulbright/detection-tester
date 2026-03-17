@@ -2,6 +2,13 @@
 
 All notable changes to Detection Method Tester are documented in this file.
 
+## [1.0.2] - 2026-03-17
+
+### Added
+- **App detail panel** on Installed Applications tab -- SplitContainer with grid on top, detail panel below showing all ARP fields for the selected application: DisplayName, Publisher, DisplayVersion, Architecture, RegistryKey, UninstallString, QuietUninstallString, InstallLocation, InstallDate
+- **Copy Details** button copies all fields to clipboard in key-value format for easy paste into packager scripts or documentation
+- `QuietUninstallString`, `InstallLocation`, and `InstallDate` now read from ARP registry during enumeration
+
 ## [1.0.1] - 2026-03-04
 
 ### Fixed

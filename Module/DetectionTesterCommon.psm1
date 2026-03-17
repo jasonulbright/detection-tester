@@ -528,12 +528,15 @@ function Get-InstalledApplications {
                     }
 
                     $apps += [PSCustomObject]@{
-                        DisplayName    = [string]$displayName
-                        Publisher      = [string]$subKey.GetValue('Publisher', '')
-                        DisplayVersion = [string]$subKey.GetValue('DisplayVersion', '')
-                        Architecture   = $arp.Arch
-                        RegistryKey    = "$($arp.Path)\$subKeyName"
-                        UninstallString = [string]$subKey.GetValue('UninstallString', '')
+                        DisplayName          = [string]$displayName
+                        Publisher            = [string]$subKey.GetValue('Publisher', '')
+                        DisplayVersion       = [string]$subKey.GetValue('DisplayVersion', '')
+                        Architecture         = $arp.Arch
+                        RegistryKey          = "$($arp.Path)\$subKeyName"
+                        UninstallString      = [string]$subKey.GetValue('UninstallString', '')
+                        QuietUninstallString = [string]$subKey.GetValue('QuietUninstallString', '')
+                        InstallLocation      = [string]$subKey.GetValue('InstallLocation', '')
+                        InstallDate          = [string]$subKey.GetValue('InstallDate', '')
                     }
 
                     $subKey.Close()
