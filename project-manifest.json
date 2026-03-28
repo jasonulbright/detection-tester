@@ -1,7 +1,0 @@
-{
-  "ProjectType": "mecm-tool",
-  "Status": "active",
-  "Category": "MECM",
-  "ValidationSchedule": "monthly",
-  "Notes": "Local detection method testing. Stable. Pending: C# + Fluent UI conversion."
-}
