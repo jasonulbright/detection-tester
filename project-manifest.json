@@ -1,0 +1,8 @@
+{
+  "ProjectType": "mecm-tool",
+  "Description": "Local testing tool for MECM application detection methods",
+  "Status": "active",
+  "Category": "MECM",
+  "ValidationSchedule": "monthly",
+  "Notes": "TASK: C# + Fluent UI conversion\nINFO: Local detection method testing tool\nINFO: Stable"
+}
