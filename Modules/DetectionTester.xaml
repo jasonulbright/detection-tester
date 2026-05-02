@@ -1,0 +1,296 @@
+<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+      Margin="8">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>  <!-- Toolbar -->
+        <RowDefinition Height="Auto"/>  <!-- Input panel -->
+        <RowDefinition Height="Auto"/>  <!-- Test row -->
+        <RowDefinition Height="Auto"/>  <!-- Result -->
+        <RowDefinition Height="*"/>     <!-- History -->
+    </Grid.RowDefinitions>
+
+    <!-- ====================  TOOLBAR  ==================== -->
+    <Border Grid.Row="0" Padding="8,6,8,8"
+            Background="{DynamicResource MahApps.Brushes.Gray10}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Detection type:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <ComboBox  Grid.Column="1" x:Name="cboType" SelectedIndex="0">
+                <ComboBoxItem Content="RegistryKeyValue"/>
+                <ComboBoxItem Content="RegistryKey"/>
+                <ComboBoxItem Content="File"/>
+                <ComboBoxItem Content="Script"/>
+                <ComboBoxItem Content="Compound (import-only)"/>
+            </ComboBox>
+
+            <Button Grid.Column="3" x:Name="btnImportManifest"
+                    Content="Import stage-manifest..."
+                    Style="{DynamicResource MahApps.Styles.Button.Square}"
+                    Controls:ControlsHelper.ContentCharacterCasing="Normal"
+                    Padding="12,4" Height="28"
+                    ToolTip="Load a stage-manifest.json from app-packager and populate the fields."/>
+
+            <CheckBox Grid.Column="5" x:Name="chkNegativeMode"
+                      Content="Negative test (expect NOT detected)"
+                      VerticalAlignment="Center"
+                      ToolTip="Flip pass/fail logic. Useful for verifying that an uninstall removed the ARP entry."/>
+        </Grid>
+    </Border>
+
+    <!-- ====================  INPUT PANELS (one visible at a time)  ==================== -->
+    <Border Grid.Row="1" Padding="12" Margin="0,8,0,0">
+        <Grid>
+            <!-- RegistryKeyValue -->
+            <StackPanel x:Name="panelRegistryKeyValue" Visibility="Visible">
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <RadioButton x:Name="rkvHiveHKLM" Content="HKLM" IsChecked="True" GroupName="rkvHive" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkvHiveHKCU" Content="HKCU"                  GroupName="rkvHive"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="4" Orientation="Horizontal">
+                        <RadioButton x:Name="rkvView64" Content="64-bit" IsChecked="True" GroupName="rkvView" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkvView32" Content="32-bit (WOW6432Node)"     GroupName="rkvView"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Margin="0,4,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Key path:"      VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="rkvKeyPath"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Value name:"    VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="rkvValueName" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="rkvOperator"  SelectedIndex="0" Margin="0,4">
+                        <ComboBoxItem Content="IsEquals"/>
+                        <ComboBoxItem Content="GreaterEquals"/>
+                        <ComboBoxItem Content="GreaterThan"/>
+                        <ComboBoxItem Content="LessEquals"/>
+                        <ComboBoxItem Content="LessThan"/>
+                    </ComboBox>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Expected:"      VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="rkvExpected"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- RegistryKey -->
+            <StackPanel x:Name="panelRegistryKey" Visibility="Collapsed">
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <RadioButton x:Name="rkHiveHKLM" Content="HKLM" IsChecked="True" GroupName="rkHive" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkHiveHKCU" Content="HKCU"                  GroupName="rkHive"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="4" Orientation="Horizontal">
+                        <RadioButton x:Name="rkView64" Content="64-bit" IsChecked="True" GroupName="rkView" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkView32" Content="32-bit (WOW6432Node)"     GroupName="rkView"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Margin="0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Key path:"     VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Column="1" x:Name="rkKeyPath"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- File -->
+            <StackPanel x:Name="panelFile" Visibility="Collapsed">
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <RadioButton x:Name="fileView64" Content="64-bit"        IsChecked="True" GroupName="fileView" Margin="0,0,12,0"
+                                     ToolTip="MECM 64-bit detection. Path resolves against System32 etc."/>
+                        <RadioButton x:Name="fileView32" Content="32-bit (WOW64)"                 GroupName="fileView"
+                                     ToolTip="MECM 32-bit detection. System32 paths approximate to SysWOW64 to mirror the agent's view."/>
+                    </StackPanel>
+                </Grid>
+                <Grid Margin="0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="File path:"     VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="fileFilePath" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"
+                               ToolTip="Folder path. Environment variables (e.g. %ProgramFiles%) are expanded."/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="File name:"     VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="fileFileName" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Property type:" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="filePropType" SelectedIndex="0" Margin="0,4">
+                        <ComboBoxItem Content="Existence"/>
+                        <ComboBoxItem Content="Version"/>
+                    </ComboBox>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox  Grid.Row="3" Grid.Column="1" x:Name="fileOperator" SelectedIndex="0" Margin="0,4">
+                        <ComboBoxItem Content="GreaterEquals"/>
+                        <ComboBoxItem Content="GreaterThan"/>
+                        <ComboBoxItem Content="IsEquals"/>
+                        <ComboBoxItem Content="LessEquals"/>
+                        <ComboBoxItem Content="LessThan"/>
+                    </ComboBox>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Expected:"      VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="fileExpected" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"
+                               ToolTip="Expected value. Only used when Property type = Version."/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Script -->
+            <StackPanel x:Name="panelScript" Visibility="Collapsed">
+                <TextBlock Text="PowerShell scriptblock body. Any non-empty stdout = DETECTED. Runs asynchronously in an isolated runspace; 30s timeout."
+                           Margin="0,0,0,2"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>
+                <TextBlock Text="Isolation note: 'exit' / 'throw' are contained, but process-level calls ([Environment]::Exit, ExitProcess) can still terminate the host. Only run detection scripts you trust."
+                           Margin="0,0,0,6"
+                           TextWrapping="Wrap"
+                           FontSize="11"
+                           Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>
+                <TextBox x:Name="scriptText"
+                         Height="180"
+                         AcceptsReturn="True"
+                         AcceptsTab="True"
+                         FontFamily="Cascadia Code, Consolas, Courier New"
+                         FontSize="12"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap"/>
+            </StackPanel>
+
+            <!-- Compound (import-only) -->
+            <StackPanel x:Name="panelCompound" Visibility="Collapsed">
+                <TextBlock Margin="0,0,0,6"
+                           Foreground="{DynamicResource MahApps.Brushes.Gray1}"
+                           TextWrapping="Wrap"
+                           Text="Compound clauses are populated by Import stage-manifest. The connector (And / Or) and child clauses are read-only here; edit the source manifest to change them."/>
+                <Grid Margin="0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Connector:" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox   Grid.Column="1" x:Name="compoundConnector" IsReadOnly="True" Margin="0,4"
+                               FontFamily="Cascadia Code, Consolas, Courier New"/>
+                </Grid>
+                <TextBlock Text="Clauses:" Margin="0,8,0,4"/>
+                <ListBox x:Name="compoundClauses" Height="160"
+                         FontFamily="Cascadia Code, Consolas, Courier New"
+                         FontSize="11"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    <!-- ====================  TEST ROW  ==================== -->
+    <Border Grid.Row="2" Padding="12,4" Margin="0,4,0,0">
+        <DockPanel>
+            <Button x:Name="btnTest" Content="Test detection"
+                    DockPanel.Dock="Left"
+                    Style="{DynamicResource MahApps.Styles.Button.Square.Accent}"
+                    Controls:ControlsHelper.ContentCharacterCasing="Normal"
+                    Padding="14,6" Height="32"
+                    IsDefault="True"
+                    ToolTip="Evaluate the clause against the local machine."/>
+            <TextBlock x:Name="txtResultBadge"
+                       DockPanel.Dock="Left"
+                       Margin="14,0,0,0"
+                       VerticalAlignment="Center"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Text=""/>
+        </DockPanel>
+    </Border>
+
+    <!-- ====================  RESULT DETAILS  ==================== -->
+    <Border Grid.Row="3" Padding="12,4" Margin="0,2,0,0">
+        <TextBlock x:Name="txtResultDetails"
+                   FontFamily="Cascadia Code, Consolas, Courier New"
+                   FontSize="11"
+                   TextWrapping="Wrap"
+                   MaxHeight="80"/>
+    </Border>
+
+    <!-- ====================  HISTORY  ==================== -->
+    <Border Grid.Row="4" Margin="0,8,0,0">
+        <DockPanel>
+            <Border DockPanel.Dock="Top" Background="{DynamicResource MahApps.Brushes.Gray10}" Padding="8,6">
+                <DockPanel>
+                    <TextBlock Text="HISTORY" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="btnRepopulate"  Content="Use selected"  Style="{DynamicResource MahApps.Styles.Button.Square}" Controls:ControlsHelper.ContentCharacterCasing="Normal" Padding="10,3" Margin="4,0" Visibility="Collapsed" ToolTip="Repopulate the input panel from the selected history row."/>
+                        <Button x:Name="btnExportCsv"   Content="Export CSV"    Style="{DynamicResource MahApps.Styles.Button.Square}" Controls:ControlsHelper.ContentCharacterCasing="Normal" Padding="10,3" Margin="4,0"/>
+                        <Button x:Name="btnExportHtml"  Content="Export HTML"   Style="{DynamicResource MahApps.Styles.Button.Square}" Controls:ControlsHelper.ContentCharacterCasing="Normal" Padding="10,3" Margin="4,0"/>
+                        <Button x:Name="btnClearHistory" Content="Clear"        Style="{DynamicResource MahApps.Styles.Button.Square}" Controls:ControlsHelper.ContentCharacterCasing="Normal" Padding="10,3" Margin="4,0"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <DataGrid x:Name="dgHistory"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      RowHeaderWidth="0"
+                      BorderThickness="0"
+                      ColumnHeaderHeight="30">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Time"     Binding="{Binding Time}"     Width="140"/>
+                    <DataGridTextColumn Header="Type"     Binding="{Binding Type}"     Width="120"/>
+                    <DataGridTextColumn Header="Mode"     Binding="{Binding Mode}"     Width="80"/>
+                    <DataGridTextColumn Header="Target"   Binding="{Binding Target}"   Width="*"/>
+                    <DataGridTextColumn Header="Expected" Binding="{Binding Expected}" Width="160"/>
+                    <DataGridTextColumn Header="Found"    Binding="{Binding Found}"    Width="160"/>
+                    <DataGridTextColumn Header="Result"   Binding="{Binding Result}"   Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Border>
+</Grid>
