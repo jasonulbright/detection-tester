@@ -29,7 +29,6 @@ Describe "Script parse validation" {
 Describe "Module load and function exports" {
     It "exports expected functions" {
         $expected = @(
-            'Initialize-Logging', 'Write-Log',
             'Test-RegistryKeyValueDetection', 'Test-RegistryKeyDetection',
             'Test-FileDetection', 'Test-ScriptDetection', 'Test-CompoundDetection',
             'Get-InstalledApplications', 'Import-DetectionManifest',
@@ -39,6 +38,13 @@ Describe "Module load and function exports" {
         foreach ($fn in $expected) {
             $exported | Should -Contain $fn
         }
+    }
+
+    It "resolves logging through the vendored SuiteCommon module" {
+        # Initialize-Logging / Write-Log moved to Lib\SuiteCommon, imported
+        # globally by the root module.
+        (Get-Command -Module SuiteCommon).Name | Should -Contain 'Initialize-Logging'
+        (Get-Command -Module SuiteCommon).Name | Should -Contain 'Write-Log'
     }
 }
 

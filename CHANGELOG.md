@@ -3,6 +3,17 @@
 All notable changes to Detection Method Tester are documented in this
 file.
 
+## [1.1.0] - 2026-08-14
+
+### Changed
+
+- **Shared plumbing moved to the vendored `SuiteCommon` module.** Logging
+  (`Initialize-Logging`, `Write-Log`) and preference persistence now load
+  from `Lib\SuiteCommon\`, shared across the tool suite and synced from
+  the suite-core repository instead of hand-edited per repo. Same log
+  format; `Initialize-Logging` additionally gains `-Attach` and a DEBUG
+  level exists behind the `SUITE_VERBOSE` environment variable.
+
 ## [1.0.0] - 2026-05-02
 
 Detection Method Tester is a local GUI for testing MECM application

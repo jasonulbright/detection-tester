@@ -25,7 +25,7 @@
 
     ScriptName : start-detectiontester.ps1
     Purpose    : Test MECM detection methods locally (WPF shell)
-    Version    : 1.0.0
+    Version    : 1.1.0
     Updated    : 2026-05-02
 #>
 
@@ -80,17 +80,7 @@ Initialize-Logging -LogPath $logPath
 # ---------------------------------------------------------------------------
 
 function Get-DTPrefs {
-    $defaults = @{ DarkMode = $true; ActiveModule = 'DetectionTester' }
-    if (Test-Path -LiteralPath $prefsPath) {
-        try {
-            $loaded = Get-Content -LiteralPath $prefsPath -Raw | ConvertFrom-Json
-            if ($null -ne $loaded.DarkMode)     { $defaults.DarkMode     = [bool]$loaded.DarkMode }
-            if ($null -ne $loaded.ActiveModule) { $defaults.ActiveModule = [string]$loaded.ActiveModule }
-        } catch {
-            Write-Log "Get-DTPrefs: prefs.json malformed; using defaults ($($_.Exception.Message))" -Level WARN -Quiet
-        }
-    }
-    return $defaults
+    return Read-SuiteSettings -Path $prefsPath -Defaults @{ DarkMode = $true; ActiveModule = 'DetectionTester' }
 }
 
 function Restore-DTWindowState {
@@ -137,9 +127,7 @@ function Restore-DTWindowState {
 
 function Save-DTPrefs {
     param([hashtable]$Prefs)
-    try {
-        $Prefs | ConvertTo-Json | Set-Content -LiteralPath $prefsPath -Encoding UTF8
-    } catch { Write-Log "Save-DTPrefs: $($_.Exception.Message)" -Quiet }
+    $null = Save-SuiteSettings -Path $prefsPath -Settings $Prefs
 }
 
 function Save-DTWindowState {
@@ -931,7 +919,7 @@ $btnOptions        = $window.FindName('btnOptions')
 $toggleTheme       = $window.FindName('toggleTheme')
 $txtThemeLabel     = $window.FindName('txtThemeLabel')
 
-$txtAppVersion.Text = 'v1.0.0'
+$txtAppVersion.Text = 'v1.1.0'
 
 # ---------------------------------------------------------------------------
 # Theme runtime brushes (XAML literal SolidColorBrush values don't flip on
@@ -1076,7 +1064,7 @@ $script:ShowOptionsDialog = {
                 <!-- About -->
                 <StackPanel x:Name="paneAbout" Visibility="Visible">
                     <TextBlock Text="Detection Tester" FontSize="18" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="txtAboutVersion" Text="v1.0.0" FontSize="11"
+                    <TextBlock x:Name="txtAboutVersion" Text="v1.1.0" FontSize="11"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}" Margin="0,2,0,12"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
                                Text="Local GUI for testing MECM application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the machine the tool is running on, without deploying through MECM. Browses ARP entries (HKLM and HKCU) for fast clause authoring."/>
@@ -1167,7 +1155,7 @@ $script:ShowOptionsDialog = {
     $btnCancel         = $dlg.FindName('btnCancel')
 
     # Populate About
-    $txtAboutVersion.Text = 'v1.0.0'
+    $txtAboutVersion.Text = 'v1.1.0'
     $modVersion = (Get-Module DetectionTesterCommon | Select-Object -First 1).Version
     $txtAboutModule.Text  = "DetectionTesterCommon $modVersion"
 

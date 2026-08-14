@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Provides:
-      - Structured logging (Initialize-Logging, Write-Log)
+      - Structured logging via the vendored SuiteCommon module (Lib\SuiteCommon)
       - Detection tests (Test-RegistryKeyValueDetection, Test-RegistryKeyDetection,
         Test-FileDetection, Test-ScriptDetection, Test-CompoundDetection)
       - ARP enumeration (Get-InstalledApplications)
@@ -17,60 +17,15 @@
 #>
 
 # ---------------------------------------------------------------------------
-# Module-scoped state
+# Shared core (vendored SuiteCommon)
 # ---------------------------------------------------------------------------
-
-$script:__LogPath = $null
-
-# ---------------------------------------------------------------------------
-# Logging
-# ---------------------------------------------------------------------------
-
-function Initialize-Logging {
-    param([string]$LogPath)
-
-    $script:__LogPath = $LogPath
-
-    if ($LogPath) {
-        $parentDir = Split-Path -Path $LogPath -Parent
-        if ($parentDir -and -not (Test-Path -LiteralPath $parentDir)) {
-            New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
-        }
-
-        $header = "[{0}] [INFO ] === Log initialized ===" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
-        Set-Content -LiteralPath $LogPath -Value $header -Encoding UTF8
-    }
-}
-
-function Write-Log {
-    <#
-    .SYNOPSIS
-        Writes a timestamped, severity-tagged log message.
-    #>
-    param(
-        [AllowEmptyString()]
-        [Parameter(Mandatory, Position = 0)]
-        [string]$Message,
-
-        [ValidateSet('INFO', 'WARN', 'ERROR')]
-        [string]$Level = 'INFO',
-
-        [switch]$Quiet
-    )
-
-    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    $formatted = "[{0}] [{1,-5}] {2}" -f $timestamp, $Level, $Message
-
-    if (-not $Quiet) {
-        Write-Host $formatted
-        if ($Level -eq 'ERROR') {
-            $host.UI.WriteErrorLine($formatted)
-        }
-    }
-
-    if ($script:__LogPath) {
-        Add-Content -LiteralPath $script:__LogPath -Value $formatted -Encoding UTF8 -ErrorAction SilentlyContinue
-    }
+# Logging (Initialize-Logging, Write-Log) and settings persistence come from
+# the vendored copy at Lib\SuiteCommon\. -Global makes the functions
+# resolvable from the shell script and from this module alike; the guard
+# keeps a -Force reimport of this module from resetting SuiteCommon state
+# mid-session.
+if (-not (Get-Module SuiteCommon)) {
+    Import-Module (Join-Path $PSScriptRoot '..\Lib\SuiteCommon\SuiteCommon.psd1') -Global -DisableNameChecking
 }
 
 # ---------------------------------------------------------------------------

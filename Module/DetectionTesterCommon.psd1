@@ -1,15 +1,14 @@
 @{
     RootModule        = 'DetectionTesterCommon.psm1'
-    ModuleVersion     = '1.0.0'
+    ModuleVersion     = '1.1.0'
     GUID              = 'a1b2c3d4-5678-9abc-def0-112233445566'
     Author            = 'Jason Ulbright'
     Description       = 'Shared module for Detection Method Testing Tool: detection tests, ARP enumeration, manifest import, export.'
     PowerShellVersion = '5.1'
 
     FunctionsToExport = @(
-        # Logging
-        'Initialize-Logging'
-        'Write-Log'
+        # Logging comes from the vendored SuiteCommon module
+        # (Lib\SuiteCommon), imported globally by the root module.
 
         # Detection tests
         'Test-RegistryKeyValueDetection'
