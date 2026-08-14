@@ -1,5 +1,10 @@
 # Detection Method Tester
 
+[![Latest release](https://img.shields.io/github/v/release/jasonulbright/detection-tester?label=release)](https://github.com/jasonulbright/detection-tester/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/jasonulbright/detection-tester/total?label=downloads)](https://github.com/jasonulbright/detection-tester/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows-0078D4)](#prerequisites)
+[![License](https://img.shields.io/github/license/jasonulbright/detection-tester)](LICENSE)
+
 Test MECM application detection methods against the local machine without deploying through MECM.
 
 ## What It Does
