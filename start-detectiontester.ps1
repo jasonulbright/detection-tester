@@ -799,7 +799,7 @@ $btnOptions        = $window.FindName('btnOptions')
 $toggleTheme       = $window.FindName('toggleTheme')
 $txtThemeLabel     = $window.FindName('txtThemeLabel')
 
-$txtAppVersion.Text = 'v1.2.0'
+$txtAppVersion.Text = 'v1.2.1'
 
 # ---------------------------------------------------------------------------
 # Theme runtime brushes (XAML literal SolidColorBrush values don't flip on
@@ -944,7 +944,7 @@ $script:ShowOptionsDialog = {
                 <!-- About -->
                 <StackPanel x:Name="paneAbout" Visibility="Visible">
                     <TextBlock Text="Detection Tester" FontSize="18" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="txtAboutVersion" Text="v1.2.0" FontSize="11"
+                    <TextBlock x:Name="txtAboutVersion" Text="v1.2.1" FontSize="11"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}" Margin="0,2,0,12"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
                                Text="Local GUI for testing MECM application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the machine the tool is running on, without deploying through MECM. Browses ARP entries (HKLM and HKCU) for fast clause authoring."/>
@@ -1035,7 +1035,7 @@ $script:ShowOptionsDialog = {
     $btnCancel         = $dlg.FindName('btnCancel')
 
     # Populate About
-    $txtAboutVersion.Text = 'v1.2.0'
+    $txtAboutVersion.Text = 'v1.2.1'
     $modVersion = (Get-Module DetectionTesterCommon | Select-Object -First 1).Version
     $txtAboutModule.Text  = "DetectionTesterCommon $modVersion"
 
