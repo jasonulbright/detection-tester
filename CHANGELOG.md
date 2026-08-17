@@ -3,6 +3,15 @@
 All notable changes to Detection Method Tester are documented in this
 file.
 
+## [1.2.0] - 2026-08-16
+
+### Changed
+
+- **The title-bar drag block now comes from the vendored `SuiteCommon`
+  module** (0.3.0). Behavior gain: hook state no longer leaks when a
+  window closes (removal previously keyed on the already-destroyed
+  window handle).
+
 ## [1.1.0] - 2026-08-14
 
 ### Changed

@@ -1,6 +1,6 @@
 @{
     RootModule        = 'DetectionTesterCommon.psm1'
-    ModuleVersion     = '1.1.0'
+    ModuleVersion     = '1.2.0'
     GUID              = 'a1b2c3d4-5678-9abc-def0-112233445566'
     Author            = 'Jason Ulbright'
     Description       = 'Shared module for Detection Method Testing Tool: detection tests, ARP enumeration, manifest import, export.'
