@@ -25,7 +25,7 @@
 
     ScriptName : start-detectiontester.ps1
     Purpose    : Test MECM detection methods locally (WPF shell)
-    Version    : 1.2.2
+    Version    : 1.2.3
     Updated    : 2026-05-02
 #>
 
@@ -788,6 +788,13 @@ Install-TitleBarDragFallback -Window $window
 # ---------------------------------------------------------------------------
 
 $txtAppVersion     = $window.FindName('txtAppVersion')
+# Installed version: the script header is the single source of truth for the
+# sidebar label and the About panel.
+$script:AppVersion = '0.0.0'
+foreach ($headerLine in (Get-Content -LiteralPath $PSCommandPath -TotalCount 80)) {
+    if ($headerLine -match '^\s*Version\s*:\s*([0-9][0-9\.]*[0-9])\s*$') { $script:AppVersion = $Matches[1]; break }
+}
+if ($txtAppVersion) { $txtAppVersion.Text = 'v' + $script:AppVersion }
 $txtModuleTitle    = $window.FindName('txtModuleTitle')
 $txtModuleSubtitle = $window.FindName('txtModuleSubtitle')
 $contentHost       = $window.FindName('contentHost')
@@ -799,8 +806,7 @@ $btnOptions        = $window.FindName('btnOptions')
 $toggleTheme       = $window.FindName('toggleTheme')
 $txtThemeLabel     = $window.FindName('txtThemeLabel')
 
-$txtAppVersion.Text = 'v1.2.1'
-
+# label set from the script header above
 # ---------------------------------------------------------------------------
 # Theme runtime brushes (XAML literal SolidColorBrush values don't flip on
 # MahApps ChangeTheme - must be set per-theme at runtime).
@@ -1035,7 +1041,7 @@ $script:ShowOptionsDialog = {
     $btnCancel         = $dlg.FindName('btnCancel')
 
     # Populate About
-    $txtAboutVersion.Text = 'v1.2.1'
+    $txtAboutVersion.Text = 'v' + $script:AppVersion
     $modVersion = (Get-Module DetectionTesterCommon | Select-Object -First 1).Version
     $txtAboutModule.Text  = "DetectionTesterCommon $modVersion"
 
