@@ -140,9 +140,9 @@
                     <TextBlock Grid.Column="0" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <RadioButton x:Name="fileView64" Content="64-bit"        IsChecked="True" GroupName="fileView" Margin="0,0,12,0"
-                                     ToolTip="MECM 64-bit detection. Path resolves against System32 etc."/>
+                                     ToolTip="Configuration Manager 64-bit detection. Path resolves against System32 etc."/>
                         <RadioButton x:Name="fileView32" Content="32-bit (WOW64)"                 GroupName="fileView"
-                                     ToolTip="MECM 32-bit detection. System32 paths approximate to SysWOW64 to mirror the agent's view."/>
+                                     ToolTip="Configuration Manager 32-bit detection. System32 paths approximate to SysWOW64 to mirror the agent's view."/>
                     </StackPanel>
                 </Grid>
                 <Grid Margin="0,4">

@@ -161,7 +161,7 @@
                     Background="{DynamicResource MahApps.Brushes.Gray10}">
                 <StackPanel>
                     <TextBlock x:Name="txtModuleTitle" Text="Detection Tester" FontSize="18" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="txtModuleSubtitle" Text="Author and test MECM detection methods locally."
+                    <TextBlock x:Name="txtModuleSubtitle" Text="Author and test Configuration Manager detection methods locally."
                                FontSize="11"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}"
                                Margin="0,2,0,0"/>

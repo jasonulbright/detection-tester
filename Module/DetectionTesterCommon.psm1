@@ -29,13 +29,13 @@ if (-not (Get-Module SuiteCommon)) {
 }
 
 # ---------------------------------------------------------------------------
-# Private helper: value comparison matching MECM behavior
+# Private helper: value comparison matching ConfigMgr behavior
 # ---------------------------------------------------------------------------
 
 function Compare-DetectionValue {
     <#
     .SYNOPSIS
-        Compares two values using MECM detection method semantics.
+        Compares two values using ConfigMgr detection method semantics.
     .DESCRIPTION
         PropertyType chooses the comparison kind:
           - 'Version' (default for greater/less): parse as System.Version (1.2.3.4 form)
@@ -366,7 +366,7 @@ function Test-FileDetection {
     try {
         $expandedPath = [System.Environment]::ExpandEnvironmentVariables($FilePath)
         # Approximate WOW64 file-system redirection: when Is64Bit=$false on a
-        # 64-bit OS, the MECM agent runs detection in 32-bit mode and
+        # 64-bit OS, the ConfigMgr agent runs detection in 32-bit mode and
         # %SystemRoot%\System32 transparently redirects to SysWOW64. We're a
         # 64-bit PS host, so simulate the redirection by string-rewriting.
         if (-not $Is64Bit -and [Environment]::Is64BitOperatingSystem) {
@@ -425,7 +425,7 @@ function Test-ScriptDetection {
     .SYNOPSIS
         Tests a Script detection rule by executing a PowerShell scriptblock.
     .DESCRIPTION
-        Any non-empty stdout from the script means DETECTED (matches MECM behavior).
+        Any non-empty stdout from the script means DETECTED (matches ConfigMgr behavior).
         The script runs in an isolated runspace so 'exit' / 'throw' don't kill
         the host, and a timeout (default 30s) prevents an infinite loop or
         Start-Sleep from freezing the GUI permanently.
@@ -436,7 +436,7 @@ function Test-ScriptDetection {
         are assumed to be packager-authored code, not adversarial input.
         For full isolation against arbitrary scripts, drive a child
         powershell.exe process - that's out of scope for this tool's
-        v1.0 use case (test bench for trusted MECM detection rules).
+        v1.0 use case (test bench for trusted ConfigMgr detection rules).
     .OUTPUTS
         [hashtable] with keys: Detected, ScriptOutput, Details, TimedOut
     #>
