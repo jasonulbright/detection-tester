@@ -5,11 +5,11 @@
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D4)](#prerequisites)
 [![License](https://img.shields.io/github/license/jasonulbright/detection-tester)](LICENSE)
 
-Test MECM application detection methods against the local machine without deploying through MECM.
+Test Configuration Manager application detection methods against the local machine without deploying through Configuration Manager.
 
 ## What It Does
 
-MECM application packagers define detection methods (registry key checks, file existence/version, scripts) that determine whether an application is installed. A broken detection rule means a failed deployment and a round-trip to fix it. This tool authors and tests detection logic locally and gives immediate pass/fail results.
+Configuration Manager application packagers define detection methods (registry key checks, file existence/version, scripts) that determine whether an application is installed. A broken detection rule means a failed deployment and a round-trip to fix it. This tool authors and tests detection logic locally and gives immediate pass/fail results.
 
 ![Detection Method Tester](screenshots/main-dark.png)
 
@@ -52,7 +52,7 @@ Select any application to see full ARP details: DisplayName, Publisher, DisplayV
 | **PowerShell** | 5.1 (ships with Windows) |
 | **.NET Framework** | 4.7.2+ (required by WPF + MahApps.Metro) |
 
-No admin rights and no MECM connection required.
+No admin rights and no Configuration Manager connection required.
 
 ## Usage
 

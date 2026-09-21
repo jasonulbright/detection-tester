@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-    Detection Method Tester - WPF shell loader.
+    Main window of Detection Method Tester, a tool that tests Configuration Manager application detection methods on the local machine.
 
 .DESCRIPTION
     Loads the MahApps WPF shell and dispatches to the Detection Tester and
     Installed Applications modules. Detection logic lives in
     Module\DetectionTesterCommon.psm1 (GUI-independent).
 
-    Tests MECM application detection methods (RegistryKeyValue, RegistryKey,
+    Tests ConfigMgr application detection methods (RegistryKeyValue, RegistryKey,
     File, Script, Compound) against the local machine without deploying
-    through MECM. Also browses ARP entries (HKLM and HKCU) for quick
+    through ConfigMgr. Also browses ARP entries (HKLM and HKCU) for quick
     clause authoring.
 
 .EXAMPLE
@@ -21,12 +21,12 @@
       - .NET Framework 4.7.2+
       - Vendored MahApps DLLs in .\Lib\
 
-    No admin rights and no MECM connection required.
+    No admin rights and no ConfigMgr connection required.
 
     ScriptName : start-detectiontester.ps1
-    Purpose    : Test MECM detection methods locally (WPF shell)
-    Version    : 1.2.3
-    Updated    : 2026-05-02
+    Purpose    : Test Configuration Manager detection methods locally
+    Version    : 2026.09.21.0007
+    Updated    : 2026-09-21
 #>
 
 param()
@@ -869,7 +869,7 @@ $script:ShowModule = {
             }
             $contentHost.Content    = $script:DTRoot
             $txtModuleTitle.Text    = 'Detection Tester'
-            $txtModuleSubtitle.Text = 'Author and test MECM detection methods locally.'
+            $txtModuleSubtitle.Text = 'Author and test Configuration Manager detection methods locally.'
             $txtStatus.Text         = 'Detection Tester selected.'
         }
         'InstalledApps' {
@@ -953,7 +953,7 @@ $script:ShowOptionsDialog = {
                     <TextBlock x:Name="txtAboutVersion" Text="v1.2.1" FontSize="11"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}" Margin="0,2,0,12"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
-                               Text="Local GUI for testing MECM application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the machine the tool is running on, without deploying through MECM. Browses ARP entries (HKLM and HKCU) for fast clause authoring."/>
+                               Text="Tests Configuration Manager application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the machine the tool is running on, without deploying through Configuration Manager. Browses ARP entries (HKLM and HKCU) for fast clause authoring."/>
                     <Grid Margin="0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120"/>
