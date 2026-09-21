@@ -3,6 +3,12 @@
 All notable changes to Detection Method Tester are documented in this
 file.
 
+## [2026.09.21.0008] - 2026-09-21
+
+### Changed
+
+- Update the README screenshot.
+
 ## [2026.09.21.0007] - 2026-09-21
 
 ### Changed
