@@ -25,7 +25,7 @@
 
     ScriptName : start-detectiontester.ps1
     Purpose    : Test Configuration Manager detection methods locally
-    Version    : 2026.10.07.0009
+    Version    : 2026.10.11.0010
     Updated    : 2026-09-21
 #>
 
@@ -1111,4 +1111,6 @@ Write-Log ("Detection Tester WPF shell starting (theme={0}, module={1})" -f `
 # Show
 # ---------------------------------------------------------------------------
 
+# Suite update notice: one shared daily lookup across the suite tools; the launcher installs.
+$null = Start-SuiteUpdateNotice -Path $PSScriptRoot -OnResult { param($u) if ($u.Available) { $txtStatus.Text = ('Suite update available: v{0}. Update from the AppPackager Suite Launcher.' -f $u.Latest) } }
 $null = $window.ShowDialog()
