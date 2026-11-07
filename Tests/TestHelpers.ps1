@@ -161,12 +161,14 @@ function Get-ShellLoaderName {
 # handler functions and script blocks, and the theme colour assignments. Plain text, so that it can cross to
 # the STA runspace.
 function Get-ShellRuntimePart {
+    param([string[]]$FunctionName = @('Get-DTComboValue', 'Import-DTXaml', 'ConvertTo-DTHistoryDataTable', 'Format-DTAppDetails'))
     $ast = Get-ShellAst
     $root = "'" + ($script:AppRoot -replace "'", "''") + "'"
     $functions = @{}
-    foreach ($name in 'Get-DTComboValue', 'Import-DTXaml', 'ConvertTo-DTHistoryDataTable', 'Format-DTAppDetails') {
+    foreach ($name in $FunctionName) {
         $def = $ast.Find({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name }, $true)
-        if ($def) { $functions[$name] = $def.Body.Extent.Text.Substring(1, $def.Body.Extent.Text.Length - 2).Replace('$PSScriptRoot', $root) }
+        if (-not $def) { throw "function $name not found in the start script" }
+        $functions[$name] = $def.Body.Extent.Text.Substring(1, $def.Body.Extent.Text.Length - 2).Replace('$PSScriptRoot', $root)
     }
     $blocks = @{}
     foreach ($name in 'DTOnTypeChanged', 'DTGatherClause', 'DTValidateClause', 'DTPostTestResult', 'DTRunTest', 'DTRepopulateFromHistory', 'DTExportHistoryCsv', 'DTExportHistoryHtml',

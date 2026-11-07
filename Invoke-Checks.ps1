@@ -18,7 +18,7 @@
     Minimum percent of module commands that the tests run. Default 80.
 
 .PARAMETER SkipWindow
-    Leave out Tests\Window.Tests.ps1, which opens windows and needs a desktop.
+    Leave out Tests\Window.Tests.ps1 and Tests\WindowHarness.Tests.ps1, which need a desktop session.
 
 .PARAMETER SkipLint
     Leave out PSScriptAnalyzer.
@@ -77,7 +77,7 @@ $cfg = New-PesterConfiguration
 $testFiles = @(Get-ChildItem -LiteralPath $root -Recurse -Filter '*.Tests.ps1' -File |
         Where-Object { $_.FullName -notlike '*\.git\*' })
 if ($testFiles.Count -eq 0) { Write-Host 'No test file found.'; exit 1 }
-if ($SkipWindow) { $testFiles = @($testFiles | Where-Object { $_.Name -ne 'Window.Tests.ps1' }) }
+if ($SkipWindow) { $testFiles = @($testFiles | Where-Object { $_.Name -notin 'Window.Tests.ps1', 'WindowHarness.Tests.ps1' }) }
 $cfg.Run.Path = $testFiles.FullName
 $cfg.Run.PassThru = $true
 $cfg.Output.Verbosity = 'Minimal'

@@ -298,7 +298,8 @@ function Close-WpfSession {
 function Invoke-WpfSta {
     param(
         [Parameter(Mandatory)][scriptblock]$Script,
-        [hashtable]$Arguments = @{}
+        [hashtable]$Arguments = @{},
+        [ValidateRange(1, 3600)][int]$TimeoutSeconds = 300
     )
     $rs = Get-WpfSession
     $rs.SessionStateProxy.SetVariable('Arguments', $Arguments)
@@ -306,7 +307,14 @@ function Invoke-WpfSta {
     try {
         $ps.Runspace = $rs
         [void]$ps.AddScript($Script.ToString(), $false)
-        $out = @($ps.Invoke())
+        # A stalled theme manager can block the script block for ever. Bound the wait, stop it, and drop the runspace.
+        $async = $ps.BeginInvoke()
+        if (-not $async.AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds($TimeoutSeconds))) {
+            try { [void]$ps.BeginStop($null, $null).AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds(10)) } catch { Write-Verbose "Stop failed: $_" }
+            Close-WpfSession
+            throw "STA script block did not finish within $TimeoutSeconds seconds."
+        }
+        $out = @($ps.EndInvoke($async))
         if ($ps.HadErrors -and $ps.Streams.Error.Count -gt 0) {
             throw (($ps.Streams.Error | ForEach-Object { $_.ToString() }) -join "`n")
         }

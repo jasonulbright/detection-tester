@@ -28,6 +28,7 @@ Run: `.\Invoke-Checks.ps1` (lint, tests, coverage floor 80%). It runs in CI on b
 | Script calls | `Script.Contract.Tests.ps1` | Every call from the script and the module into an app function or SuiteCommon names only parameters that exist |
 | Windows | `Window.Tests.ps1` | Main window, both module views (five input panels), the Options dialog: names, titles, no clipped text and nothing off screen at 1024x720 and 1440x900 in both themes, text and control contrast |
 | Handlers on real controls | `Window.Tests.ps1` | The script's own script blocks run in a real window: clicks, background script test, history, installed applications, theme change |
+| Window harness | `WindowHarness.Tests.ps1` | `Invoke-WpfSta` ends a script block that does not finish, closes the stalled session and starts a new one on the next call |
 | User guide | `Documentation.Tests.ps1` | Links, images and pages of the user guide |
 
 ## Defects found by the tests
@@ -53,9 +54,9 @@ Each defect has a test that failed on the old code and passes now. The old code 
 | 15 | The title of the HTML report was split over three lines (operator precedence) | `Module.Export` | Parentheses |
 | 16 | The Options dialog title bar had 3.3:1 contrast in the light theme | `Window` | Same brushes as the main window |
 | 17 | The Copy details button was outside the window at 1024 pixels width | `Window` | Flexible filter column |
+| 18 | A test of the old suite failed on every checkout with Windows line endings (the pattern ended with `\n`) | `Shell.Logic` | The test reads the syntax tree, not the text |
 | 19 | An `Is64Bit` value of another type (a date) made the conversion throw | `Module.Compare` | Numeric types only |
 | 20 | A CSV column name that starts with `=`, `+`, `-` or `@` ran as a formula | `Module.Export` | Same quote prefix as the cells |
-| 18 | A test of the old suite failed on every checkout with Windows line endings (the pattern ended with `\n`) | `Shell.Logic` | The test reads the syntax tree, not the text |
 
 Items that look like defects and are not changed:
 
