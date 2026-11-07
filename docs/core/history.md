@@ -4,7 +4,7 @@ The history grid lists every test of the session.
 
 ## What it does
 
-Each test adds one row at the top: the time, the type, the mode, the target, the expected value, the found value and the result. **Use selected** puts a row back in the form. **Export CSV** and **Export HTML** save the rows. **Clear** removes them.
+Each test that gives a result adds one row at the top: the time, the type, the mode, the target, the expected value, the found value and the result. A script test that ends with an error shows **Error** on the result panel and adds no row. **Use selected** puts a row back in the form. **Export CSV** and **Export HTML** save the rows. **Clear** removes them.
 
 ## When to use it
 
@@ -54,6 +54,7 @@ Select **Clear**. The grid is empty. Nothing asks for a confirmation.
 ## Limits
 
 - The history lives in memory. It is lost when you close the tool.
+- A script test that ends with an error adds no row, and the exports omit it.
 - **Export CSV**, **Export HTML** and **Clear** work on all rows. They have no selection.
 
 ## Troubleshooting

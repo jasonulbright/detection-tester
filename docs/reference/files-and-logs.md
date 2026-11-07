@@ -4,7 +4,7 @@ This page lists every folder and file that Detection Tester writes.
 
 ## What it does
 
-The tool writes in `%LOCALAPPDATA%\DetectionTester` and in the folder that you choose for an export. It writes nothing in the registry and nothing in the folder of the script.
+The tool writes its own files in `%LOCALAPPDATA%\DetectionTester` and in the folder that you choose for an export. It writes nothing in the registry and nothing in the folder of the script. A script that you test can write to the registry and to every file that the starting account can write.
 
 ## When to use it
 

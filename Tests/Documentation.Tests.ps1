@@ -5,15 +5,15 @@ BeforeAll {
     $script:strRepositoryRoot = Split-Path -Path $strTestsFolder -Parent
     $script:strDocsRoot = Join-Path -Path $script:strRepositoryRoot -ChildPath 'docs'
     $script:arrPage = @(Get-ChildItem -LiteralPath $script:strDocsRoot -Recurse -File -Filter '*.md')
-    $script:arrImage = @(Get-ChildItem -LiteralPath (Join-Path -Path $script:strDocsRoot -ChildPath 'images') -File -Filter '*.png')
+    $script:arrImage = @(Get-ChildItem -LiteralPath (Join-Path -Path $script:strDocsRoot -ChildPath 'images') -Recurse -File -Filter '*.png')
 
     function Get-DocLink {
         param ([System.IO.FileInfo]$Page)
-        $strText = Get-Content -LiteralPath $Page.FullName -Raw
-        foreach ($objMatch in [regex]::Matches($strText, '(?<!\!)\[[^\]]*\]\(([^)\s]+)\)')) {
+        $strText = [regex]::Replace((Get-Content -LiteralPath $Page.FullName -Raw), '(?s)```.*?```', '')
+        foreach ($objMatch in [regex]::Matches($strText, '(?<!\!)\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)')) {
             [pscustomobject]@{ Page = $Page; Target = $objMatch.Groups[1].Value; Kind = 'Link' }
         }
-        foreach ($objMatch in [regex]::Matches($strText, '\!\[[^\]]*\]\(([^)\s]+)\)')) {
+        foreach ($objMatch in [regex]::Matches($strText, '\!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)')) {
             [pscustomobject]@{ Page = $Page; Target = $objMatch.Groups[1].Value; Kind = 'Image' }
         }
     }
@@ -33,13 +33,13 @@ Describe 'User guide' {
             $strPath = ($objRef.Target -split '#')[0]
             if (-not $strPath) { continue }
             $strFull = Join-Path -Path (Split-Path -Path $objRef.Page.FullName -Parent) -ChildPath $strPath
-            if (-not (Test-Path -LiteralPath $strFull)) { '{0}: {1}' -f $objRef.Page.Name, $objRef.Target }
+            if (-not (Test-Path -LiteralPath $strFull -PathType Leaf)) { '{0}: {1}' -f $objRef.Page.Name, $objRef.Target }
         }
         @($arrMissing) | Should -BeNullOrEmpty
     }
 
     It 'links every page from the index' {
-        $strIndex = Get-Content -LiteralPath (Join-Path -Path $script:strDocsRoot -ChildPath 'index.md') -Raw
+        $strIndex = [regex]::Replace((Get-Content -LiteralPath (Join-Path -Path $script:strDocsRoot -ChildPath 'index.md') -Raw), '(?s)```.*?```', '')
         $arrOrphan = foreach ($objPage in $script:arrPage) {
             $strRelative = $objPage.FullName.Substring($script:strDocsRoot.Length + 1).Replace('\', '/')
             if ($strRelative -ne 'index.md' -and $strIndex -notmatch [regex]::Escape('](' + $strRelative + ')')) { $strRelative }
@@ -48,8 +48,8 @@ Describe 'User guide' {
     }
 
     It 'uses every image in at least one page' {
-        $arrUsed = @($script:arrRef | Where-Object { $_.Kind -eq 'Image' } | ForEach-Object { Split-Path -Path $_.Target -Leaf })
-        $arrUnused = @($script:arrImage | Where-Object { $arrUsed -notcontains $_.Name } | ForEach-Object { $_.Name })
+        $arrUsed = @($script:arrRef | Where-Object { $_.Kind -eq 'Image' } | ForEach-Object { $strFull = Join-Path -Path (Split-Path -Path $_.Page.FullName -Parent) -ChildPath $_.Target; Resolve-Path -LiteralPath $strFull -ErrorAction SilentlyContinue | ForEach-Object { $_.ProviderPath } })
+        $arrUnused = @($script:arrImage | Where-Object { $arrUsed -notcontains $_.FullName } | ForEach-Object { $_.Name })
         $arrUnused | Should -BeNullOrEmpty
     }
 
@@ -65,6 +65,7 @@ Describe 'User guide' {
     }
 
     It 'links the guide from the README' {
-        (Get-Content -LiteralPath (Join-Path -Path $script:strRepositoryRoot -ChildPath 'README.md') -Raw) | Should -Match '\(docs/index\.md\)'
+        $strReadme = [regex]::Replace((Get-Content -LiteralPath (Join-Path -Path $script:strRepositoryRoot -ChildPath 'README.md') -Raw), '(?s)```.*?```', '')
+        $strReadme | Should -Match '\]\(docs/index\.md\)'
     }
 }

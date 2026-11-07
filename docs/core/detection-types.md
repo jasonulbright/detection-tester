@@ -1,6 +1,6 @@
 # Detection types
 
-The Detection Tester page tests one clause at a time. The clause type decides which fields show.
+The Detection Tester page tests one clause, or one imported Compound detection. The clause type decides which fields show. To test several clauses together, see [Import a manifest](import-manifest.md).
 
 ## What it does
 

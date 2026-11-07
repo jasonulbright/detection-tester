@@ -34,7 +34,7 @@ The tool does not save the clause, the history or the filter.
 
 ## Limits
 
-- A window that was off the screen is moved to the middle at start.
+- A window that was off the screen is moved to the middle at start. The tool compares the saved place with the bounding rectangle of all monitors. A window in a gap between monitors can stay off the screen. Reset the tool as described above.
 
 ## Troubleshooting
 

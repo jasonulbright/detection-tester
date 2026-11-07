@@ -24,7 +24,7 @@ A JSON file with a `Detection` block.
 
 ![A Compound detection after the import](../images/import-compound.png)
 
-4. Select **Test detection**. The result shows **Pass** when the clauses satisfy the connector. The detail line reads, for example, `And: 2/2 clauses passed - DETECTED`.
+Then select **Test detection**. The result shows **Pass** when the clauses satisfy the connector. The detail line reads, for example, `And: 2/2 clauses passed - DETECTED`.
 
 ![The result of the Compound test](../images/import-compound-run.png)
 

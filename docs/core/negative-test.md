@@ -24,7 +24,7 @@ A clause that is detected fails the negative test. The detail line still shows t
 
 ![A negative test that fails: the clause is detected](../images/negative-test-fail.png)
 
-A clause that is not detected passes the negative test.
+A clause that is not detected passes the negative test. Read the detail line before you take a pass as proof that the application is gone. When the account cannot read a registry key, the clause can be not detected although the key exists.
 
 ![A negative test that passes: the clause is not detected](../images/negative-test-pass.png)
 

@@ -18,7 +18,7 @@ None.
 
 | Clause | Right |
 |---|---|
-| RegistryKeyValue, RegistryKey | Read access to the key. HKLM is readable by every user. HKCU is the hive of the account that started the tool. |
+| RegistryKeyValue, RegistryKey | Read access to the key. Access to HKLM depends on the permissions of the key. HKCU is the hive of the account that started the tool. |
 | File | Read access to the folder. |
 | Script | The rights of the account. The script runs in a new PowerShell runspace on this computer. |
 | Installed Applications | Read access to the three ARP keys. |
@@ -33,7 +33,7 @@ Start the tool with **Run as different user** or from a PowerShell prompt of tha
 
 ## Limits
 
-The tool cannot run a clause as System.
+The tool does not switch accounts. To test as System, start the tool in a session that runs as System.
 
 ## Troubleshooting
 

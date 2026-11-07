@@ -42,6 +42,8 @@ Select a row. The panel shows **DisplayName**, **Publisher**, **DisplayVersion**
 
 Select **Copy details** to copy these lines to the clipboard.
 
+An entry can have no `DisplayVersion`. The clause that **Use for detection** fills then has an empty expected value and fails in a positive test. Change **Value name** to another value that the key has, for example `DisplayName`, and enter its value in **Expected**.
+
 ### Use an entry for a detection
 
 1. Select a row.
