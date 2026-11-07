@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Main window of Detection Method Tester, a tool that tests Configuration Manager application detection methods on the local machine.
 
@@ -25,8 +25,8 @@
 
     ScriptName : start-detectiontester.ps1
     Purpose    : Test Configuration Manager detection methods locally
-    Version    : 2026.11.06.0013
-    Updated    : 2026-09-21
+    Version    : 2026.11.07.0014
+    Updated    : 2026-11-07
 #>
 
 param()
