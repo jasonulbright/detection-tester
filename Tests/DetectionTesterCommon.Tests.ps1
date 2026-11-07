@@ -721,8 +721,10 @@ Describe "Grid column headers" {
 Describe "Result panel" {
     It "clears the previous result when a clause is filled from an application or a manifest" {
         $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
-        $strUse = [regex]::Match($strStart, '(?s)\$script:IAUseForDetection = \{.*?\n\}\n').Value
-        $strImport = [regex]::Match($strStart, '(?s)\$script:DTImportManifest = \{.*?\n\}\n').Value
+        $strUse = [regex]::Match($strStart, '(?s)\$script:IAUseForDetection = \{.*?\r?\n\}\r?\n').Value
+        $strImport = [regex]::Match($strStart, '(?s)\$script:DTImportManifest = \{.*?\r?\n\}\r?\n').Value
+        $strUse | Should -Not -BeNullOrEmpty
+        $strImport | Should -Not -BeNullOrEmpty
         $strUse | Should -Match "txtResultBadge\.Text\s*=\s*''"
         $strUse | Should -Match "txtResultDetails\.Text\s*=\s*''"
         $strImport | Should -Match "txtResultBadge\.Text\s*=\s*''"
