@@ -21,6 +21,40 @@ Describe 'Test-WindowTestsAllowed' {
     }
 }
 
+Describe 'Test-WindowTestsAllowed environment default' {
+    BeforeEach {
+        $script:savedOptIn = $env:SUITE_ALLOW_WINDOW_TESTS
+    }
+
+    AfterEach {
+        if ($null -eq $script:savedOptIn) { Remove-Item -LiteralPath 'Env:\SUITE_ALLOW_WINDOW_TESTS' -ErrorAction SilentlyContinue }
+        else { $env:SUITE_ALLOW_WINDOW_TESTS = $script:savedOptIn }
+    }
+
+    It 'allows the run when the environment value is 1' {
+        $env:SUITE_ALLOW_WINDOW_TESTS = '1'
+        $g = Test-WindowTestsAllowed
+        $g.Allowed | Should -BeTrue
+        $g.Reason | Should -Be ''
+    }
+
+    It 'refuses the run when the environment value is "<Value>"' -ForEach @(
+        @{ Value = '0' }, @{ Value = 'true' }
+    ) {
+        $env:SUITE_ALLOW_WINDOW_TESTS = $Value
+        $g = Test-WindowTestsAllowed
+        $g.Allowed | Should -BeFalse
+        $g.Reason | Should -Be 'SUITE_ALLOW_WINDOW_TESTS is not 1'
+    }
+
+    It 'refuses the run when the environment value is not set' {
+        Remove-Item -LiteralPath 'Env:\SUITE_ALLOW_WINDOW_TESTS' -ErrorAction SilentlyContinue
+        $g = Test-WindowTestsAllowed
+        $g.Allowed | Should -BeFalse
+        $g.Reason | Should -Be 'SUITE_ALLOW_WINDOW_TESTS is not 1'
+    }
+}
+
 Describe 'Test-WindowTestsAllowed signature' {
     It 'has the OptIn parameter and no ComputerName parameter' {
         $names = @((Get-Command Test-WindowTestsAllowed).Parameters.Keys | Where-Object { $_ -notin [System.Management.Automation.Cmdlet]::CommonParameters })
