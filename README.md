@@ -11,7 +11,11 @@ Test Configuration Manager application detection methods against the local machi
 
 Configuration Manager application packagers define detection methods (registry key checks, file existence/version, scripts) that determine whether an application is installed. A broken detection rule means a failed deployment and a round-trip to fix it. This tool authors and tests detection logic locally and gives immediate pass/fail results.
 
-![Detection Method Tester](screenshots/main-dark.png)
+![Detection Method Tester](docs/images/start-first-run.png)
+
+## User guide
+
+The user guide is in [docs/index.md](docs/index.md). It has one page for each part of the window, a settings page, reference pages and troubleshooting. Every image in it is a capture of the running window.
 
 ## Detection Types
 
