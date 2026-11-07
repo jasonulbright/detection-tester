@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026.11.06.0013] - 2026-11-06
+
+## 1 crash fixed that the user guide found
+
+### Fixed
+
+- Stop a crash after a Compound import. A second import of a manifest, or Use selected on a Compound history row, ended the tool. The window state kept the clause data under a name that differs from a control name only in case.
+
 ## [2026.10.12.0012] - 2026-10-12
 
 ## 1 PowerShell 7 fix

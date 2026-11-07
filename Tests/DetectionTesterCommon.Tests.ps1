@@ -676,3 +676,15 @@ Describe "Import-DetectionManifest" {
         { Import-DetectionManifest -Path "C:\nonexistent\manifest.json" } | Should -Throw "*not found*"
     }
 }
+
+Describe "Window context keys" {
+    It "never stores a value under a key that differs from a control name only in case" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $strNames = [regex]::Match($strStart, "(?s)\`$names = @\((.*?)\)\s*\`$ctx = @\{").Groups[1].Value
+        $arrControl = @([regex]::Matches($strNames, "'([A-Za-z0-9_]+)'") | ForEach-Object { $_.Groups[1].Value })
+        $arrControl.Count | Should -BeGreaterThan 20
+        $arrAssigned = @([regex]::Matches($strStart, '\$ctx\.([A-Za-z0-9_]+)\s*=(?!=)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+        $arrClash = @($arrAssigned | Where-Object { $strName = $_; $arrControl | Where-Object { $_ -ieq $strName } })
+        $arrClash | Should -BeNullOrEmpty
+    }
+}

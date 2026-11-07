@@ -25,7 +25,7 @@
 
     ScriptName : start-detectiontester.ps1
     Purpose    : Test Configuration Manager detection methods locally
-    Version    : 2026.10.12.0012
+    Version    : 2026.11.06.0013
     Updated    : 2026-09-21
 #>
 
@@ -246,13 +246,13 @@ $script:DTGatherClause = {
             }
         }
         'Compound (import-only)' {
-            if ($null -eq $ctx.CompoundClauses -or $ctx.CompoundClauses.Count -eq 0) {
+            if ($null -eq $ctx.CompoundClauseData -or $ctx.CompoundClauseData.Count -eq 0) {
                 return $null
             }
             return @{
                 Type      = 'Compound'
                 Connector = $ctx.compoundConnector.Text
-                Clauses   = $ctx.CompoundClauses
+                Clauses   = $ctx.CompoundClauseData
             }
         }
     }
@@ -428,7 +428,7 @@ $script:DTImportManifest = {
             }
             [void]$ctx.compoundClauses.Items.Add($line)
         }
-        $ctx.CompoundClauses = $det.Clauses
+        $ctx.CompoundClauseData = $det.Clauses
     } elseif ($det.Type -eq 'RegistryKeyValue') {
         $ctx.cboType.SelectedIndex = 0
         $ctx.rkvKeyPath.Text   = [string]$det.RegistryKeyRelative
@@ -536,7 +536,7 @@ $script:DTRepopulateFromHistory = {
             foreach ($c in $clause.Clauses) {
                 [void]$ctx.compoundClauses.Items.Add(("{0}: {1}" -f $c.Type, ($c | ConvertTo-Json -Compress)))
             }
-            $ctx.CompoundClauses = $clause.Clauses
+            $ctx.CompoundClauseData = $clause.Clauses
         }
     }
     Write-Log ("Repopulate: restored full clause from history (type={0}, negative={1})" -f $clause.Type, $row.Negative)
