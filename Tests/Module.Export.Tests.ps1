@@ -173,12 +173,12 @@ Describe 'Export-DetectionResultsCsv' {
         $r.Found | Should -Be $Cell
     }
 
-    It 'leaves the column names as they are' {
+    It 'protects a column name that a spreadsheet would run as a formula' {
         $t = New-ResultTable -Column @('=Time', 'Type')
         [void]$t.Rows.Add('a', 'b')
         $out = Join-Path $TestDrive 'header.csv'
         Export-DetectionResultsCsv -DataTable $t -OutputPath $out
-        (Import-Csv -LiteralPath $out -Encoding UTF8)[0].PSObject.Properties.Name | Should -Contain '=Time'
+        (Import-Csv -LiteralPath $out -Encoding UTF8)[0].PSObject.Properties.Name | Should -Contain "'=Time"
     }
 }
 

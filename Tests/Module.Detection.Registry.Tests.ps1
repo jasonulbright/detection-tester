@@ -323,8 +323,8 @@ Describe 'Test-RegistryKeyValueDetection on a throwaway key' {
     }
 
     It 'sees the 64-bit and the 32-bit view of HKLM differ for a 64-bit ARP entry' {
-        $x64 = Get-InstalledApplications | Where-Object { $_.Architecture -eq 'x64' -and $_.Scope -eq 'Machine' } | Select-Object -First 1
-        if (-not $x64) { Set-ItResult -Skipped -Because 'this machine has no 64-bit machine-wide application'; return }
+        $x64 = Get-ViewExclusiveX64App
+        if (-not $x64) { Set-ItResult -Skipped -Because 'this machine has no 64-bit machine-wide application that the 32-bit view hides'; return }
         (Test-RegistryKeyDetection -RegistryKeyRelative $x64.RegistryKeyRelative -Is64Bit $true).Detected | Should -BeTrue
         (Test-RegistryKeyDetection -RegistryKeyRelative $x64.RegistryKeyRelative -Is64Bit $false).Detected | Should -BeFalse
     }
@@ -394,6 +394,15 @@ Describe 'Registry handle cleanup' {
         # No Close call on the base key outside a finally block
         $all = @($fn.FindAll({ param($n) $n -is [System.Management.Automation.Language.InvokeMemberExpressionAst] -and $n.Member.Value -eq 'Close' -and $n.Expression.Extent.Text -eq '$rootKey' }, $true))
         $inFinally = @($finallies | ForEach-Object { $_.FindAll({ param($n) $n -is [System.Management.Automation.Language.InvokeMemberExpressionAst] -and $n.Member.Value -eq 'Close' -and $n.Expression.Extent.Text -eq '$rootKey' }, $true) })
+        # Each acquisition is followed at once by a try whose finally closes the key.
+        foreach ($open in $opens) {
+            $stmt = $open
+            while ($stmt.Parent -isnot [System.Management.Automation.Language.StatementBlockAst] -and $stmt.Parent -isnot [System.Management.Automation.Language.NamedBlockAst]) { $stmt = $stmt.Parent }
+            $siblings = @($stmt.Parent.Statements)
+            $next = $siblings[[array]::IndexOf($siblings, $stmt) + 1]
+            $next | Should -BeOfType ([System.Management.Automation.Language.TryStatementAst]) -Because 'a statement between OpenBaseKey and the try can throw and leak the key'
+            $next.Finally.Extent.Text | Should -Match '\$rootKey\.Close\(\)'
+        }
         $all.Count | Should -Be $inFinally.Count -Because 'an early Close outside the finally block is skipped when an exception happens first'
     }
 }

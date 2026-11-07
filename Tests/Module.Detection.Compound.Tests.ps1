@@ -41,7 +41,7 @@ Describe "Test-CompoundDetection" {
 
 Describe 'Test-CompoundDetection results' {
     BeforeAll {
-        $script:Key = New-TestRegistryKey -Value @{ Ver = '2.0.0'; Zero = @{ Data = 0; Kind = 'DWord' }; Flag = @{ Data = 1; Kind = 'DWord' } }
+        $script:Key = New-TestRegistryKey -Value @{ Ver = '9.9.9'; DisplayVersion = '2.0.0'; Zero = @{ Data = 0; Kind = 'DWord' }; Flag = @{ Data = 1; Kind = 'DWord' } }
         $script:Dir = Join-Path $TestDrive 'cmp'
         New-Item -ItemType Directory -Path $script:Dir -Force | Out-Null
         Set-Content -LiteralPath (Join-Path $script:Dir 'present.txt') -Value 'x'
@@ -90,8 +90,8 @@ Describe 'Test-CompoundDetection results' {
     }
 
     It 'evaluates a RegistryKeyValue clause and defaults the type, the value name, the operator and the hive' {
-        $clause = @{ RegistryKeyRelative = $script:Key; Hive = 'CurrentUser'; DisplayVersion = '2.0.0' }
-        $clause.ValueName = 'Ver'
+        # No ValueName: the default is DisplayVersion. Ver holds a different value on purpose.
+        $clause = @{ RegistryKeyRelative = $script:Key; Hive = 'CurrentUser'; ExpectedValue = '2.0.0' }
         $r = Test-CompoundDetection -Connector And -Clauses @($clause)
         $r.ClauseResults[0].Type | Should -Be 'RegistryKeyValue'
         $r.ClauseResults[0].Detected | Should -BeTrue
@@ -99,7 +99,7 @@ Describe 'Test-CompoundDetection results' {
     }
 
     It 'takes the expected value from DisplayVersion when ExpectedValue is missing' {
-        $clause = @{ Type = 'RegistryKeyValue'; RegistryKeyRelative = $script:Key; Hive = 'CurrentUser'; ValueName = 'Ver'; DisplayVersion = '2.0.0' }
+        $clause = @{ Type = 'RegistryKeyValue'; RegistryKeyRelative = $script:Key; Hive = 'CurrentUser'; ValueName = 'DisplayVersion'; DisplayVersion = '2.0.0' }
         (Test-CompoundDetection -Connector And -Clauses @($clause)).Detected | Should -BeTrue
     }
 
@@ -183,8 +183,8 @@ Describe 'Test-CompoundDetection results' {
         @{ Value = 0;        Expected = $false }
     ) {
         # An HKLM ARP entry of a 64-bit application is visible only in the 64-bit view, so Is64Bit decides the result.
-        $x64 = Get-InstalledApplications | Where-Object { $_.Architecture -eq 'x64' -and $_.Scope -eq 'Machine' } | Select-Object -First 1
-        if (-not $x64) { Set-ItResult -Skipped -Because 'this machine has no 64-bit machine-wide application'; return }
+        $x64 = Get-ViewExclusiveX64App
+        if (-not $x64) { Set-ItResult -Skipped -Because 'this machine has no 64-bit machine-wide application that the 32-bit view hides'; return }
         $clause = @{ Type = 'RegistryKey'; RegistryKeyRelative = $x64.RegistryKeyRelative; Hive = 'LocalMachine'; Is64Bit = $Value }
         (Test-CompoundDetection -Connector And -Clauses @($clause)).Detected | Should -Be $Expected
     }

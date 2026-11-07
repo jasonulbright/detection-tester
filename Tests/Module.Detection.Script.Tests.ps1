@@ -157,6 +157,13 @@ Describe 'Test-ScriptDetection timeout' {
         $r.Details | Should -BeLike 'Script timed out after 1s *'
     }
 
+    It 'returns the output of a quick script for a timeout of <Timeout>' -ForEach @(@{ Timeout = 0 }, @{ Timeout = -5 }) {
+        $r = Test-ScriptDetection -ScriptText '"ok"' -TimeoutSeconds $Timeout
+        $r.TimedOut | Should -BeFalse
+        $r.Detected | Should -BeTrue
+        $r.ScriptOutput | Should -Be 'ok'
+    }
+
     It 'returns normal output well before a long timeout' {
         $sw = [Diagnostics.Stopwatch]::StartNew()
         $r = Test-ScriptDetection -ScriptText '"quick"' -TimeoutSeconds 60

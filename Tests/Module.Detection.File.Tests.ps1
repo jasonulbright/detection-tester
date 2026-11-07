@@ -74,8 +74,9 @@ Describe 'Test-FileDetection on files in a test folder' {
             $src = Join-Path $script:Dir 'zz.cs'
             Set-Content -LiteralPath $src -Value '[assembly: System.Reflection.AssemblyFileVersion("3.4.5.6")] class P { static void Main() { } }'
             $exe = Join-Path $script:Dir 'versioned.exe'
-            $null = & $csc /nologo /target:exe "/out:$exe" $src 2>&1
-            if (Test-Path -LiteralPath $exe) { $script:ExePath = $exe }
+            $compile = & $csc /nologo /target:exe "/out:$exe" $src 2>&1
+            if (-not (Test-Path -LiteralPath $exe)) { throw ('The fixture program did not compile: ' + ($compile -join ' ')) }
+            $script:ExePath = $exe
         }
     }
     AfterAll { Remove-Item Env:\ZZTEST_DT_DIR -ErrorAction SilentlyContinue }

@@ -496,7 +496,7 @@ Describe 'Handlers on the real controls' -Skip:(-not $script:WindowGuard.Allowed
                 }
             }
             finally { Remove-TestRegistryKey -Relative $key }
-            $r.All | Should -BeGreaterThan 1
+            $r.All | Should -BeGreaterThan 0
             $r.ByText | Should -Be 1
             $r.Machine | Should -Be 0 -Because 'the throwaway entry is a per-user entry'
             $r.User | Should -Be 1

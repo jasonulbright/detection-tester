@@ -79,6 +79,16 @@ function Get-CommandParameterName {
                 $scope = $scope.Parent
             }
             if ($assigns.Count -eq 0) { continue }
+            # A hashtable literal that an outer block assigns before the branch also counts (its keys stay in the splat).
+            $outer = $scope.Parent
+            while ($outer) {
+                if ($outer -is [System.Management.Automation.Language.StatementBlockAst] -or $outer -is [System.Management.Automation.Language.NamedBlockAst]) {
+                    $assigns += @($outer.Statements | Where-Object {
+                            $_ -is [System.Management.Automation.Language.AssignmentStatementAst] -and $_.Left -is [System.Management.Automation.Language.VariableExpressionAst] -and
+                            $_.Left.VariablePath.UserPath -eq $var -and $_.Right.Expression -is [System.Management.Automation.Language.HashtableAst] })
+                }
+                $outer = $outer.Parent
+            }
             foreach ($a in $assigns) {
                 $left = $a.Left
                 if ($left -is [System.Management.Automation.Language.VariableExpressionAst] -and $left.VariablePath.UserPath -eq $var -and $a.Right.Expression -is [System.Management.Automation.Language.HashtableAst]) {
@@ -170,4 +180,16 @@ function Get-ShellRuntimePart {
                 $n.Left.VariablePath.UserPath -in 'script:DarkButtonBg', 'script:DarkButtonBorder', 'script:LightButtonBg', 'script:LightButtonBorder', 'script:TitleBarBlue', 'script:TitleBarBlueInactive'
             }, $true) | ForEach-Object { $_.Extent.Text })
     return @{ Functions = $functions; Blocks = $blocks; Assignments = $assignments }
+}
+
+# The first 64-bit machine-wide ARP entry that the 32-bit registry view does not show, or $null. Detection of such a key
+# must differ between the two views, whatever else is installed.
+function Get-ViewExclusiveX64App {
+    foreach ($a in (Get-InstalledApplications | Where-Object { $_.Architecture -eq 'x64' -and $_.Scope -eq 'Machine' })) {
+        $base = [Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::LocalMachine, [Microsoft.Win32.RegistryView]::Registry32)
+        try { $sub = $base.OpenSubKey($a.RegistryKeyRelative); $seen = ($null -ne $sub); if ($sub) { $sub.Close() } }
+        finally { $base.Close() }
+        if (-not $seen) { return $a }
+    }
+    return $null
 }

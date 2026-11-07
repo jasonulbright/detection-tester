@@ -181,6 +181,8 @@ Describe 'ConvertTo-DTBoolean' {
         @{ Value = $null }
         @{ Value = '' }
         @{ Value = 'maybe' }
+        @{ Value = [datetime]'2026-01-01' }
+        @{ Value = [guid]::Empty }
     ) {
         InModuleScope DetectionTesterCommon -Parameters @{ Value = $Value } {
             ConvertTo-DTBoolean -Value $Value -Default $true | Should -BeTrue

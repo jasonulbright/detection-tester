@@ -77,7 +77,7 @@ $cfg = New-PesterConfiguration
 $testFiles = @(Get-ChildItem -LiteralPath $root -Recurse -Filter '*.Tests.ps1' -File |
         Where-Object { $_.FullName -notlike '*\.git\*' })
 if ($testFiles.Count -eq 0) { Write-Host 'No test file found.'; exit 1 }
-if ($SkipWindow) { $testFiles = @($testFiles | Where-Object { $_.Name -notlike 'Window*.Tests.ps1' }) }
+if ($SkipWindow) { $testFiles = @($testFiles | Where-Object { $_.Name -ne 'Window.Tests.ps1' }) }
 $cfg.Run.Path = $testFiles.FullName
 $cfg.Run.PassThru = $true
 $cfg.Output.Verbosity = 'Minimal'
