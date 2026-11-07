@@ -705,3 +705,15 @@ Describe "History export table" {
         $objMany.Rows.Count | Should -Be 3
     }
 }
+
+Describe "Grid column headers" {
+    It "gives every fixed-width column nine pixels for each character of its header" {
+        foreach ($strFile in 'DetectionTester.xaml', 'InstalledApps.xaml') {
+            $strXaml = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\Modules\$strFile") -Raw
+            foreach ($objMatch in [regex]::Matches($strXaml, '<DataGridTextColumn\s+Header="([^"]+)"[^>]*?Width="(\d+)"')) {
+                $strHeader = $objMatch.Groups[1].Value
+                [int]$objMatch.Groups[2].Value | Should -BeGreaterOrEqual (9 * $strHeader.Length) -Because "$strFile column $strHeader"
+            }
+        }
+    }
+}
