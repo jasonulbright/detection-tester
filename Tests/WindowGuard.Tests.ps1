@@ -3,36 +3,21 @@
 
 BeforeAll {
     . "$PSScriptRoot\WindowHarness.ps1"
-    $script:Other = 'OTHERPC'
 }
 
 Describe 'Test-WindowTestsAllowed' {
-    It 'refuses the dev PC "<Name>" even with the opt-in' -ForEach @(
-        @{ Name = 'AYW' }, @{ Name = 'ayw' }, @{ Name = 'Ayw' }
-    ) {
-        $g = Test-WindowTestsAllowed -ComputerName $Name -OptIn '1'
-        $g.Allowed | Should -BeFalse
-        $g.Reason | Should -BeLike '*AYW*'
-    }
-
-    It 'allows another machine with the opt-in' {
-        $g = Test-WindowTestsAllowed -ComputerName $script:Other -OptIn '1'
+    It 'allows the run with the opt-in' {
+        $g = Test-WindowTestsAllowed -OptIn '1'
         $g.Allowed | Should -BeTrue
         $g.Reason | Should -Be ''
     }
 
-    It 'refuses another machine when the opt-in is "<OptIn>"' -ForEach @(
+    It 'refuses the run when the opt-in is "<OptIn>"' -ForEach @(
         @{ OptIn = '' }, @{ OptIn = '0' }, @{ OptIn = 'true' }, @{ OptIn = $null }
     ) {
-        $g = Test-WindowTestsAllowed -ComputerName $script:Other -OptIn $OptIn
+        $g = Test-WindowTestsAllowed -OptIn $OptIn
         $g.Allowed | Should -BeFalse
         $g.Reason | Should -Be 'SUITE_ALLOW_WINDOW_TESTS is not 1'
-    }
-
-    It 'gives a reason whenever it refuses' -ForEach @(
-        @{ Name = 'AYW'; OptIn = '1' }, @{ Name = 'CM01'; OptIn = '' }
-    ) {
-        (Test-WindowTestsAllowed -ComputerName $Name -OptIn $OptIn).Reason | Should -Not -BeNullOrEmpty
     }
 }
 

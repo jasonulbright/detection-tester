@@ -30,6 +30,7 @@
 ### Changed
 
 - Update the shared SuiteCommon module to 2026.11.07.0075.
+- Run window tests only when the SUITE_ALLOW_WINDOW_TESTS opt-in is set.
 
 ## [2026.11.07.0014] - 2026-11-07
 

@@ -63,14 +63,11 @@ if (-not $SkipLint) {
 }
 
 # ---- Window guard ----------------------------------------------------------
-# The window tests skip themselves on the dev PC and where SUITE_ALLOW_WINDOW_TESTS is not 1.
+# The window tests skip themselves where SUITE_ALLOW_WINDOW_TESTS is not 1.
 . (Join-Path $root 'Tests\WindowHarness.ps1')
 $guard = Test-WindowTestsAllowed
 $windowsRan = $guard.Allowed -and -not $SkipWindow
-if (-not $guard.Allowed) {
-    if ($env:COMPUTERNAME -ieq 'AYW') { Write-Host 'Window tests skipped: dev PC (AYW). Run them on CM01/CLIENT01 or in CI.' }
-    else { Write-Host 'Window tests skipped: SUITE_ALLOW_WINDOW_TESTS is not 1.' }
-}
+if (-not $guard.Allowed) { Write-Host 'Window tests skipped: SUITE_ALLOW_WINDOW_TESTS is not 1.' }
 
 # ---- 2. Tests and coverage -------------------------------------------------
 $cfg = New-PesterConfiguration

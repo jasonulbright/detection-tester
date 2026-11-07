@@ -15,15 +15,13 @@ $script:HarnessRoot = Split-Path -Parent $PSScriptRoot
 
 $script:HarnessSession = $null
 
-# Window tests open a window only when SUITE_ALLOW_WINDOW_TESTS is 1, and never on the dev PC (AYW).
+# Window tests open a window only when SUITE_ALLOW_WINDOW_TESTS is 1.
 function Test-WindowTestsAllowed {
     [CmdletBinding()]
     param(
-        [string]$ComputerName = $env:COMPUTERNAME,
         [string]$OptIn = $env:SUITE_ALLOW_WINDOW_TESTS
     )
-    if ($ComputerName -ieq 'AYW') { return [pscustomobject]@{ Allowed = $false; Reason = 'dev PC (AYW): window tests never run here' } }
-    if ($OptIn -ne '1')           { return [pscustomobject]@{ Allowed = $false; Reason = 'SUITE_ALLOW_WINDOW_TESTS is not 1' } }
+    if ($OptIn -ne '1') { return [pscustomobject]@{ Allowed = $false; Reason = 'SUITE_ALLOW_WINDOW_TESTS is not 1' } }
     [pscustomobject]@{ Allowed = $true; Reason = '' }
 }
 
