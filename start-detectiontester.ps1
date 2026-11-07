@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Main window of Detection Method Tester, a tool that tests Configuration Manager application detection methods on the local machine.
 
@@ -25,7 +25,7 @@
 
     ScriptName : start-detectiontester.ps1
     Purpose    : Test Configuration Manager detection methods locally
-    Version    : 2026.11.07.0014
+    Version    : 2026.11.07.0015
     Updated    : 2026-11-07
 #>
 
@@ -544,6 +544,23 @@ $script:DTRepopulateFromHistory = {
     Write-Log ("Repopulate: restored full clause from history (type={0}, negative={1})" -f $clause.Type, $row.Negative)
 }
 
+# Helper: the text that Copy details puts on the clipboard, one line for each field of an application.
+function Format-DTAppDetails {
+    param([Parameter(Mandatory)]$App)
+    return @(
+        ("DisplayName:          $($App.DisplayName)"),
+        ("Publisher:            $($App.Publisher)"),
+        ("DisplayVersion:       $($App.DisplayVersion)"),
+        ("Architecture:         $($App.Architecture)"),
+        ("Scope:                $($App.Scope)"),
+        ("RegistryKey:          $($App.RegistryKey)"),
+        ("UninstallString:      $($App.UninstallString)"),
+        ("QuietUninstallString: $($App.QuietUninstallString)"),
+        ("InstallLocation:      $($App.InstallLocation)"),
+        ("InstallDate:          $($App.InstallDate)")
+    ) -join "`r`n"
+}
+
 # Helper: convert ObservableCollection of PSCustomObject to DataTable for export
 function ConvertTo-DTHistoryDataTable {
     param([Parameter(Mandatory)]$Items)
@@ -573,7 +590,14 @@ $script:DTExportHistoryCsv = {
     $dlg.FileName = ('detection-history-{0}.csv' -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
     if (-not $dlg.ShowDialog($window)) { return }
     $dt = ConvertTo-DTHistoryDataTable -Items $script:HistoryItems
-    Export-DetectionResultsCsv -DataTable $dt -OutputPath $dlg.FileName
+    # An export error shows in the result panel. An exception in a click handler ends the tool.
+    try {
+        Export-DetectionResultsCsv -DataTable $dt -OutputPath $dlg.FileName
+    } catch {
+        $script:DTContext.txtResultBadge.Text   = 'Export failed'
+        $script:DTContext.txtResultDetails.Text = "Failed to export to '$($dlg.FileName)': $($_.Exception.Message)"
+        Write-Log "Export CSV failed: $($_.Exception.Message)" -Level WARN -Quiet
+    }
 }
 
 $script:DTExportHistoryHtml = {
@@ -584,7 +608,13 @@ $script:DTExportHistoryHtml = {
     $dlg.FileName = ('detection-history-{0}.html' -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
     if (-not $dlg.ShowDialog($window)) { return }
     $dt = ConvertTo-DTHistoryDataTable -Items $script:HistoryItems
-    Export-DetectionResultsHtml -DataTable $dt -OutputPath $dlg.FileName
+    try {
+        Export-DetectionResultsHtml -DataTable $dt -OutputPath $dlg.FileName
+    } catch {
+        $script:DTContext.txtResultBadge.Text   = 'Export failed'
+        $script:DTContext.txtResultDetails.Text = "Failed to export to '$($dlg.FileName)': $($_.Exception.Message)"
+        Write-Log "Export HTML failed: $($_.Exception.Message)" -Level WARN -Quiet
+    }
 }
 
 $script:DTClearHistory = {
@@ -612,10 +642,9 @@ $script:IAApplyFilter = {
             $hay = "$($a.DisplayName) $($a.Publisher) $($a.DisplayVersion)"
             if ($hay -notmatch [regex]::Escape($filterText)) { continue }
         }
-        switch ($scopeSel) {
-            'Machine (HKLM)' { if ($a.Scope -ne 'Machine') { continue } }
-            'User (HKCU)'    { if ($a.Scope -ne 'User')    { continue } }
-        }
+        # 'continue' inside a switch ends the switch, not the loop, so the scope test uses if.
+        if ($scopeSel -eq 'Machine (HKLM)' -and $a.Scope -ne 'Machine') { continue }
+        if ($scopeSel -eq 'User (HKCU)' -and $a.Scope -ne 'User') { continue }
         $script:IAItems.Add($a)
     }
 }
@@ -671,19 +700,7 @@ $script:IAUseForDetection = {
 $script:IACopyDetails = {
     $a = $script:IAContext.dgApps.SelectedItem
     if ($null -eq $a) { return }
-    $lines = @(
-        ("DisplayName:          $($a.DisplayName)"),
-        ("Publisher:            $($a.Publisher)"),
-        ("DisplayVersion:       $($a.DisplayVersion)"),
-        ("Architecture:         $($a.Architecture)"),
-        ("Scope:                $($a.Scope)"),
-        ("RegistryKey:          $($a.RegistryKey)"),
-        ("UninstallString:      $($a.UninstallString)"),
-        ("QuietUninstallString: $($a.QuietUninstallString)"),
-        ("InstallLocation:      $($a.InstallLocation)"),
-        ("InstallDate:          $($a.InstallDate)")
-    ) -join "`r`n"
-    [System.Windows.Clipboard]::SetText($lines)
+    [System.Windows.Clipboard]::SetText((Format-DTAppDetails -App $a))
 }
 
 # ---------------------------------------------------------------------------
@@ -1028,6 +1045,13 @@ $script:ShowOptionsDialog = {
     $currentTheme = [ControlzEx.Theming.ThemeManager]::Current.DetectTheme($window)
     if ($currentTheme) {
         [ControlzEx.Theming.ThemeManager]::Current.ChangeTheme($dlg, $currentTheme) | Out-Null
+    }
+
+    # The theme default title bar of the light theme has too little contrast with the title text. The main
+    # window sets its own brushes in ApplyButtonTheme; the dialog gets the same ones.
+    if (-not $script:Prefs.DarkMode) {
+        $dlg.WindowTitleBrush          = $script:TitleBarBlue
+        $dlg.NonActiveWindowTitleBrush = $script:TitleBarBlueInactive
     }
 
     $dlg.Owner = $window
