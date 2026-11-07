@@ -36,6 +36,18 @@ Describe 'Test-WindowTestsAllowed' {
     }
 }
 
+Describe 'Test-WindowTestsAllowed signature' {
+    It 'has the OptIn parameter and no ComputerName parameter' {
+        $names = @((Get-Command Test-WindowTestsAllowed).Parameters.Keys | Where-Object { $_ -notin [System.Management.Automation.Cmdlet]::CommonParameters })
+        $names | Should -Be @('OptIn')
+    }
+
+    It 'decides on the opt-in only' {
+        (Test-WindowTestsAllowed -OptIn '1').Allowed | Should -BeTrue
+        (Test-WindowTestsAllowed -OptIn '').Allowed | Should -BeFalse
+    }
+}
+
 Describe 'Window test files' {
     It 'checks the guard in every test file that opens a window' {
         $self = 'WindowGuard.Tests.ps1'
