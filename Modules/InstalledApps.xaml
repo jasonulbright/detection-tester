@@ -15,10 +15,10 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="8*" MinWidth="60" MaxWidth="260"/>
                 <ColumnDefinition Width="12"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>

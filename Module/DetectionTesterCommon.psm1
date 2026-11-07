@@ -37,11 +37,17 @@ function Compare-DetectionValue {
     .SYNOPSIS
         Compares two values using ConfigMgr detection method semantics.
     .DESCRIPTION
-        PropertyType chooses the comparison kind:
-          - 'Version' (default for greater/less): parse as System.Version (1.2.3.4 form)
-          - 'Integer' / 'DWORD' / 'QWORD': parse as Int64
-          - 'String' (default): culture-invariant string compare
-        IsEquals always falls back to string equality if numeric parse fails.
+        IsEquals is a culture-invariant string compare (letter case ignored) for every
+        PropertyType. The ordering operators (GreaterEquals, GreaterThan, LessEquals,
+        LessThan) depend on PropertyType:
+          - 'Integer' / 'Int' / 'Int32' / 'Int64' / 'DWORD' / 'QWORD': both values must
+            be whole numbers (Int64). A value with a decimal part does not match.
+          - 'Version' / 'FileVersion' / 'ProductVersion', and 'String' (the default):
+            both values parse as System.Version (1.2.3.4 form) and compare part by part.
+            When they do not parse as versions, whole numbers compare as Int64.
+            The 'String' kind orders by version, never by text: the shell sends 'String'
+            for every registry value, so that 1.10 is greater than 1.9.
+        A value that does not parse never matches, and an unknown operator never matches.
     .OUTPUTS
         [bool] True if comparison succeeds.
     #>
@@ -52,6 +58,7 @@ function Compare-DetectionValue {
         [string]$PropertyType = 'String'
     )
 
+    # The parameters are typed [string], so a null argument arrives as an empty string.
     if ($null -eq $Actual) { return $false }
 
     if ($Operator -eq 'IsEquals') { return ($Actual -eq $Expected) }
@@ -61,18 +68,20 @@ function Compare-DetectionValue {
     $isVersion = $PropertyType -in @('Version','FileVersion','ProductVersion','String')
 
     if ($isInteger) {
-        try {
-            $iActual   = [int64]$Actual
-            $iExpected = [int64]$Expected
-            switch ($Operator) {
-                'GreaterEquals' { return ($iActual -ge $iExpected) }
-                'GreaterThan'   { return ($iActual -gt $iExpected) }
-                'LessEquals'    { return ($iActual -le $iExpected) }
-                'LessThan'      { return ($iActual -lt $iExpected) }
-            }
-        } catch {
-            Write-Log "Integer parse failed: Actual='$Actual', Expected='$Expected' - $_" -Level WARN -Quiet
+        # A string cast to Int64 rounds '1.5' to 2. Parse the text as a whole number instead.
+        $style = [System.Globalization.NumberStyles]::Integer
+        $culture = [System.Globalization.CultureInfo]::InvariantCulture
+        $iActual = [int64]0
+        $iExpected = [int64]0
+        if (-not ([int64]::TryParse($Actual, $style, $culture, [ref]$iActual) -and [int64]::TryParse($Expected, $style, $culture, [ref]$iExpected))) {
+            Write-Log "Integer parse failed: Actual='$Actual', Expected='$Expected'" -Level WARN -Quiet
             return $false
+        }
+        switch ($Operator) {
+            'GreaterEquals' { return ($iActual -ge $iExpected) }
+            'GreaterThan'   { return ($iActual -gt $iExpected) }
+            'LessEquals'    { return ($iActual -le $iExpected) }
+            'LessThan'      { return ($iActual -lt $iExpected) }
         }
     }
 
@@ -90,23 +99,78 @@ function Compare-DetectionValue {
             # Fall through to integer attempt below for ambiguous cases (e.g. "8246" parses as a version OR an int).
             Write-Log "Compare-DetectionValue: Version parse failed for Actual='$Actual' Expected='$Expected'; trying Int64 path." -Level WARN -Quiet
         }
-        try {
-            $iActual   = [int64]$Actual
-            $iExpected = [int64]$Expected
-            switch ($Operator) {
-                'GreaterEquals' { return ($iActual -ge $iExpected) }
-                'GreaterThan'   { return ($iActual -gt $iExpected) }
-                'LessEquals'    { return ($iActual -le $iExpected) }
-                'LessThan'      { return ($iActual -lt $iExpected) }
-            }
-        } catch {
-            Write-Log "Version/Integer parse failed: Actual='$Actual', Expected='$Expected' - $_" -Level WARN -Quiet
+        $style = [System.Globalization.NumberStyles]::Integer
+        $culture = [System.Globalization.CultureInfo]::InvariantCulture
+        $iActual = [int64]0
+        $iExpected = [int64]0
+        if (-not ([int64]::TryParse($Actual, $style, $culture, [ref]$iActual) -and [int64]::TryParse($Expected, $style, $culture, [ref]$iExpected))) {
+            Write-Log "Version/Integer parse failed: Actual='$Actual', Expected='$Expected'" -Level WARN -Quiet
             return $false
+        }
+        switch ($Operator) {
+            'GreaterEquals' { return ($iActual -ge $iExpected) }
+            'GreaterThan'   { return ($iActual -gt $iExpected) }
+            'LessEquals'    { return ($iActual -le $iExpected) }
+            'LessThan'      { return ($iActual -lt $iExpected) }
         }
     }
 
     Write-Log "Unknown operator/PropertyType combo: Operator=$Operator PropertyType=$PropertyType" -Level WARN -Quiet
     return $false
+}
+
+# ---------------------------------------------------------------------------
+# Private helpers: version text, booleans, empty values
+# ---------------------------------------------------------------------------
+
+function ConvertTo-DTCleanFileVersion {
+    <#
+    .SYNOPSIS
+        Turns the FileVersion text of a version resource into text that System.Version accepts.
+    .DESCRIPTION
+        A version resource holds free text: '1, 0, 0, 1' (commas and spaces), '10.0.1 (WinBuild.160101.0800)'
+        (a build suffix) or '4.7.3062.0 built by: NET472REL1'. The leading run of numbers becomes
+        '1.0.0.1', '10.0.1' and '4.7.3062.0'. Text that does not start with a number is returned
+        without its parenthetical suffix and without spaces.
+    .OUTPUTS
+        [string] the cleaned version; an empty string for empty input.
+    #>
+    param([AllowEmptyString()][AllowNull()][string]$Version)
+    if ([string]::IsNullOrWhiteSpace($Version)) { return '' }
+    $text = $Version.Trim()
+    $numbers = [regex]::Match($text, '^(\d+(?:\s*[.,]\s*\d+)*)(?:\s|\(|$)')
+    if ($numbers.Success) { return (($numbers.Groups[1].Value -replace '\s*,\s*', '.') -replace '\s+', '') }
+    return ($text -replace '\s*\(.*\)\s*$', '' -replace '\s+', '')
+}
+
+function ConvertTo-DTBoolean {
+    <#
+    .SYNOPSIS
+        Reads a manifest or clause value as a boolean. 'false', '0' and 'no' (any case) are false;
+        'true', '1' and 'yes' are true; a number is false when it is 0. A missing, empty or unknown
+        value gives the default.
+    #>
+    param($Value, [bool]$Default)
+    if ($null -eq $Value) { return $Default }
+    if ($Value -is [bool]) { return $Value }
+    if ($Value -is [string]) {
+        switch ($Value.Trim().ToLowerInvariant()) {
+            { $_ -in 'true', '1', 'yes' } { return $true }
+            { $_ -in 'false', '0', 'no' } { return $false }
+            default { return $Default }
+        }
+    }
+    if ($Value -is [ValueType]) { return ([double]$Value -ne 0) }
+    return $Default
+}
+
+function Test-DTHasValue {
+    <#
+    .SYNOPSIS
+        True when a value is present. The number 0 is a value; $null and an empty string are not.
+    #>
+    param($Value)
+    return ($null -ne $Value -and [string]$Value -ne '')
 }
 
 # ---------------------------------------------------------------------------
@@ -160,8 +224,8 @@ function ConvertTo-DTRegistryRelativePath {
     $p = $Path.Trim()
     # Strip the PowerShell registry provider prefix if present.
     $p = $p -replace '^(Registry::|Microsoft\.PowerShell\.Core\\Registry::)', ''
-    # Strip any hive name with either a backslash or a colon-then-backslash separator.
-    $p = $p -replace '^(HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)(:\\|\\|:)', ''
+    # Strip any hive name with a backslash or colon-then-backslash separator, or a path that is only the hive name.
+    $p = $p -replace '^(HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)(:\\|\\|:|$)', ''
     return $p.TrimStart('\')
 }
 
@@ -230,20 +294,26 @@ function Test-RegistryKeyValueDetection {
             [Microsoft.Win32.RegistryHive]::LocalMachine
         }
 
+        # Both keys close in finally blocks, so an exception while reading does not leave a handle open.
         $rootKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($hiveEnum, $view)
-        $subKey  = $rootKey.OpenSubKey($RegistryKeyRelative)
+        try {
+            $subKey = $rootKey.OpenSubKey($RegistryKeyRelative)
 
-        if ($null -eq $subKey) {
+            if ($null -eq $subKey) {
+                $result.Details = "Key not found: ${hivePrefix}\$RegistryKeyRelative"
+                Write-Log "RegistryKeyValue: Key not found - ${hivePrefix}\$RegistryKeyRelative" -Quiet
+                return $result
+            }
+
+            try {
+                $result.KeyExists = $true
+                $rawValue = $subKey.GetValue($ValueName, $null)
+            } finally {
+                $subKey.Close()
+            }
+        } finally {
             $rootKey.Close()
-            $result.Details = "Key not found: ${hivePrefix}\$RegistryKeyRelative"
-            Write-Log "RegistryKeyValue: Key not found - ${hivePrefix}\$RegistryKeyRelative" -Quiet
-            return $result
         }
-
-        $result.KeyExists = $true
-        $rawValue = $subKey.GetValue($ValueName, $null)
-        $subKey.Close()
-        $rootKey.Close()
 
         if ($null -eq $rawValue) {
             $result.Details = "Value '$ValueName' not found in key"
@@ -374,7 +444,8 @@ function Test-FileDetection {
         }
         $fullPath = Join-Path $expandedPath $FileName
 
-        if (-not (Test-Path -LiteralPath $fullPath)) {
+        # A folder with the name of the file is not the file.
+        if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
             $result.Details = "File not found: $fullPath"
             Write-Log "File: $($result.Details)" -Quiet
             return $result
@@ -395,8 +466,8 @@ function Test-FileDetection {
                 return $result
             }
 
-            # Clean version string: strip build metadata, parenthetical suffixes, spaces
-            $fileVersion = $fileVersion.Trim() -replace '\s*\(.*\)\s*$', '' -replace '\s+', ''
+            # Clean version string: '1, 0, 0, 1' and build suffixes become a version that System.Version accepts.
+            $fileVersion = ConvertTo-DTCleanFileVersion -Version $fileVersion
             $result.ActualValue = $fileVersion
 
             $match = Compare-DetectionValue -Actual $fileVersion -Expected $ExpectedValue -Operator $Operator -PropertyType 'Version'
@@ -475,7 +546,9 @@ function Test-ScriptDetection {
         [void]$ps.AddScript($ScriptText)
 
         $async = $ps.BeginInvoke()
-        $deadline = [DateTime]::UtcNow.AddSeconds([Math]::Max(1, $TimeoutSeconds))
+        # The limit is at least one second; the message names the limit that was used.
+        $limitSeconds = [Math]::Max(1, $TimeoutSeconds)
+        $deadline = [DateTime]::UtcNow.AddSeconds($limitSeconds)
         while (-not $async.IsCompleted -and [DateTime]::UtcNow -lt $deadline) {
             Start-Sleep -Milliseconds 100
         }
@@ -483,7 +556,7 @@ function Test-ScriptDetection {
         if (-not $async.IsCompleted) {
             try { $ps.Stop() } catch { Write-Log "Test-ScriptDetection: Stop() on timeout swallowed: $($_.Exception.Message)" -Level WARN -Quiet }
             $result.TimedOut = $true
-            $result.Details = "Script timed out after ${TimeoutSeconds}s (no output captured); treated as NOT DETECTED."
+            $result.Details = "Script timed out after ${limitSeconds}s (no output captured); treated as NOT DETECTED."
             Write-Log "Script: $($result.Details)" -Level WARN -Quiet
             return $result
         }
@@ -548,44 +621,50 @@ function Test-CompoundDetection {
     foreach ($clause in $Clauses) {
         $type = if ($clause.Type) { $clause.Type } else { 'RegistryKeyValue' }
 
-        $clauseResult = switch ($type) {
-            'RegistryKeyValue' {
-                $p = @{
-                    RegistryKeyRelative = $clause.RegistryKeyRelative
-                    ValueName           = if ($clause.ValueName) { $clause.ValueName } else { 'DisplayVersion' }
-                    ExpectedValue       = if ($clause.ExpectedValue) { $clause.ExpectedValue } else { $clause.DisplayVersion }
-                    Operator            = if ($clause.Operator) { $clause.Operator } else { 'IsEquals' }
-                    PropertyType        = if ($clause.PropertyType) { $clause.PropertyType } else { 'String' }
-                    Is64Bit             = if ($null -ne $clause.Is64Bit) { [bool]$clause.Is64Bit } else { $true }
-                    Hive                = if ($clause.Hive) { [string]$clause.Hive } else { 'LocalMachine' }
+        # A clause that cannot run (an empty key path from a manifest, for example) fails that clause only.
+        try {
+            $clauseResult = switch ($type) {
+                'RegistryKeyValue' {
+                    $p = @{
+                        RegistryKeyRelative = $clause.RegistryKeyRelative
+                        ValueName           = if ($clause.ValueName) { $clause.ValueName } else { 'DisplayVersion' }
+                        ExpectedValue       = if (Test-DTHasValue $clause.ExpectedValue) { [string]$clause.ExpectedValue } elseif (Test-DTHasValue $clause.DisplayVersion) { [string]$clause.DisplayVersion } else { '' }
+                        Operator            = if ($clause.Operator) { $clause.Operator } else { 'IsEquals' }
+                        PropertyType        = if ($clause.PropertyType) { $clause.PropertyType } else { 'String' }
+                        Is64Bit             = ConvertTo-DTBoolean -Value $clause.Is64Bit -Default $true
+                        Hive                = if ($clause.Hive) { [string]$clause.Hive } else { 'LocalMachine' }
+                    }
+                    Test-RegistryKeyValueDetection @p
                 }
-                Test-RegistryKeyValueDetection @p
-            }
-            'RegistryKey' {
-                $p = @{
-                    RegistryKeyRelative = $clause.RegistryKeyRelative
-                    Is64Bit             = if ($null -ne $clause.Is64Bit) { [bool]$clause.Is64Bit } else { $true }
-                    Hive                = if ($clause.Hive) { [string]$clause.Hive } else { 'LocalMachine' }
+                'RegistryKey' {
+                    $p = @{
+                        RegistryKeyRelative = $clause.RegistryKeyRelative
+                        Is64Bit             = ConvertTo-DTBoolean -Value $clause.Is64Bit -Default $true
+                        Hive                = if ($clause.Hive) { [string]$clause.Hive } else { 'LocalMachine' }
+                    }
+                    Test-RegistryKeyDetection @p
                 }
-                Test-RegistryKeyDetection @p
-            }
-            'File' {
-                $p = @{
-                    FilePath      = $clause.FilePath
-                    FileName      = $clause.FileName
-                    PropertyType  = if ($clause.PropertyType) { $clause.PropertyType } else { 'Existence' }
-                    ExpectedValue = $clause.ExpectedValue
-                    Operator      = if ($clause.Operator) { $clause.Operator } else { 'GreaterEquals' }
-                    Is64Bit       = if ($null -ne $clause.Is64Bit) { [bool]$clause.Is64Bit } else { $true }
+                'File' {
+                    $p = @{
+                        FilePath      = $clause.FilePath
+                        FileName      = $clause.FileName
+                        PropertyType  = if ($clause.PropertyType) { $clause.PropertyType } else { 'Existence' }
+                        ExpectedValue = $clause.ExpectedValue
+                        Operator      = if ($clause.Operator) { $clause.Operator } else { 'GreaterEquals' }
+                        Is64Bit       = ConvertTo-DTBoolean -Value $clause.Is64Bit -Default $true
+                    }
+                    Test-FileDetection @p
                 }
-                Test-FileDetection @p
+                'Script' {
+                    Test-ScriptDetection -ScriptText $clause.ScriptText -ScriptLanguage $(if ($clause.ScriptLanguage) { $clause.ScriptLanguage } else { 'PowerShell' })
+                }
+                default {
+                    @{ Detected = $false; Details = "Unknown clause type: $type" }
+                }
             }
-            'Script' {
-                Test-ScriptDetection -ScriptText $clause.ScriptText -ScriptLanguage $(if ($clause.ScriptLanguage) { $clause.ScriptLanguage } else { 'PowerShell' })
-            }
-            default {
-                @{ Detected = $false; Details = "Unknown clause type: $type" }
-            }
+        } catch {
+            $clauseResult = @{ Type = $type; Detected = $false; Details = "Error: $($_.Exception.Message)" }
+            Write-Log "Compound: clause of type $type failed - $($_.Exception.Message)" -Level WARN -Quiet
         }
 
         $clauseResults += $clauseResult
@@ -602,6 +681,9 @@ function Test-CompoundDetection {
 
     $passCount = ($detected | Where-Object { $_ -eq $true }).Count
     $result.Details = "${Connector}: $passCount/$($Clauses.Count) clauses passed - $(if ($result.Detected) { 'DETECTED' } else { 'NOT DETECTED' })"
+    if ($Connector -ne 'And' -and $Connector -ne 'Or') {
+        $result.Details = "Unsupported connector '$Connector' (use And or Or) - NOT DETECTED"
+    }
     $result.ActualValue = "$passCount/$($Clauses.Count) passed"
 
     Write-Log "Compound: $($result.Details)" -Quiet
@@ -637,53 +719,55 @@ function Get-InstalledApplications {
                 [Microsoft.Win32.RegistryHive]::LocalMachine
             }
 
+            # Every key closes in a finally block, so an exception does not leave a handle open.
             $rootKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey(
                 $hiveEnum,
                 [Microsoft.Win32.RegistryView]::Registry64
             )
-            $parentKey = $rootKey.OpenSubKey($arp.Path)
-            if ($null -eq $parentKey) {
-                $rootKey.Close()
-                continue
-            }
+            try {
+                $parentKey = $rootKey.OpenSubKey($arp.Path)
+                if ($null -eq $parentKey) { continue }
 
-            $hivePrefix = Get-DTHiveDisplayPrefix -Hive $arp.Hive
-
-            foreach ($subKeyName in $parentKey.GetSubKeyNames()) {
                 try {
-                    $subKey = $parentKey.OpenSubKey($subKeyName)
-                    if ($null -eq $subKey) { continue }
+                    $hivePrefix = Get-DTHiveDisplayPrefix -Hive $arp.Hive
 
-                    $displayName = $subKey.GetValue('DisplayName', $null)
-                    if ([string]::IsNullOrWhiteSpace($displayName)) {
-                        $subKey.Close()
-                        continue
+                    foreach ($subKeyName in $parentKey.GetSubKeyNames()) {
+                        try {
+                            $subKey = $parentKey.OpenSubKey($subKeyName)
+                            if ($null -eq $subKey) { continue }
+
+                            try {
+                                $displayName = $subKey.GetValue('DisplayName', $null)
+                                if ([string]::IsNullOrWhiteSpace($displayName)) { continue }
+
+                                $apps += [PSCustomObject]@{
+                                    DisplayName          = [string]$displayName
+                                    Publisher            = [string]$subKey.GetValue('Publisher', '')
+                                    DisplayVersion       = [string]$subKey.GetValue('DisplayVersion', '')
+                                    Architecture         = $arp.Arch
+                                    Scope                = $arp.Scope
+                                    Hive                 = $arp.Hive
+                                    RegistryKey          = "${hivePrefix}\$($arp.Path)\$subKeyName"
+                                    RegistryKeyRelative  = "$($arp.Path)\$subKeyName"
+                                    UninstallString      = [string]$subKey.GetValue('UninstallString', '')
+                                    QuietUninstallString = [string]$subKey.GetValue('QuietUninstallString', '')
+                                    InstallLocation      = [string]$subKey.GetValue('InstallLocation', '')
+                                    InstallDate          = [string]$subKey.GetValue('InstallDate', '')
+                                }
+                            } finally {
+                                $subKey.Close()
+                            }
+                        } catch {
+                            # Access denied on individual ARP subkeys is normal; skip and continue.
+                            Write-Log "Get-InstalledApplications: skipped subkey '$subKeyName' ($($_.Exception.Message))" -Level WARN -Quiet
+                        }
                     }
-
-                    $apps += [PSCustomObject]@{
-                        DisplayName          = [string]$displayName
-                        Publisher            = [string]$subKey.GetValue('Publisher', '')
-                        DisplayVersion       = [string]$subKey.GetValue('DisplayVersion', '')
-                        Architecture         = $arp.Arch
-                        Scope                = $arp.Scope
-                        Hive                 = $arp.Hive
-                        RegistryKey          = "${hivePrefix}\$($arp.Path)\$subKeyName"
-                        RegistryKeyRelative  = "$($arp.Path)\$subKeyName"
-                        UninstallString      = [string]$subKey.GetValue('UninstallString', '')
-                        QuietUninstallString = [string]$subKey.GetValue('QuietUninstallString', '')
-                        InstallLocation      = [string]$subKey.GetValue('InstallLocation', '')
-                        InstallDate          = [string]$subKey.GetValue('InstallDate', '')
-                    }
-
-                    $subKey.Close()
-                } catch {
-                    # Access denied on individual ARP subkeys is normal; skip and continue.
-                    Write-Log "Get-InstalledApplications: skipped subkey '$subKeyName' ($($_.Exception.Message))" -Level WARN -Quiet
+                } finally {
+                    $parentKey.Close()
                 }
+            } finally {
+                $rootKey.Close()
             }
-
-            $parentKey.Close()
-            $rootKey.Close()
         } catch {
             Write-Log "ARP enumeration error ($($arp.Hive) $($arp.Arch)): $_" -Level WARN -Quiet
         }
@@ -714,8 +798,17 @@ function Import-DetectionManifest {
         throw "Manifest file not found: $Path"
     }
 
+    # -Encoding UTF8 reads a manifest with non-ASCII text correctly in Windows PowerShell 5.1, which defaults to
+    # the ANSI code page. -ErrorAction Stop makes an unreadable file (a folder, a locked file) an error here
+    # and not an empty manifest.
     try {
-        $manifest = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+        $text = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 -ErrorAction Stop
+    } catch {
+        throw "Failed to read manifest: $($_.Exception.Message)"
+    }
+
+    try {
+        $manifest = $text | ConvertFrom-Json
     } catch {
         throw "Failed to parse manifest JSON: $_"
     }
@@ -760,10 +853,10 @@ function Resolve-DetectionFields {
             if (-not $rawHive) { $rawHive = Get-DTHiveFromPath -Path $rawPath }
             $normalized.RegistryKeyRelative = ConvertTo-DTRegistryRelativePath -Path $rawPath
             $normalized.ValueName           = if ($Det.ValueName) { [string]$Det.ValueName } else { 'DisplayVersion' }
-            $normalized.ExpectedValue       = if ($Det.ExpectedValue) { [string]$Det.ExpectedValue } elseif ($Det.DisplayVersion) { [string]$Det.DisplayVersion } else { '' }
+            $normalized.ExpectedValue       = if (Test-DTHasValue $Det.ExpectedValue) { [string]$Det.ExpectedValue } elseif (Test-DTHasValue $Det.DisplayVersion) { [string]$Det.DisplayVersion } else { '' }
             $normalized.Operator            = if ($Det.Operator) { [string]$Det.Operator } else { 'IsEquals' }
             $normalized.PropertyType        = if ($Det.PropertyType) { [string]$Det.PropertyType } else { 'String' }
-            $normalized.Is64Bit             = if ($null -ne $Det.Is64Bit) { [bool]$Det.Is64Bit } else { $true }
+            $normalized.Is64Bit             = ConvertTo-DTBoolean -Value $Det.Is64Bit -Default $true
             $normalized.Hive                = ConvertTo-DTHiveName -Value $rawHive
         }
         'RegistryKey' {
@@ -771,16 +864,16 @@ function Resolve-DetectionFields {
             $rawHive = if ($Det.Hive) { [string]$Det.Hive } else { '' }
             if (-not $rawHive) { $rawHive = Get-DTHiveFromPath -Path $rawPath }
             $normalized.RegistryKeyRelative = ConvertTo-DTRegistryRelativePath -Path $rawPath
-            $normalized.Is64Bit             = if ($null -ne $Det.Is64Bit) { [bool]$Det.Is64Bit } else { $true }
+            $normalized.Is64Bit             = ConvertTo-DTBoolean -Value $Det.Is64Bit -Default $true
             $normalized.Hive                = ConvertTo-DTHiveName -Value $rawHive
         }
         'File' {
             $normalized.FilePath      = if ($Det.FilePath) { [string]$Det.FilePath } else { '' }
             $normalized.FileName      = if ($Det.FileName) { [string]$Det.FileName } else { '' }
             $normalized.PropertyType  = if ($Det.PropertyType) { [string]$Det.PropertyType } else { 'Existence' }
-            $normalized.ExpectedValue = if ($Det.ExpectedValue) { [string]$Det.ExpectedValue } else { '' }
+            $normalized.ExpectedValue = if (Test-DTHasValue $Det.ExpectedValue) { [string]$Det.ExpectedValue } else { '' }
             $normalized.Operator      = if ($Det.Operator) { [string]$Det.Operator } else { 'GreaterEquals' }
-            $normalized.Is64Bit       = if ($null -ne $Det.Is64Bit) { [bool]$Det.Is64Bit } else { $true }
+            $normalized.Is64Bit       = ConvertTo-DTBoolean -Value $Det.Is64Bit -Default $true
         }
         'Script' {
             $normalized.ScriptText     = if ($Det.ScriptText) { [string]$Det.ScriptText } else { '' }
@@ -795,10 +888,34 @@ function Resolve-DetectionFields {
 # Export
 # ---------------------------------------------------------------------------
 
+function ConvertTo-DTCsvSafeValue {
+    <#
+    .SYNOPSIS
+        Stops a CSV cell from running as a formula when the file is opened in a spreadsheet.
+    .DESCRIPTION
+        A cell that starts with = @ (or a tab or a carriage return), or with + or - followed by text that
+        is not a number, gets a single quote in front. The cells hold registry data and script output.
+        A plain number such as -5 stays as it is.
+    #>
+    param($Value)
+    if ($null -eq $Value -or $Value -is [System.DBNull]) { return '' }
+    $text = [string]$Value
+    if ($text.Length -eq 0) { return $text }
+    $first = $text[0]
+    if ($first -eq '=' -or $first -eq '@' -or $first -eq "`t" -or $first -eq "`r") { return "'" + $text }
+    if ($first -eq '+' -or $first -eq '-') {
+        $number = [double]0
+        $isNumber = [double]::TryParse($text, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$number)
+        if (-not $isNumber) { return "'" + $text }
+    }
+    return $text
+}
+
 function Export-DetectionResultsCsv {
     <#
     .SYNOPSIS
-        Exports a DataTable of test results to CSV.
+        Exports a DataTable of test results to CSV. A cell that a spreadsheet would run as a formula
+        gets a single quote in front (see ConvertTo-DTCsvSafeValue).
     #>
     param(
         [Parameter(Mandatory)][System.Data.DataTable]$DataTable,
@@ -807,19 +924,19 @@ function Export-DetectionResultsCsv {
 
     $parentDir = Split-Path -Path $OutputPath -Parent
     if ($parentDir -and -not (Test-Path -LiteralPath $parentDir)) {
-        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $parentDir -Force -ErrorAction Stop | Out-Null
     }
 
     $rows = @()
     foreach ($row in $DataTable.Rows) {
         $obj = [ordered]@{}
         foreach ($col in $DataTable.Columns) {
-            $obj[$col.ColumnName] = $row[$col.ColumnName]
+            $obj[$col.ColumnName] = ConvertTo-DTCsvSafeValue -Value $row[$col.ColumnName]
         }
         $rows += [PSCustomObject]$obj
     }
 
-    $rows | Export-Csv -LiteralPath $OutputPath -NoTypeInformation -Encoding UTF8
+    $rows | Export-Csv -LiteralPath $OutputPath -NoTypeInformation -Encoding UTF8 -ErrorAction Stop
     Write-Log "Exported CSV to $OutputPath"
 }
 
@@ -836,11 +953,10 @@ function Export-DetectionResultsHtml {
 
     $parentDir = Split-Path -Path $OutputPath -Parent
     if ($parentDir -and -not (Test-Path -LiteralPath $parentDir)) {
-        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $parentDir -Force -ErrorAction Stop | Out-Null
     }
 
-        # Brand: status is conveyed via glyph shape, not color.
-    # See feedback_no_red_green_in_brand.md.
+    # Status is conveyed by glyph shape, not by color.
     $css = @(
         '<style>',
         'body { font-family: "Segoe UI", Arial, sans-serif; margin: 20px; background: #fafafa; color: #1e1e1e; }',
@@ -883,7 +999,7 @@ function Export-DetectionResultsHtml {
     $titleSafe = ConvertTo-HtmlSafe $ReportTitle
     $html = @(
         '<!DOCTYPE html>',
-        '<html><head><meta charset="utf-8"><title>' + $titleSafe + '</title>',
+        ('<html><head><meta charset="utf-8"><title>' + $titleSafe + '</title>'),
         $css,
         '</head><body>',
         "<h1>$titleSafe</h1>",
@@ -893,6 +1009,6 @@ function Export-DetectionResultsHtml {
         '</body></html>'
     ) -join "`r`n"
 
-    Set-Content -LiteralPath $OutputPath -Value $html -Encoding UTF8
+    Set-Content -LiteralPath $OutputPath -Value $html -Encoding UTF8 -ErrorAction Stop
     Write-Log "Exported HTML to $OutputPath"
 }

@@ -1,5 +1,30 @@
 # Changelog
 
+## [2026.11.07.0015] - 2026-11-07
+
+## 18 defects fixed that the new test suite found
+
+### Fixed
+
+- Compare an expected value of 0 as the number 0 in manifests and compound tests.
+- Read file versions such as "1, 0, 0, 1" as versions.
+- Read manifests with non-ASCII text correctly in Windows PowerShell 5.1.
+- Show a read error for a manifest that cannot be read, not "No Detection block".
+- Treat a path that is only a hive name as an empty key path.
+- Stop integer comparisons from rounding values such as 1.5.
+- Fail only the clause that cannot run in a compound test.
+- Name an unsupported connector in the compound result.
+- Read the text "false" in Is64Bit as false.
+- Stop a folder with the name of the file from counting as the file.
+- Report the real limit in the script timeout message.
+- Close registry keys when a read fails.
+- Apply the Machine and User scope filter in Installed Applications.
+- Show an export error in the result panel, and stop reporting a failed HTML export as done.
+- Prefix CSV cells that start with = + - or @ with a quote, so a spreadsheet does not run them.
+- Write the HTML report title on one line.
+- Raise the contrast of the Options title bar in the light theme.
+- Keep the Copy details button inside the window at 1024 pixels width.
+
 ## [2026.11.07.0014] - 2026-11-07
 
 ## 1 user guide ships with the release
