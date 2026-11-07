@@ -1,5 +1,16 @@
 # Changelog
 
+## [2026.11.06.0013] - 2026-11-06
+
+## 2 crashes, 1 clipped header and 1 stale result fixed that the user guide found
+
+### Fixed
+
+- Stop a crash after a Compound import. A second import of a manifest, or Use selected on a Compound history row, ended the tool. The window state kept the clause data under a name that differs from a control name only in case.
+- Stop a crash at Export CSV and Export HTML. The history table was returned as its rows, not as one table.
+- Widen the Architecture column of Installed Applications so that its header is not cut.
+- Clear the old result when a clause is filled from an installed application or from a manifest. The result of an earlier failed import stayed on the page.
+
 ## [2026.10.12.0012] - 2026-10-12
 
 ## 1 PowerShell 7 fix

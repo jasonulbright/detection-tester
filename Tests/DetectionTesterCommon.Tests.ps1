@@ -676,3 +676,65 @@ Describe "Import-DetectionManifest" {
         { Import-DetectionManifest -Path "C:\nonexistent\manifest.json" } | Should -Throw "*not found*"
     }
 }
+
+Describe "Window context keys" {
+    It "never stores a value under a key that differs from a control name only in case" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $strNames = [regex]::Match($strStart, "(?s)\`$names = @\((.*?)\)\s*\`$ctx = @\{").Groups[1].Value
+        $arrControl = @([regex]::Matches($strNames, "'([A-Za-z0-9_]+)'") | ForEach-Object { $_.Groups[1].Value })
+        $arrControl.Count | Should -BeGreaterThan 20
+        $arrAssigned = @([regex]::Matches($strStart, '\$ctx\.([A-Za-z0-9_]+)\s*=(?!=)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+        $arrClash = @($arrAssigned | Where-Object { $strName = $_; $arrControl | Where-Object { $_ -ieq $strName } })
+        $arrClash | Should -BeNullOrEmpty
+    }
+}
+
+Describe "History export table" {
+    It "returns one DataTable for one row and for several rows" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $objAst = [System.Management.Automation.Language.Parser]::ParseInput($strStart, [ref]$null, [ref]$null)
+        $objFunction = $objAst.Find({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'ConvertTo-DTHistoryDataTable' }, $true)
+        $objFunction | Should -Not -BeNullOrEmpty
+        . ([scriptblock]::Create($objFunction.Extent.Text))
+        $objItem = [pscustomobject]@{ Time = '12:00:00'; Type = 'File'; Mode = 'Positive'; Target = 'a'; Expected = 'b'; Found = 'c'; Result = 'Pass' }
+        $objOne = ConvertTo-DTHistoryDataTable -Items @($objItem)
+        $objOne.GetType().FullName | Should -Be "System.Data.DataTable"
+        $objOne.Rows.Count | Should -Be 1
+        $objMany = ConvertTo-DTHistoryDataTable -Items @($objItem, $objItem, $objItem)
+        $objMany.GetType().FullName | Should -Be "System.Data.DataTable"
+        $objMany.Rows.Count | Should -Be 3
+    }
+}
+
+Describe "Grid column headers" {
+    It "gives every fixed-width column nine pixels for each character of its header" {
+        foreach ($strFile in 'DetectionTester.xaml', 'InstalledApps.xaml') {
+            $strXaml = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\Modules\$strFile") -Raw
+            foreach ($objMatch in [regex]::Matches($strXaml, '<DataGridTextColumn\s+Header="([^"]+)"[^>]*?Width="(\d+)"')) {
+                $strHeader = $objMatch.Groups[1].Value
+                [int]$objMatch.Groups[2].Value | Should -BeGreaterOrEqual (9 * $strHeader.Length) -Because "$strFile column $strHeader"
+            }
+        }
+    }
+}
+
+Describe "Result panel" {
+    It "clears the previous result when a clause is filled from an application or a manifest" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $strUse = [regex]::Match($strStart, '(?s)\$script:IAUseForDetection = \{.*?\n\}\n').Value
+        $strImport = [regex]::Match($strStart, '(?s)\$script:DTImportManifest = \{.*?\n\}\n').Value
+        $strUse | Should -Match "txtResultBadge\.Text\s*=\s*''"
+        $strUse | Should -Match "txtResultDetails\.Text\s*=\s*''"
+        $strImport | Should -Match "txtResultBadge\.Text\s*=\s*''"
+        $strImport | Should -Match "txtResultDetails\.Text\s*=\s*''"
+    }
+}
+
+Describe "Compound clause data" {
+    It "reads the control only through its Items and the data only through CompoundClauseData" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $arrBare = @([regex]::Matches($strStart, '(?i)\$(?:ctx|dt)\.compoundClauses\b(?!\.Items)'))
+        $arrBare.Count | Should -Be 0
+        @([regex]::Matches($strStart, '\$ctx\.CompoundClauseData')).Count | Should -BeGreaterOrEqual 3
+    }
+}
