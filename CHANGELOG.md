@@ -27,6 +27,10 @@
 - Use the default for an Is64Bit value that is not a boolean, text or number.
 - Prefix CSV column names that start with = + - or @ with a quote.
 
+### Changed
+
+- Update the shared SuiteCommon module to 2026.11.07.0075.
+
 ## [2026.11.07.0014] - 2026-11-07
 
 ## 1 user guide ships with the release
