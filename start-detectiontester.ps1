@@ -26,7 +26,7 @@
     ScriptName : start-detectiontester.ps1
     Purpose    : Test Configuration Manager detection methods locally
     Version    : 2026.11.07.0014
-    Updated    : 2026-09-21
+    Updated    : 2026-11-07
 #>
 
 param()
