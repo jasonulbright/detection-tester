@@ -1054,3 +1054,9 @@ Describe 'Start script source' {
         $shellVersion | Should -Match '^\d{4}\.\d{2}\.\d{2}\.\d{4}$'
     }
 }
+
+Describe 'Get-ShellRuntimePart' {
+    It 'throws when a listed function is missing from the start script' {
+        { Get-ShellRuntimePart -FunctionName 'Get-DTComboValue', 'Zz-NoSuchFunction' } | Should -Throw '*function Zz-NoSuchFunction not found*'
+    }
+}
