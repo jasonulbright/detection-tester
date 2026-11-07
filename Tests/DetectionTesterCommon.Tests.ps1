@@ -688,3 +688,20 @@ Describe "Window context keys" {
         $arrClash | Should -BeNullOrEmpty
     }
 }
+
+Describe "History export table" {
+    It "returns one DataTable for one row and for several rows" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $objAst = [System.Management.Automation.Language.Parser]::ParseInput($strStart, [ref]$null, [ref]$null)
+        $objFunction = $objAst.Find({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'ConvertTo-DTHistoryDataTable' }, $true)
+        $objFunction | Should -Not -BeNullOrEmpty
+        . ([scriptblock]::Create($objFunction.Extent.Text))
+        $objItem = [pscustomobject]@{ Time = '12:00:00'; Type = 'File'; Mode = 'Positive'; Target = 'a'; Expected = 'b'; Found = 'c'; Result = 'Pass' }
+        $objOne = ConvertTo-DTHistoryDataTable -Items @($objItem)
+        $objOne.GetType().FullName | Should -Be "System.Data.DataTable"
+        $objOne.Rows.Count | Should -Be 1
+        $objMany = ConvertTo-DTHistoryDataTable -Items @($objItem, $objItem, $objItem)
+        $objMany.GetType().FullName | Should -Be "System.Data.DataTable"
+        $objMany.Rows.Count | Should -Be 3
+    }
+}

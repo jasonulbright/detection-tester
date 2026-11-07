@@ -560,7 +560,7 @@ function ConvertTo-DTHistoryDataTable {
         $row['Result']   = [string]$r.Result
         [void]$dt.Rows.Add($row)
     }
-    return $dt
+    return ,$dt
 }
 
 $script:DTExportHistoryCsv = {
