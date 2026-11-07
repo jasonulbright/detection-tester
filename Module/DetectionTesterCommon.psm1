@@ -160,7 +160,7 @@ function ConvertTo-DTBoolean {
             default { return $Default }
         }
     }
-    if ($Value -is [ValueType]) { return ([double]$Value -ne 0) }
+    if ($Value -is [byte] -or $Value -is [sbyte] -or $Value -is [int16] -or $Value -is [uint16] -or $Value -is [int] -or $Value -is [uint32] -or $Value -is [int64] -or $Value -is [uint64] -or $Value -is [single] -or $Value -is [double] -or $Value -is [decimal]) { return ([double]$Value -ne 0) }
     return $Default
 }
 
@@ -893,7 +893,7 @@ function ConvertTo-DTCsvSafeValue {
     .SYNOPSIS
         Stops a CSV cell from running as a formula when the file is opened in a spreadsheet.
     .DESCRIPTION
-        A cell that starts with = @ (or a tab or a carriage return), or with + or - followed by text that
+        A cell, or a column name, that starts with = @ (or a tab or a carriage return), or with + or - followed by text that
         is not a number, gets a single quote in front. The cells hold registry data and script output.
         A plain number such as -5 stays as it is.
     #>
@@ -931,7 +931,7 @@ function Export-DetectionResultsCsv {
     foreach ($row in $DataTable.Rows) {
         $obj = [ordered]@{}
         foreach ($col in $DataTable.Columns) {
-            $obj[$col.ColumnName] = ConvertTo-DTCsvSafeValue -Value $row[$col.ColumnName]
+            $obj[(ConvertTo-DTCsvSafeValue -Value $col.ColumnName)] = ConvertTo-DTCsvSafeValue -Value $row[$col.ColumnName]
         }
         $rows += [PSCustomObject]$obj
     }

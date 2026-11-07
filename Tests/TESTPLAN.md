@@ -53,6 +53,8 @@ Each defect has a test that failed on the old code and passes now. The old code 
 | 15 | The title of the HTML report was split over three lines (operator precedence) | `Module.Export` | Parentheses |
 | 16 | The Options dialog title bar had 3.3:1 contrast in the light theme | `Window` | Same brushes as the main window |
 | 17 | The Copy details button was outside the window at 1024 pixels width | `Window` | Flexible filter column |
+| 19 | An `Is64Bit` value of another type (a date) made the conversion throw | `Module.Compare` | Numeric types only |
+| 20 | A CSV column name that starts with `=`, `+`, `-` or `@` ran as a formula | `Module.Export` | Same quote prefix as the cells |
 | 18 | A test of the old suite failed on every checkout with Windows line endings (the pattern ended with `\n`) | `Shell.Logic` | The test reads the syntax tree, not the text |
 
 Items that look like defects and are not changed:
