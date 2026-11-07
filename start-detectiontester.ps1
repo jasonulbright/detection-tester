@@ -414,6 +414,8 @@ $script:DTImportManifest = {
         return
     }
 
+    $ctx.txtResultBadge.Text   = ''
+    $ctx.txtResultDetails.Text = ''
     if ($det.Type -eq 'Compound') {
         $ctx.cboType.SelectedIndex = 4
         $ctx.compoundConnector.Text = [string]$det.Connector
@@ -661,6 +663,8 @@ $script:IAUseForDetection = {
     $dt.rkvView32.IsChecked = ($a.Architecture -eq 'x86')
     # Operator default: IsEquals
     $dt.rkvOperator.SelectedIndex = 0
+    $dt.txtResultBadge.Text   = ''
+    $dt.txtResultDetails.Text = ''
     Write-Log ("Use for detection: app='{0}' key={1}" -f $a.DisplayName, $a.RegistryKey)
 }
 

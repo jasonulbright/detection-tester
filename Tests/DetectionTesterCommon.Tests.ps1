@@ -717,3 +717,24 @@ Describe "Grid column headers" {
         }
     }
 }
+
+Describe "Result panel" {
+    It "clears the previous result when a clause is filled from an application or a manifest" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $strUse = [regex]::Match($strStart, '(?s)\$script:IAUseForDetection = \{.*?\n\}\n').Value
+        $strImport = [regex]::Match($strStart, '(?s)\$script:DTImportManifest = \{.*?\n\}\n').Value
+        $strUse | Should -Match "txtResultBadge\.Text\s*=\s*''"
+        $strUse | Should -Match "txtResultDetails\.Text\s*=\s*''"
+        $strImport | Should -Match "txtResultBadge\.Text\s*=\s*''"
+        $strImport | Should -Match "txtResultDetails\.Text\s*=\s*''"
+    }
+}
+
+Describe "Compound clause data" {
+    It "reads the control only through its Items and the data only through CompoundClauseData" {
+        $strStart = Get-Content -LiteralPath (Join-Path $PSScriptRoot "..\start-detectiontester.ps1") -Raw
+        $arrBare = @([regex]::Matches($strStart, '(?i)\$(?:ctx|dt)\.compoundClauses\b(?!\.Items)'))
+        $arrBare.Count | Should -Be 0
+        @([regex]::Matches($strStart, '\$ctx\.CompoundClauseData')).Count | Should -BeGreaterOrEqual 3
+    }
+}
