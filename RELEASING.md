@@ -2,11 +2,14 @@
 
 ## 1. Test
 
-Run the full suite under Windows PowerShell 5.1 with Pester 5. The release stops if a test fails. Never run the suite under PowerShell 7.
+Run the checks under Windows PowerShell 5.1 and under PowerShell 7. The command runs the linter, all tests and the coverage floor. The release stops if either run fails.
 
 ```powershell
-powershell -NoProfile -Command "Import-Module Pester -MinimumVersion 5.0; $r = Invoke-Pester -Path Tests -PassThru -Output None; 'passed {0} failed {1}' -f $r.PassedCount, $r.FailedCount"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Invoke-Checks.ps1
+pwsh -NoProfile -File .\Invoke-Checks.ps1
 ```
+
+The same command runs in CI on both hosts (`.github/workflows/checks.yml`). The window tests open windows off screen and need a desktop session.
 
 ## 2. Version
 
@@ -30,11 +33,11 @@ C:\projects\app-packager-suite\sync-suitecommon.ps1 -Consumer C:\projects\detect
 
 ## 4. Commit, tag, and package
 
-Commit to `master`. Every commit to `master` is part of a release: the suite installer build refuses a component whose `master` is ahead of its latest tag. Tag the commit `v<ver>` with an annotated tag. Build the zip from the tag. The zip excludes the tests and this file.
+Commit to `master`. Every commit to `master` is part of a release: the suite installer build refuses a component whose `master` is ahead of its latest tag. Tag the commit `v<ver>` with an annotated tag. Build the zip from the tag. The zip excludes the tests, the check script, the CI workflow and this file.
 
 ```bash
 git tag -a v<ver> -m v<ver>
-git archive --format=zip -o DetectionMethodTester-<ver>.zip v<ver> -- . ':(exclude)Tests' ':(exclude)*.Tests.ps1' ':(exclude)RELEASING.md'
+git archive --format=zip -o DetectionMethodTester-<ver>.zip v<ver> -- . ':(exclude)Tests' ':(exclude)*.Tests.ps1' ':(exclude)Invoke-Checks.ps1' ':(exclude).github' ':(exclude)RELEASING.md'
 sha256sum DetectionMethodTester-<ver>.zip | sed 's/ \*/  /' > checksums.txt
 ```
 
