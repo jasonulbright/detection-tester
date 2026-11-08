@@ -180,6 +180,35 @@ Describe 'Export-DetectionResultsCsv' {
         Export-DetectionResultsCsv -DataTable $t -OutputPath $out
         (Import-Csv -LiteralPath $out -Encoding UTF8)[0].PSObject.Properties.Name | Should -Contain "'=Time"
     }
+
+    It 'keeps the value of every column when the column names are the same after the quote prefix' {
+        $t = New-ResultTable -Column @('=Time', "'=Time", 'Type')
+        [void]$t.Rows.Add('first', 'second', 'third')
+        [void]$t.Rows.Add('fourth', 'fifth', 'sixth')
+        $out = Join-Path $TestDrive 'collide.csv'
+        Export-DetectionResultsCsv -DataTable $t -OutputPath $out
+        $rows = @(Import-Csv -LiteralPath $out -Encoding UTF8)
+        $names = @($rows[0].PSObject.Properties.Name)
+        $names.Count | Should -Be 3
+        @($names | Select-Object -Unique).Count | Should -Be 3
+        $names[0] | Should -Be "'=Time"
+        $names[2] | Should -Be 'Type'
+        @($rows[0].PSObject.Properties.Value) | Should -Be @('first', 'second', 'third')
+        @($rows[1].PSObject.Properties.Value) | Should -Be @('fourth', 'fifth', 'sixth')
+    }
+
+    It 'gives a column name that the export made unique a name that a spreadsheet does not run as a formula' {
+        $t = New-ResultTable -Column @('=A', "'=A", "'=A (2)")
+        [void]$t.Rows.Add('one', 'two', 'three')
+        $out = Join-Path $TestDrive 'collide-reserved.csv'
+        Export-DetectionResultsCsv -DataTable $t -OutputPath $out
+        $row = @(Import-Csv -LiteralPath $out -Encoding UTF8)[0]
+        $names = @($row.PSObject.Properties.Name)
+        @($names | Select-Object -Unique).Count | Should -Be 3
+        $names | ForEach-Object { $_.StartsWith("'") | Should -BeTrue }
+        @($row.PSObject.Properties.Value) | Should -Be @('one', 'two', 'three')
+        $row.PSObject.Properties["'=A (2)"].Value | Should -Be 'three'
+    }
 }
 
 Describe 'Export-DetectionResultsHtml' {
