@@ -927,11 +927,28 @@ function Export-DetectionResultsCsv {
         New-Item -ItemType Directory -Path $parentDir -Force -ErrorAction Stop | Out-Null
     }
 
+    # Two column names can be the same after the quote prefix (=Time and '=Time). The second column gets
+    # a number after its name, so that no column overwrites the value of another column.
+    $reserved = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($col in $DataTable.Columns) { [void]$reserved.Add((ConvertTo-DTCsvSafeValue -Value $col.ColumnName)) }
+    $used = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    $keys = @{}
+    foreach ($col in $DataTable.Columns) {
+        $key = ConvertTo-DTCsvSafeValue -Value $col.ColumnName
+        if ($used.Contains($key)) {
+            $number = 2
+            while ($used.Contains("$key ($number)") -or $reserved.Contains("$key ($number)")) { $number++ }
+            $key = "$key ($number)"
+        }
+        [void]$used.Add($key)
+        $keys[$col.ColumnName] = $key
+    }
+
     $rows = @()
     foreach ($row in $DataTable.Rows) {
         $obj = [ordered]@{}
         foreach ($col in $DataTable.Columns) {
-            $obj[(ConvertTo-DTCsvSafeValue -Value $col.ColumnName)] = ConvertTo-DTCsvSafeValue -Value $row[$col.ColumnName]
+            $obj[$keys[$col.ColumnName]] = ConvertTo-DTCsvSafeValue -Value $row[$col.ColumnName]
         }
         $rows += [PSCustomObject]$obj
     }

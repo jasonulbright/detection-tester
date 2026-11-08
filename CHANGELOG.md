@@ -2,7 +2,7 @@
 
 ## [2026.11.07.0015] - 2026-11-07
 
-## 20 defects fixed that the new test suite found
+## 21 defects fixed that the new test suite found
 
 ### Fixed
 
@@ -26,6 +26,7 @@
 - Keep the Copy details button inside the window at 1024 pixels width.
 - Use the default for an Is64Bit value that is not a boolean, text or number.
 - Prefix CSV column names that start with = + - or @ with a quote.
+- Keep the value of every column in the CSV export when two column names are the same after the quote prefix.
 
 ### Changed
 

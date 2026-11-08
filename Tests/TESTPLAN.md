@@ -57,6 +57,7 @@ Each defect has a test that failed on the old code and passes now. The old code 
 | 18 | A test of the old suite failed on every checkout with Windows line endings (the pattern ended with `\n`) | `Shell.Logic` | The test reads the syntax tree, not the text |
 | 19 | An `Is64Bit` value of another type (a date) made the conversion throw | `Module.Compare` | Numeric types only |
 | 20 | A CSV column name that starts with `=`, `+`, `-` or `@` ran as a formula | `Module.Export` | Same quote prefix as the cells |
+| 21 | Two CSV columns with the same name after the quote prefix (`=Time` and `'=Time`) lost the value of the first column in every row | `Module.Export` | A number after the name of the second column |
 
 Items that look like defects and are not changed:
 
