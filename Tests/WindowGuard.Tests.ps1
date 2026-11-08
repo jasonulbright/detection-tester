@@ -13,7 +13,7 @@ Describe 'Test-WindowTestsAllowed' {
     }
 
     It 'refuses the run when the opt-in is "<OptIn>"' -ForEach @(
-        @{ OptIn = '' }, @{ OptIn = '0' }, @{ OptIn = 'true' }, @{ OptIn = $null }
+        @{ OptIn = '' }, @{ OptIn = '0' }, @{ OptIn = 'true' }, @{ OptIn = '1 ' }, @{ OptIn = $null }
     ) {
         $g = Test-WindowTestsAllowed -OptIn $OptIn
         $g.Allowed | Should -BeFalse
