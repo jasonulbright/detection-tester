@@ -1,5 +1,26 @@
 # Changelog
 
+## [2026.11.12.0016] - 2026-11-12
+
+## 1 shared themed style for every button in both themes
+
+### Fixed
+
+- Show white text on blue buttons and selected items in the light theme.
+- Keep text contrast on buttons when the pointer is over them or they are pressed.
+- Raise the dark theme button border to a contrast of 3:1.
+- Show a fixed message in the window when an error occurs, not the raw exception text.
+
+### Changed
+
+- Use one themed style for every button.
+- Use one gray style for secondary dialog buttons such as Cancel.
+- Draw selected rows, cells and list items in the theme highlight color.
+- Write titles, buttons and field labels in Title Case. Show titles and field labels in bold.
+- Update the shared SuiteCommon module to 2026.11.12.0081.
+- Retake the images of the user guide.
+- Add tests that check the theme rules.
+
 ## [2026.11.07.0015] - 2026-11-07
 
 ## 21 defects fixed that the new test suite found
