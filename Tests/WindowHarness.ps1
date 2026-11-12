@@ -77,14 +77,13 @@ $script:HarnessBootstrap = {
         $global:txtThemeLabel = $Window.FindName('txtThemeLabel')
         $global:Prefs = @{ DarkMode = $true; ActiveModule = 'DetectionTester' }
         $global:ActiveView = 'DetectionTester'
-        # The theme context of the shell: the same call as in the start script, with the same palette override table.
+        # The theme context of the shell: the same call as in the start script, with the inactive title bar brush of MainWindow.xaml.
         $global:ViewButtons = @(
             @{ Name = 'DetectionTester'; Button = $Window.FindName('btnDetection') }
             @{ Name = 'InstalledApps'; Button = $Window.FindName('btnInstalled') }
         )
-        $suiteBrushes = @{}
-        $conv = [Windows.Media.BrushConverter]::new()
-        foreach ($key in $global:SuiteBrushOverride.Keys) { $suiteBrushes[$key] = $conv.ConvertFrom($global:SuiteBrushOverride[$key]) }
+        $global:TitleBarInactiveBrush = $Window.FindResource('MahApps.Brushes.WindowTitle.NonActive')
+        $suiteBrushes = @{ TitleBarInactive = $global:TitleBarInactiveBrush }
         Initialize-SuiteTheme -Window $Window -IsDarkGetter { [bool]$global:Prefs.DarkMode } -ActiveViewGetter { $global:ActiveView } -ViewButtons $global:ViewButtons -OptionsButton $Window.FindName('btnOptions') -LogLabel $Window.FindName('lblLogOutput') -Brushes $suiteBrushes
         $global:reportsDir = [System.IO.Path]::GetDirectoryName($LogPath)
         $global:DTRoot = $null; $global:IARoot = $null; $global:DTContext = @{}; $global:IAContext = @{}
@@ -237,6 +236,7 @@ $script:MeasureAppScript = {
             $dw = if ($full) { 640 } else { 560 }
             $dh = if ($full) { 440 } else { 380 }
             $d = Open-TestWindow -XamlText $Arguments.DialogXaml -Dark $Arguments.Dark -Width $dw -Height $dh
+            $d.Resources['MahApps.Brushes.WindowTitle.NonActive'] = $global:TitleBarInactiveBrush
             Set-DialogTheme -Dialog $d -IsDark $Arguments.Dark
             $d.FindName('txtAboutVersion').Text = 'v2026.11.06.0013'
             $d.FindName('txtAboutModule').Text = 'DetectionTesterCommon 2026.11.06.0013'

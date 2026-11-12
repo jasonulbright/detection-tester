@@ -100,7 +100,7 @@ Describe 'Test-ScriptDetection output rules' {
 
     It 'shows a fixed message next to "no output" when the script only writes an error' {
         $r = Test-ScriptDetection -ScriptText 'Write-Error "disk missing"'
-        $r.Details | Should -Be 'Script produced no output (NOT DETECTED) The script wrote errors. See the log for details.'
+        $r.Details | Should -Be 'Script produced no output (NOT DETECTED). The script wrote errors. See the log for details.'
     }
 
     It 'shows a fixed message and no exception text when the script throws' {

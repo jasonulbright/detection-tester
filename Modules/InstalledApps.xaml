@@ -37,7 +37,7 @@
             </ComboBox>
 
             <Button Grid.Column="6" x:Name="btnRefresh"           Content="Refresh"           Style="{DynamicResource SquareInlineButtonStyle}" ToolTip="Read the ARP entries again."/>
-            <Button Grid.Column="7" x:Name="btnUseForDetection"   Content="Use for Detection" Style="{DynamicResource PrimaryButtonStyle}" Height="28" Padding="10,0,10,0" Visibility="Collapsed" ToolTip="Fill a registry value clause from the selected entry."/>
+            <Button Grid.Column="7" x:Name="btnUseForDetection"   Content="Use for Detection" Style="{DynamicResource PrimaryButtonStyle}" Visibility="Collapsed" ToolTip="Fill a registry value clause from the selected entry."/>
             <Button Grid.Column="8" x:Name="btnCopyDetails"       Content="Copy Details"      Style="{DynamicResource SquareInlineButtonStyle}" Visibility="Collapsed" ToolTip="Copy the fields of the selected entry to the clipboard."/>
         </Grid>
     </Border>

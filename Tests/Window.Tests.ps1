@@ -48,10 +48,6 @@ BeforeAll {
                 $n -is [System.Management.Automation.Language.StringConstantExpressionAst] -and $n.Value -match '^\s*<Controls:MetroWindow'
             }, $true) | ForEach-Object { $_.Value })
 
-    # The palette override table that the shell passes to SuiteCommon (Initialize-SuiteTheme -Brushes).
-    $script:ShellOverride = @{}
-    $table = [regex]::Match($script:ShellText, '(?s)\$script:SuiteBrushOverride\s*=\s*@\{(.*?)\}')
-    foreach ($m in [regex]::Matches($table.Groups[1].Value, '(\w+)\s*=\s*''(#[0-9A-Fa-f]{6})''')) { $script:ShellOverride[$m.Groups[1].Value] = $m.Groups[2].Value }
 
     $script:ShellParts = Get-ShellRuntimePart
     $script:Measured = @{}
@@ -109,8 +105,11 @@ Describe 'Main window XAML' -Skip:(-not $script:WindowGuard.Allowed) {
         }
     }
 
-    It 'finds the palette override table in the shell' {
-        $script:ShellOverride.TitleBarInactive | Should -Match '^#[0-9A-Fa-f]{6}$' -Because 'the shell sets the inactive title bar of the light theme'
+    It 'takes the inactive title bar brush from MainWindow.xaml in the shell and in the Options dialog' {
+        $script:ShellText | Should -Match 'FindResource\(''MahApps\.Brushes\.WindowTitle\.NonActive''\)'
+        $script:ShellText | Should -Match 'Resources\[''MahApps\.Brushes\.WindowTitle\.NonActive''\]\s*=\s*\$script:TitleBarInactiveBrush'
+        ([regex]::Matches($script:ShellText, 'x:Key="MahApps\.Brushes\.WindowTitle\.NonActive"')).Count | Should -Be 0 -Because 'the value is defined once, in MainWindow.xaml'
+        (Get-Content -LiteralPath $script:XamlPath -Raw) | Should -Match 'x:Key="MahApps\.Brushes\.WindowTitle\.NonActive"'
     }
 }
 Describe 'Module XAML' -Skip:(-not $script:WindowGuard.Allowed) {
@@ -260,6 +259,66 @@ Describe 'Contrast <Theme>' -ForEach @(@{ Theme = 'dark' }, @{ Theme = 'light' }
     }
 }
 
+# The states that the enabled and disabled measurement does not reach: a selected row, cell, list item and combo item, and the
+# colour pairs that the hover, pressed, highlight and disabled states of the button template and the item styles use. A state that
+# is set by a trigger cannot be forced on a real control (IsPressed and IsHighlighted are read-only), so the pairs are read from the
+# resources that the triggers name. The selected states are measured on real controls with the item selected.
+Describe 'State contrast <Theme>' -ForEach @(@{ Theme = 'dark'; Dark = $true }, @{ Theme = 'light'; Dark = $false }) -Skip:(-not $script:WindowGuard.Allowed) {
+    It 'keeps white text on the selected colour and the hover, pressed and disabled pairs at the contrast limit' {
+        $r = Invoke-WpfSta -Arguments @{ Dark = $Dark; Config = $script:AppConfig; Parts = $script:ShellParts; TempDir = $TestDrive } -Script {
+            $rows = New-Object System.Collections.ArrayList
+            try {
+            $cfg = $Arguments.Config
+            $w = Open-TestWindow -XamlPath (Join-Path $Root $cfg.Xaml) -Dark $Arguments.Dark
+            Initialize-ShellRuntime -Window $w -Parts $Arguments.Parts -LogPath (Join-Path $Arguments.TempDir 'state.log')
+            & $global:ApplyTheme -IsDark $Arguments.Dark
+            $addPair = {
+                param($Name, $FgKey, $BgKey, $Min)
+                try {
+                    $f = $w.FindResource($FgKey); $b = $w.FindResource($BgKey)
+                    [void]$rows.Add([PSCustomObject]@{ Name = $Name; Ratio = (Get-ContrastRatio $f.Color $b.Color); Min = $Min })
+                }
+                catch { [void]$rows.Add([PSCustomObject]@{ Name = ('{0} threw {1}' -f $Name, $_.Exception.Message); Ratio = 0; Min = $Min }) }
+            }
+            & $addPair 'selected and highlighted text: IdealForeground on Highlight' 'MahApps.Brushes.IdealForeground' 'MahApps.Brushes.Highlight' 4.5
+            & $addPair 'pressed button text: ThemeBackground on ThemeForeground' 'MahApps.Brushes.ThemeBackground' 'MahApps.Brushes.ThemeForeground' 4.5
+            & $addPair 'hover border: ThemeForeground on ThemeBackground' 'MahApps.Brushes.ThemeForeground' 'MahApps.Brushes.ThemeBackground' 3.0
+            & $addPair 'disabled text: Gray.MouseOver on ThemeBackground' 'MahApps.Brushes.Gray.MouseOver' 'MahApps.Brushes.ThemeBackground' 4.5
+            $addElement = {
+                param($Name, $Element)
+                $fg = $null; $bg = $null
+                try { if ($Element) { $fg = Get-SolidColor $Element.Foreground; $bg = Get-SolidColor $Element.Background } } catch { $Name = ('{0} threw {1}' -f $Name, $_.Exception.Message) }
+                $ratio = 0
+                if ($fg -and $bg) { try { $ratio = Get-ContrastRatio $fg.Color $bg.Color } catch { $Name = ('{0} threw {1}' -f $Name, $_.Exception.Message) } }
+                [void]$rows.Add([PSCustomObject]@{ Name = $Name; Ratio = $ratio; Min = 4.5 })
+            }
+            $compound = @($cfg.Views | Where-Object { $_.Panel -eq 'panelCompound' })[0]
+            Show-AppView -Window $w -Config $cfg -View $compound
+            $m = $w.FindName($cfg.ContentHost).Content
+            try { $list = $m.FindName('compoundClauses'); $list.SelectedIndex = 0; Wait-Layout $w
+            & $addElement 'selected ListBoxItem' $list.ItemContainerGenerator.ContainerFromIndex(0) } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('list step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $grid = $m.FindName('dgHistory'); $grid.SelectedIndex = 0; Wait-Layout $w
+            $row = $grid.ItemContainerGenerator.ContainerFromIndex(0)
+            & $addElement 'selected HistoryGridRow' $row
+            $cell = @(Get-VisualDescendants $row | Where-Object { $_ -is [System.Windows.Controls.DataGridCell] })[0]
+            & $addElement 'selected GridCellStyle cell' $cell } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('grid step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $combo = $m.FindName('cboType'); $combo.SelectedIndex = 1; $combo.IsDropDownOpen = $true; Wait-Layout $w
+            & $addElement 'selected ComboBoxItem' $combo.ItemContainerGenerator.ContainerFromIndex(1)
+            $combo.IsDropDownOpen = $false } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('combo step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $apps = @($cfg.Views | Where-Object { $_.Module -eq 'InstalledApps' })[0]
+            Show-AppView -Window $w -Config $cfg -View $apps
+            $appGrid = $w.FindName($cfg.ContentHost).Content.FindName('dgApps'); $appGrid.SelectedIndex = 0; Wait-Layout $w
+            & $addElement 'selected row of the installed applications grid' $appGrid.ItemContainerGenerator.ContainerFromIndex(0) } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('apps step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            }
+            catch { [void]$rows.Add([PSCustomObject]@{ Name = ('script threw at line {0}: {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $w.Close() } catch { $null = $_ }
+            , @($rows.ToArray())
+        }
+        @($r).Count | Should -BeGreaterOrEqual 9
+        $bad = @($r | Where-Object { $_.Ratio -lt $_.Min } | ForEach-Object { '{0} = {1:N2} (needs {2})' -f $_.Name, $_.Ratio, $_.Min })
+        $bad | Should -BeNullOrEmpty
+    }
+}
 # The handlers of the start script run here on the real controls of a real window. The shell's own script blocks
 # (loaders, click handlers, theme code) are cut out of the script and defined in the same STA runspace, and the tests
 # click the buttons and read the result back. Only the dialogs of the operating system are left out, because they
