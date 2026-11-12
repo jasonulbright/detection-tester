@@ -160,6 +160,11 @@
                 </Style.Triggers>
             </Style>
 
+            <!-- Column headers keep the case of their text (Title Case). MahApps makes them upper case by default. -->
+            <Style x:Key="GridHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}">
+                <Setter Property="Controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+            </Style>
+
             <Style x:Key="HistoryGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MahApps.Styles.DataGrid}">
                 <Setter Property="AutoGenerateColumns" Value="False"/>
                 <Setter Property="CanUserAddRows" Value="False"/>
@@ -177,6 +182,7 @@
                 <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource MahApps.Brushes.Gray8}"/>
                 <Setter Property="AlternationCount" Value="2"/>
                 <Setter Property="RowStyle" Value="{StaticResource HistoryGridRow}"/>
+                <Setter Property="ColumnHeaderStyle" Value="{StaticResource GridHeaderStyle}"/>
             </Style>
 
             <Style x:Key="GridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MahApps.Styles.DataGridCell}">

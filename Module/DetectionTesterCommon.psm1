@@ -576,7 +576,7 @@ function Test-ScriptDetection {
             $result.Details = "Script produced no output (NOT DETECTED)"
             if (-not [string]::IsNullOrWhiteSpace($stderr)) {
                 $errPreview = $stderr.Substring(0, [Math]::Min(200, $stderr.Length))
-                $result.Details += " | Errors: $errPreview"
+                $result.Details += ' The script wrote errors. See the log for details.'; Write-Log "Script error stream: $errPreview" -Level WARN -Quiet
             }
         }
 
