@@ -25,37 +25,28 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="Filter:"   VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Filter:"   VerticalAlignment="Center" Margin="0,0,8,0"/>
             <TextBox   Grid.Column="1" x:Name="txtFilter"
-                       ToolTip="Substring match across DisplayName, Publisher, and DisplayVersion."/>
+                       ToolTip="Match text in DisplayName, Publisher and DisplayVersion."/>
 
-            <TextBlock Grid.Column="3" Text="Scope:"    VerticalAlignment="Center" Margin="0,0,8,0"/>
-            <ComboBox  Grid.Column="4" x:Name="cboScope" SelectedIndex="0">
+            <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="Scope:"    VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Column="4" x:Name="cboScope" SelectedIndex="0">
                 <ComboBoxItem Content="All"/>
                 <ComboBoxItem Content="Machine (HKLM)"/>
                 <ComboBoxItem Content="User (HKCU)"/>
             </ComboBox>
 
-            <Button Grid.Column="6" x:Name="btnRefresh"           Content="Refresh"           Style="{DynamicResource MahApps.Styles.Button.Square}"        Controls:ControlsHelper.ContentCharacterCasing="Normal" Padding="10,4" Margin="4,0" ToolTip="Re-enumerate ARP."/>
-            <Button Grid.Column="7" x:Name="btnUseForDetection"   Content="Use for detection" Style="{DynamicResource MahApps.Styles.Button.Square.Accent}" Controls:ControlsHelper.ContentCharacterCasing="Normal" Padding="10,4" Margin="4,0" Visibility="Collapsed" ToolTip="Switch to the Detection Tester module with this app's registry key prefilled."/>
-            <Button Grid.Column="8" x:Name="btnCopyDetails"       Content="Copy details"      Style="{DynamicResource MahApps.Styles.Button.Square}"        Controls:ControlsHelper.ContentCharacterCasing="Normal" Padding="10,4" Margin="4,0" Visibility="Collapsed" ToolTip="Copy all fields of the selected app to the clipboard."/>
+            <Button Grid.Column="6" x:Name="btnRefresh"           Content="Refresh"           Style="{DynamicResource SquareInlineButtonStyle}" ToolTip="Read the ARP entries again."/>
+            <Button Grid.Column="7" x:Name="btnUseForDetection"   Content="Use for Detection" Style="{DynamicResource PrimaryButtonStyle}" Height="28" Padding="10,0,10,0" Visibility="Collapsed" ToolTip="Fill a registry value clause from the selected entry."/>
+            <Button Grid.Column="8" x:Name="btnCopyDetails"       Content="Copy Details"      Style="{DynamicResource SquareInlineButtonStyle}" Visibility="Collapsed" ToolTip="Copy the fields of the selected entry to the clipboard."/>
         </Grid>
     </Border>
 
     <!-- ====================  GRID  ==================== -->
     <DataGrid Grid.Row="1" x:Name="dgApps"
               Margin="0,8,0,0"
-              AutoGenerateColumns="False"
-              CanUserAddRows="False"
-              CanUserDeleteRows="False"
-              IsReadOnly="True"
-              SelectionMode="Single"
-              SelectionUnit="FullRow"
-              HeadersVisibility="Column"
-              GridLinesVisibility="Horizontal"
-              RowHeaderWidth="0"
-              BorderThickness="0"
-              ColumnHeaderHeight="30">
+              Style="{DynamicResource HistoryGridStyle}"
+              CellStyle="{DynamicResource GridCellStyle}">
         <DataGrid.Columns>
             <DataGridTextColumn Header="DisplayName"    Binding="{Binding DisplayName}"    Width="*"/>
             <DataGridTextColumn Header="Publisher"      Binding="{Binding Publisher}"      Width="200"/>
@@ -89,23 +80,23 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="DisplayName:"          FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="DisplayName:"          Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="dtlDisplayName"      FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Publisher:"            FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Publisher:"            Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="dtlPublisher"        FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="DisplayVersion:"       FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="DisplayVersion:"       Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="dtlDisplayVersion"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Architecture / Scope:" FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Architecture and Scope:" Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="dtlArchScope"        FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="RegistryKey:"          FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="RegistryKey:"          Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="4" Grid.Column="1" x:Name="dtlRegistryKey"      FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="UninstallString:"      FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="UninstallString:"      Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="5" Grid.Column="1" x:Name="dtlUninstallString"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="QuietUninstallString:" FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="QuietUninstallString:" Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="6" Grid.Column="1" x:Name="dtlQuietUninstall"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="InstallLocation:"      FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="InstallLocation:"      Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="7" Grid.Column="1" x:Name="dtlInstallLocation"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="8" Grid.Column="0" Text="InstallDate:"          FontWeight="SemiBold" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="InstallDate:"          Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="8" Grid.Column="1" x:Name="dtlInstallDate"      FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
             </Grid>
         </ScrollViewer>

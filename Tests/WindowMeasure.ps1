@@ -170,6 +170,7 @@ $script:MeasureFunctions = {
         $worst = $null
         foreach ($t in (Get-VisualDescendants $Control)) {
             if ($t -isnot [System.Windows.Controls.TextBlock] -or [string]::IsNullOrWhiteSpace($t.Text) -or $t.ActualWidth -le 0) { continue }
+            if (-not (Test-VisibleInTree $t)) { continue }
             $sc = Get-SolidColor $t.Foreground
             if (-not $sc) { continue }
             $fgc = Merge-Color $sc.Color ((Get-ElementOpacity $t) * $sc.Opacity) $backdrop

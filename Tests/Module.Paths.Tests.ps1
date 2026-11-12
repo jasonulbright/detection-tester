@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Hive and registry path helpers: every prefix form, empty and hostile input.
 
 BeforeAll {

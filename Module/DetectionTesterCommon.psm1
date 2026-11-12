@@ -335,7 +335,7 @@ function Test-RegistryKeyValueDetection {
 
         Write-Log "RegistryKeyValue: $($result.Details)" -Quiet
     } catch {
-        $result.Details = "Error: $_"
+        $result.Details = 'The registry value could not be read. See the log for details.'
         Write-Log "RegistryKeyValue error: $_" -Level ERROR -Quiet
     }
 
@@ -399,7 +399,7 @@ function Test-RegistryKeyDetection {
 
         Write-Log "RegistryKey: $($result.Details)" -Quiet
     } catch {
-        $result.Details = "Error: $_"
+        $result.Details = 'The registry key could not be read. See the log for details.'
         Write-Log "RegistryKey error: $_" -Level ERROR -Quiet
     }
 
@@ -484,7 +484,7 @@ function Test-FileDetection {
 
         Write-Log "File: $($result.Details)" -Quiet
     } catch {
-        $result.Details = "Error: $_"
+        $result.Details = 'The file could not be checked. See the log for details.'
         Write-Log "File error: $_" -Level ERROR -Quiet
     }
 
@@ -582,7 +582,7 @@ function Test-ScriptDetection {
 
         Write-Log "Script: $($result.Details)" -Quiet
     } catch {
-        $result.Details = "Script execution error: $_"
+        $result.Details = 'The script could not run. See the log for details.'
         Write-Log "Script error: $_" -Level ERROR -Quiet
     } finally {
         # Dispose failures can't be acted on; log and continue so cleanup races don't leak.
@@ -663,7 +663,7 @@ function Test-CompoundDetection {
                 }
             }
         } catch {
-            $clauseResult = @{ Type = $type; Detected = $false; Details = "Error: $($_.Exception.Message)" }
+            $clauseResult = @{ Type = $type; Detected = $false; Details = 'The clause could not be evaluated. See the log for details.' }
             Write-Log "Compound: clause of type $type failed - $($_.Exception.Message)" -Level WARN -Quiet
         }
 

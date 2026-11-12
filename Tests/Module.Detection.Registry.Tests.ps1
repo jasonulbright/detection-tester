@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Registry key and registry value detection.
 
 BeforeAll {
@@ -319,7 +319,7 @@ Describe 'Test-RegistryKeyValueDetection on a throwaway key' {
     It 'returns an error result for a key path longer than the registry allows' {
         $r = Test-RegistryKeyValueDetection -RegistryKeyRelative ('Software\' + ('a' * 300)) -ValueName 'Str' -ExpectedValue '1' -Hive CurrentUser
         $r.Detected | Should -BeFalse
-        $r.Details | Should -BeLike 'Error:*'
+        $r.Details | Should -Be 'The registry value could not be read. See the log for details.'
     }
 
     It 'sees the 64-bit and the 32-bit view of HKLM differ for a 64-bit ARP entry' {
@@ -366,7 +366,7 @@ Describe 'Test-RegistryKeyDetection on a throwaway key' {
     It 'returns an error result for a key path longer than the registry allows' {
         $r = Test-RegistryKeyDetection -RegistryKeyRelative ('Software\' + ('a' * 300)) -Hive CurrentUser
         $r.Detected | Should -BeFalse
-        $r.Details | Should -BeLike 'Error:*'
+        $r.Details | Should -Be 'The registry key could not be read. See the log for details.'
     }
 
     It 'rejects an empty key path before it runs' {

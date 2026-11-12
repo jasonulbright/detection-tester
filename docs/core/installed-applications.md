@@ -36,21 +36,21 @@ Select **Refresh** to read the registry again.
 
 ### Read the details
 
-Select a row. The panel shows **DisplayName**, **Publisher**, **DisplayVersion**, **Architecture / Scope**, **RegistryKey**, **UninstallString**, **QuietUninstallString**, **InstallLocation** and **InstallDate**.
+Select a row. The panel shows **DisplayName**, **Publisher**, **DisplayVersion**, **Architecture and Scope**, **RegistryKey**, **UninstallString**, **QuietUninstallString**, **InstallLocation** and **InstallDate**.
 
 ![The details of an entry](../images/installed-details.png)
 
-Select **Copy details** to copy these lines to the clipboard.
+Select **Copy Details** to copy these lines to the clipboard.
 
-An entry can have no `DisplayVersion`. The clause that **Use for detection** fills then has an empty expected value and fails in a positive test. Change **Value name** to another value that the key has, for example `DisplayName`, and enter its value in **Expected**.
+An entry can have no `DisplayVersion`. The clause that **Use for Detection** fills then has an empty expected value and fails in a positive test. Change **Value Name** to another value that the key has, for example `DisplayName`, and enter its value in **Expected**.
 
 ### Use an entry for a detection
 
 1. Select a row.
-2. Select **Use for detection**. The Detection Tester page opens with the type RegistryKeyValue, the key of the entry, the value name `DisplayVersion`, the version of the entry as the expected value, the operator IsEquals, and the hive and the view of the entry.
-3. Select **Test detection**.
+2. Select **Use for Detection**. The Detection Tester page opens with the type RegistryKeyValue, the key of the entry, the value name `DisplayVersion`, the version of the entry as the expected value, the operator IsEquals, and the hive and the view of the entry.
+3. Select **Test Detection**.
 
-![The Detection Tester page after Use for detection](../images/use-for-detection.png)
+![The Detection Tester page after Use for Detection](../images/use-for-detection.png)
 
 ## Options and settings of this page
 
@@ -59,8 +59,8 @@ An entry can have no `DisplayVersion`. The clause that **Use for detection** fil
 | **Filter** | Narrows the grid. |
 | **Scope** | **All**, **Machine (HKLM)** or **User (HKCU)**. |
 | **Refresh** | Reads the registry again. |
-| **Use for detection** | Fills a registry value clause. |
-| **Copy details** | Copies the details of the entry. |
+| **Use for Detection** | Fills a registry value clause. |
+| **Copy Details** | Copies the details of the entry. |
 
 ## Limits
 
@@ -72,7 +72,7 @@ An entry can have no `DisplayVersion`. The clause that **Use for detection** fil
 | Message or symptom | Cause | Fix |
 |---|---|---|
 | An application is missing. | It has no ARP entry, or it installs per user for another account. | Look in the **User (HKCU)** scope of the right account. |
-| **Use for detection** does nothing. | No row is selected. | Select a row. |
+| **Use for Detection** does nothing. | No row is selected. | Select a row. |
 
 ## Links
 

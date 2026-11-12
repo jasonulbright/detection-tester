@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Script detection.
 
 BeforeAll {
@@ -103,9 +103,10 @@ Describe 'Test-ScriptDetection output rules' {
         $r.Details | Should -Be 'Script produced no output (NOT DETECTED) | Errors: disk missing'
     }
 
-    It 'shows the exception text when the script throws' {
+    It 'shows a fixed message and no exception text when the script throws' {
         $r = Test-ScriptDetection -ScriptText 'throw "boom"'
-        $r.Details | Should -BeLike 'Script execution error:*boom*'
+        $r.Details | Should -Be 'The script could not run. See the log for details.'
+        $r.Details | Should -Not -Match 'boom|Exception'
         $r.ScriptOutput | Should -BeNullOrEmpty
     }
 

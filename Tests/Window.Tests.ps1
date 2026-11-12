@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Window tests. The main window, both module views and the Options dialog (built from XAML text in the
 # script) are opened off screen on an STA thread, in both themes and at 1024x720 and 1440x900, and
 # measured. The app-specific names live in WindowConfig.ps1.
@@ -48,14 +48,10 @@ BeforeAll {
                 $n -is [System.Management.Automation.Language.StringConstantExpressionAst] -and $n.Value -match '^\s*<Controls:MetroWindow'
             }, $true) | ForEach-Object { $_.Value })
 
-    # The colour literals that the shell sets at start-up and on a theme change.
-    $script:ShellColors = @{}
-    foreach ($k in 'DarkButtonBg', 'DarkButtonBorder', 'LightButtonBg', 'LightButtonBorder', 'TitleBarBlue', 'TitleBarBlueInactive') {
-        $m = [regex]::Match($script:ShellText, ('\$script:{0}\s*=\s*\[Windows\.Media\.BrushConverter\]::new\(\)\.ConvertFrom\(''(#[0-9A-Fa-f]{{6}})''\)' -f $k))
-        if ($m.Success) { $script:ShellColors[$k] = $m.Groups[1].Value }
-    }
-    $log = [regex]::Match($script:ShellText, '\$hex\s*=\s*if\s*\(\$IsDark\)\s*\{\s*''(#[0-9A-Fa-f]{6})''\s*\}\s*else\s*\{\s*''(#[0-9A-Fa-f]{6})''\s*\}')
-    if ($log.Success) { $script:ShellColors.LogDark = $log.Groups[1].Value; $script:ShellColors.LogLight = $log.Groups[2].Value }
+    # The palette override table that the shell passes to SuiteCommon (Initialize-SuiteTheme -Brushes).
+    $script:ShellOverride = @{}
+    $table = [regex]::Match($script:ShellText, '(?s)\$script:SuiteBrushOverride\s*=\s*@\{(.*?)\}')
+    foreach ($m in [regex]::Matches($table.Groups[1].Value, '(\w+)\s*=\s*''(#[0-9A-Fa-f]{6})''')) { $script:ShellOverride[$m.Groups[1].Value] = $m.Groups[2].Value }
 
     $script:ShellParts = Get-ShellRuntimePart
     $script:Measured = @{}
@@ -64,7 +60,6 @@ BeforeAll {
             @{ Dark = $false; W = 1024; H = 720 }, @{ Dark = $false; W = 1440; H = 900 })) {
         $key = '{0}|{1}x{2}' -f $(if ($case.Dark) { 'dark' } else { 'light' }), $case.W, $case.H
         $case.Config = $script:AppConfig
-        $case.Colors = $script:ShellColors
         $case.Parts = $script:ShellParts
         $case.TempDir = $TestDrive
         $case.DialogXaml = $script:DialogXaml[0]
@@ -114,13 +109,10 @@ Describe 'Main window XAML' -Skip:(-not $script:WindowGuard.Allowed) {
         }
     }
 
-    It 'finds the theme colours in the shell' {
-        foreach ($k in 'DarkButtonBg', 'DarkButtonBorder', 'LightButtonBg', 'LightButtonBorder', 'TitleBarBlue', 'TitleBarBlueInactive', 'LogDark', 'LogLight') {
-            $script:ShellColors[$k] | Should -Match '^#[0-9A-Fa-f]{6}$' -Because "the shell has a colour for $k"
-        }
+    It 'finds the palette override table in the shell' {
+        $script:ShellOverride.TitleBarInactive | Should -Match '^#[0-9A-Fa-f]{6}$' -Because 'the shell sets the inactive title bar of the light theme'
     }
 }
-
 Describe 'Module XAML' -Skip:(-not $script:WindowGuard.Allowed) {
     It 'has the control <Name> that the <Module> loader looks up' -ForEach $script:ModuleNameCases {
         $xaml = Get-Content -LiteralPath (Join-Path $script:Root $script:AppConfig.Modules[$Module].Xaml) -Raw
@@ -216,14 +208,12 @@ Describe 'Dialog windows' -Skip:(-not $script:WindowGuard.Allowed) {
         ($titles | Select-Object -Unique).Count | Should -Be $titles.Count
     }
 
-    # The theme default title bar of the light theme has 3.3:1 against the title text. The main window sets its own
-    # brushes; the dialog must set the same ones, and the harness applies them to the dialog it measures.
-    It 'gives the Options dialog the title bar brushes of the main window in the light theme' {
+    # The theme default title bar of the light theme has too little contrast with the title text. SuiteCommon sets the
+    # title bar brushes of a dialog in Set-DialogTheme, with the same palette as the main window.
+    It 'gives the Options dialog the theme and the title bar brushes of the main window through SuiteCommon' {
         $text = Get-ShellBlockText -Name 'ShowOptionsDialog'
-        $text | Should -Match '\$dlg\.WindowTitleBrush\s*=\s*\$script:TitleBarBlue\b'
-        $text | Should -Match '\$dlg\.NonActiveWindowTitleBrush\s*=\s*\$script:TitleBarBlueInactive\b'
+        $text | Should -Match 'Set-DialogTheme\s+-Dialog\s+\$dlg\b'
     }
-
     It 'shows the dialog title "Options" on the title bar' {
         $r = Invoke-WpfSta -Arguments @{ Xaml = $script:DialogXaml[0] } -Script {
             $d = Open-TestWindow -XamlText $Arguments.Xaml -Width 640 -Height 440
@@ -533,31 +523,74 @@ Describe 'Handlers on the real controls' -Skip:(-not $script:WindowGuard.Allowed
             $r[1].Subtitle | Should -Not -BeNullOrEmpty
         }
 
-        It 'applies the <Name> theme with the theme name, the label, the log colour and the sidebar colours' -ForEach @(
-            @{ Name = 'light'; Dark = $false; Theme = 'Light.Blue'; Label = 'Light Theme'; Log = '#FF595959'; Button = '#FF0078D4'; Border = '#FF006CBE'; Title = '#FF0078D4' }
-            @{ Name = 'dark'; Dark = $true; Theme = 'Dark.Steel'; Label = 'Dark Theme'; Log = '#FFB0B0B0'; Button = '#FF1E1E1E'; Border = '#FF555555'; Title = $null }
+        It 'applies the <Name> theme with the theme name, the label, the log colour, the sidebar colours and the text colours' -ForEach @(
+            @{ Name = 'light'; Dark = $false; Theme = 'Light.Blue'; Label = 'Light Theme'; Log = '#FF595959'; ActiveButton = '#FF005A9E'; IdleButton = '#FF0078D4'; Border = '#FF006CBE'; Title = '#FF0078D4'; TitleInactive = '#FF595959'; Text = '#FFFFFFFF' }
+            @{ Name = 'dark'; Dark = $true; Theme = 'Dark.Steel'; Label = 'Dark Theme'; Log = '#FFB0B0B0'; ActiveButton = '#FF3A3A3A'; IdleButton = '#FF1E1E1E'; Border = '#FF8C8C8C'; Title = $null; TitleInactive = $null; Text = $null }
         ) {
             $r = Invoke-WpfSta -Arguments @{ Dark = $Dark } -Script {
+                $global:Prefs.DarkMode = $Arguments.Dark
                 & $global:ApplyTheme -IsDark $Arguments.Dark
                 Wait-Layout $global:HW
+                $active = $global:HW.FindName('btnDetection'); $idle = $global:HW.FindName('btnInstalled'); $opt = $global:HW.FindName('btnOptions')
                 [PSCustomObject]@{
                     Theme = [ControlzEx.Theming.ThemeManager]::Current.DetectTheme($global:HW).Name
                     Label = $global:txtThemeLabel.Text
                     Log = $global:lblLogOutput.Foreground.Color.ToString()
-                    Button = $global:HW.FindName('btnDetection').Background.Color.ToString()
-                    Border = $global:HW.FindName('btnOptions').BorderBrush.Color.ToString()
+                    ActiveButton = $active.Background.Color.ToString()
+                    IdleButton = $idle.Background.Color.ToString()
+                    Border = $opt.BorderBrush.Color.ToString()
+                    ActiveText = $(if ($active.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -is [System.Windows.Media.SolidColorBrush]) { $active.Foreground.Color.ToString() })
+                    OptionsText = $(if ($opt.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -is [System.Windows.Media.SolidColorBrush]) { $opt.Foreground.Color.ToString() })
                     TitleLocal = $global:HW.ReadLocalValue([MahApps.Metro.Controls.MetroWindow]::WindowTitleBrushProperty) -is [System.Windows.Media.SolidColorBrush]
                     Title = $(if ($global:HW.WindowTitleBrush -is [System.Windows.Media.SolidColorBrush]) { $global:HW.WindowTitleBrush.Color.ToString() })
+                    TitleInactive = $(if ($global:HW.NonActiveWindowTitleBrush -is [System.Windows.Media.SolidColorBrush] -and $global:HW.ReadLocalValue([MahApps.Metro.Controls.MetroWindow]::NonActiveWindowTitleBrushProperty) -is [System.Windows.Media.SolidColorBrush]) { $global:HW.NonActiveWindowTitleBrush.Color.ToString() })
                     Pref = $global:Prefs.DarkMode
                 }
             }
             $r.Theme | Should -Be $Theme
             $r.Label | Should -Be $Label
             $r.Log | Should -Be $Log
-            $r.Button | Should -Be $Button
+            $r.ActiveButton | Should -Be $ActiveButton
+            $r.IdleButton | Should -Be $IdleButton
             $r.Border | Should -Be $Border
             $r.Pref | Should -Be $Dark
-            if ($Dark) { $r.TitleLocal | Should -BeFalse } else { $r.Title | Should -Be $Title }
+            # The light theme paints the sidebar buttons blue: they show white text. The dark theme sets no local text color.
+            $r.ActiveText | Should -Be $Text
+            $r.OptionsText | Should -Be $Text
+            if ($Dark) { $r.TitleLocal | Should -BeFalse } else { $r.Title | Should -Be $Title; $r.TitleInactive | Should -Be $TitleInactive }
+        }
+
+        It 'Set-ThemeForeground paints a real button white in the light theme and clears its own value in the dark theme' {
+            $r = Invoke-WpfSta -Script {
+                $b = New-Object System.Windows.Controls.Button
+                $white = [Windows.Media.BrushConverter]::new().ConvertFrom('#FFFFFF')
+                # Set-ThemeForeground is internal to SuiteCommon: call it in the module scope.
+                $module = Get-Module SuiteCommon
+                & $module { param($c, $w) Set-ThemeForeground -Control $c -IsDark $false -OnBlue $w } $b $white
+                $lightLocal = ($b.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -is [System.Windows.Media.SolidColorBrush])
+                $lightColor = $b.Foreground.Color.ToString()
+                & $module { param($c, $w) Set-ThemeForeground -Control $c -IsDark $true -OnBlue $w } $b $white
+                [PSCustomObject]@{ LightLocal = $lightLocal; LightColor = $lightColor; DarkCleared = ($b.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -eq [System.Windows.DependencyProperty]::UnsetValue) }
+            }
+            $r.LightLocal | Should -BeTrue
+            $r.LightColor | Should -Be '#FFFFFFFF'
+            $r.DarkCleared | Should -BeTrue
+        }
+        It 'marks the module that is shown as the active view in the sidebar' {
+            $r = Invoke-WpfSta -Script {
+                $global:Prefs.DarkMode = $true
+                & $global:ApplyTheme -IsDark $true
+                & $global:ShowModule 'InstalledApps'
+                Wait-Layout $global:HW
+                $installed = $global:HW.FindName('btnInstalled').Background.Color.ToString()
+                $detection = $global:HW.FindName('btnDetection').Background.Color.ToString()
+                & $global:ShowModule 'DetectionTester'
+                Wait-Layout $global:HW
+                [PSCustomObject]@{ Installed = $installed; Detection = $detection; After = $global:HW.FindName('btnDetection').Background.Color.ToString() }
+            }
+            $r.Installed | Should -Be '#FF3A3A3A'
+            $r.Detection | Should -Be '#FF1E1E1E'
+            $r.After | Should -Be '#FF3A3A3A'
         }
     }
 }

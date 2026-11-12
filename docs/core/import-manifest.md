@@ -1,10 +1,10 @@
 # Import a manifest
 
-**Import stage-manifest...** fills the clause from the `Detection` block of a `stage-manifest.json` file.
+**Import Stage Manifest...** fills the clause from the `Detection` block of a `stage-manifest.json` file.
 
 ## What it does
 
-The tool reads the file, picks the type of the detection and fills the fields. A manifest with a connector and clauses becomes a Compound detection. The tool does not run the test until you select **Test detection**.
+The tool reads the file, picks the type of the detection and fills the fields. A manifest with a connector and clauses becomes a Compound detection. The tool does not run the test until you select **Test Detection**.
 
 ## When to use it
 
@@ -18,13 +18,13 @@ A JSON file with a `Detection` block.
 
 ### Import a manifest
 
-1. Select **Import stage-manifest...**. The Open dialog is titled **Import stage-manifest.json**.
+1. Select **Import Stage Manifest...**. The Open dialog is titled **Import stage-manifest.json**.
 2. Select the file and select **Open**.
 3. Read the fields. For a single clause, they show the clause. For a Compound detection, the type is **Compound (import-only)**, the **Connector** shows `And` or `Or`, and the list **Clauses** shows one line for each clause.
 
 ![A Compound detection after the import](../images/import-compound.png)
 
-Then select **Test detection**. The result shows **Pass** when the clauses satisfy the connector. The detail line reads, for example, `And: 2/2 clauses passed - DETECTED`.
+Then select **Test Detection**. The result shows **Pass** when the clauses satisfy the connector. The detail line reads, for example, `And: 2/2 clauses passed - DETECTED`.
 
 ![The result of the Compound test](../images/import-compound-run.png)
 
@@ -38,7 +38,7 @@ A file with no `Detection` block does not change the fields. The result shows **
 
 ## Options and settings of this page
 
-The Compound clauses cannot be edited in the window. Edit the source manifest and import it again. After **Use selected** on a Compound history row, the clauses come back from the history.
+The Compound clauses cannot be edited in the window. Edit the source manifest and import it again. After **Use Selected** on a Compound history row, the clauses come back from the history.
 
 ## Limits
 
@@ -49,9 +49,7 @@ The Compound clauses cannot be edited in the window. Edit the source manifest an
 
 | Message | Cause | Fix |
 |---|---|---|
-| Failed to import: No 'Detection' block found in manifest | The file has no `Detection` block. | Import the `stage-manifest.json` of a staged build. |
-| Failed to import: Failed to parse manifest JSON | The file is not valid JSON. | Fix the file. |
-| Failed to import: Manifest file not found | The path does not exist. | Select an existing file. |
+| The manifest could not be imported. Select a stage-manifest.json file with a Detection block. | The file has no `Detection` block, is not valid JSON, or cannot be read. | Import the `stage-manifest.json` of a staged build. Check the log for the exact reason. |
 
 ## Links
 

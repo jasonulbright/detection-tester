@@ -21,7 +21,7 @@ None.
 
 ![The About section](../images/options-about.png)
 
-3. Select **Logging** to read the path of the log of this session and the log folder. **Open log folder** opens the folder in Explorer. **Open app data folder** opens %LOCALAPPDATA%\DetectionTester.
+3. Select **Logging** to read the path of the log of this session and the log folder. **Open Log Folder** opens the folder in Explorer. **Open App Data Folder** opens %LOCALAPPDATA%\DetectionTester.
 
 ![The Logging section](../images/options-logging.png)
 

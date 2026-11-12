@@ -4,7 +4,7 @@ A negative test passes when the clause is not detected.
 
 ## What it does
 
-With **Negative test (expect NOT detected)** selected, the tool reverses the result of the clause. A clause that is detected gives **Fail**. A clause that is not detected gives **Pass**.
+With **Negative Test (Expect NOT Detected)** selected, the tool reverses the result of the clause. A clause that is detected gives **Fail**. A clause that is not detected gives **Pass**.
 
 ## When to use it
 
@@ -17,8 +17,8 @@ None.
 ## Steps
 
 1. Fill a clause. See [Detection types](detection-types.md).
-2. Select **Negative test (expect NOT detected)**.
-3. Select **Test detection**.
+2. Select **Negative Test (Expect NOT Detected)**.
+3. Select **Test Detection**.
 
 A clause that is detected fails the negative test. The detail line still shows the real comparison.
 
@@ -28,13 +28,13 @@ A clause that is not detected passes the negative test. Read the detail line bef
 
 ![A negative test that passes: the clause is not detected](../images/negative-test-pass.png)
 
-The history grid shows **Negative** in the **Mode** column for these rows. **Use selected** restores the check box. See [History](history.md).
+The history grid shows **Negative** in the **Mode** column for these rows. **Use Selected** restores the check box. See [History](history.md).
 
 ## Options and settings of this page
 
 | Control | Effect |
 |---|---|
-| **Negative test (expect NOT detected)** | Reverses Pass and Fail. It applies to every type. The selection stays until you clear it. |
+| **Negative Test (Expect NOT Detected)** | Reverses Pass and Fail. It applies to every type. The selection stays until you clear it. |
 
 ## Limits
 
@@ -44,7 +44,7 @@ The history grid shows **Negative** in the **Mode** column for these rows. **Use
 
 | Message or symptom | Cause | Fix |
 |---|---|---|
-| A test shows **Fail** although the detail line says MATCH. | **Negative test** is selected. | Clear the check box. |
+| A test shows **Fail** although the detail line says MATCH. | **Negative Test (Expect NOT Detected)** is selected. | Clear the check box. |
 
 ## Links
 

@@ -11,7 +11,7 @@ Detection Tester tests Configuration Manager application detection methods on th
 - [Detection types](core/detection-types.md): RegistryKeyValue, RegistryKey, File and Script clauses, the result and the checks.
 - [Negative test](core/negative-test.md): the test that passes when the clause is not detected.
 - [Import a manifest](core/import-manifest.md): fill the clause from a `stage-manifest.json`, including Compound detections.
-- [History](core/history.md): the history grid, Use selected, Export CSV, Export HTML and Clear.
+- [History](core/history.md): the history grid, Use Selected, Export CSV, Export HTML and Clear.
 - [Installed Applications](core/installed-applications.md): browse the ARP entries and send one to the Detection Tester.
 - [Options dialog](core/options.md): About and Logging.
 

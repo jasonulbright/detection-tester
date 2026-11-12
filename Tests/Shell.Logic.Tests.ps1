@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Logic of start-detectiontester.ps1. The script opens its window when it runs, so it cannot be dot-sourced.
 # Each function and each script-scope script block is cut out of its syntax tree and defined here, with plain
 # objects in place of the window controls. The real controls are used in Window.Tests.ps1.
@@ -567,11 +567,12 @@ Describe 'DTImportManifest' {
         $global:Fx.Dialog.Title | Should -Be 'Import stage-manifest.json'
     }
 
-    It 'shows the file name and the reason when the import fails' {
+    It 'shows a fixed message and no exception text when the import fails' {
         $global:Fx.Manifest = "No 'Detection' block found in manifest"
         & $script:DTImportManifest
         $script:DTContext.txtResultBadge.Text | Should -Be 'Import failed'
-        $script:DTContext.txtResultDetails.Text | Should -Be "Failed to import 'C:\m\stage-manifest.json': No 'Detection' block found in manifest"
+        $script:DTContext.txtResultDetails.Text | Should -Be 'The manifest could not be imported. Select a stage-manifest.json file with a Detection block.'
+        $script:DTContext.txtResultDetails.Text | Should -Not -Match 'No .Detection. block found|Exception'
         $script:DTContext.cboType.SelectedIndex | Should -Be 0
     }
 
@@ -790,12 +791,12 @@ Describe 'History export and clear' {
         $global:Fx.Calls.Count | Should -Be 0
     }
 
-    It 'shows the reason in the result panel when the export fails, for <Block>' -ForEach @(@{ Block = 'DTExportHistoryCsv'; Fn = 'Export-DetectionResultsCsv' }, @{ Block = 'DTExportHistoryHtml'; Fn = 'Export-DetectionResultsHtml' }) {
+    It 'shows a fixed message and no exception text in the result panel when the export fails, for <Block>' -ForEach @(@{ Block = 'DTExportHistoryCsv'; Fn = 'Export-DetectionResultsCsv' }, @{ Block = 'DTExportHistoryHtml'; Fn = 'Export-DetectionResultsHtml' }) {
         Mock $Fn { throw 'disk is full' }
         { & $script:Blocks[$Block] } | Should -Not -Throw
         $script:DTContext.txtResultBadge.Text | Should -Be 'Export failed'
-        $script:DTContext.txtResultDetails.Text | Should -BeLike '*disk is full*'
-        $script:DTContext.txtResultDetails.Text | Should -BeLike ('*' + $global:Fx.Dialog.Chosen + '*')
+        $script:DTContext.txtResultDetails.Text | Should -Be 'The history could not be saved. Select a folder that you can write to.'
+        $script:DTContext.txtResultDetails.Text | Should -Not -BeLike '*disk is full*'
     }
 
     It 'empties the history' {
@@ -947,6 +948,8 @@ Describe 'Format-DTAppDetails' {
 
 Describe 'ShowModule' {
     BeforeEach {
+        Mock Update-SidebarButtonTheme {}
+        $script:ActiveView = $null
         $script:Prefs = @{ DarkMode = $true; ActiveModule = 'DetectionTester' }
         $script:DTRoot = $null; $script:IARoot = $null
         $global:Fx.Loads = New-Object System.Collections.ArrayList
@@ -969,6 +972,12 @@ Describe 'ShowModule' {
         $txtModuleSubtitle.Text | Should -Not -BeNullOrEmpty
         $txtStatus.Text | Should -Be $Status
         $script:Prefs.ActiveModule | Should -Be $Name
+    }
+
+    It 'marks the module as the active view and themes the sidebar buttons' -ForEach @(@{ Name = 'DetectionTester' }, @{ Name = 'InstalledApps' }) {
+        & $script:ShowModule $Name
+        $script:ActiveView | Should -Be $Name
+        Should -Invoke Update-SidebarButtonTheme -Times 1 -Exactly
     }
 
     It 'loads a module once and shows the same root the second time' {

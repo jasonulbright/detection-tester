@@ -20,7 +20,7 @@ None.
 |---|---|---|
 | `%LOCALAPPDATA%\DetectionTester\prefs.json` | The theme and the open page. | You change the theme or the page. |
 | `%LOCALAPPDATA%\DetectionTester\windowstate.json` | The window size and place. | You close the window. |
-| `%LOCALAPPDATA%\DetectionTester\logs\DetectionTester-<yyyyMMdd-HHmmss>.log` | The log of one session: each test, each import and each Use selected. | During the session. |
+| `%LOCALAPPDATA%\DetectionTester\logs\DetectionTester-<yyyyMMdd-HHmmss>.log` | The log of one session: each test, each import and each Use Selected. | During the session. |
 | `%LOCALAPPDATA%\DetectionTester\reports\detection-history-<date>-<time>.csv` or `.html` | An export of the history. The Save As dialog starts in this folder. | **Export CSV** or **Export HTML**. |
 
 A log line is `[time] [level] text`. A test writes `Test: type=<type> mode=<mode> result=<result> target='<target>'`.

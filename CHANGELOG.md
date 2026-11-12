@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Show white text on every blue control in the light theme: sidebar buttons, primary buttons, selected rows, cells and list items.
+- Use one themed button style with a visible hover and pressed state, and one gray Cancel style in the Options dialog.
+- Show the active module in the sidebar, in both themes.
+- Make field titles and section titles bold in both themes. Use Title Case for titles, buttons and labels.
+- Show a fixed message in the window when a test, an import or an export fails. The log keeps the reason.
+- Raise the contrast of the inactive title bar and of disabled text.
+
+### Changed
+
+- Take the vendored SuiteCommon 2026.11.11.0080.
+- Add guard tests for the theme rules.
+
 ## [2026.11.07.0015] - 2026-11-07
 
 ## 21 defects fixed that the new test suite found

@@ -4,7 +4,7 @@ This page lists the most common problems of Detection Tester with their cause an
 
 ## What it does
 
-The page helps you find the fix for a message on the result panel. [Error messages](reference/error-messages.md) lists all messages.
+Use this page to find the fix for a message on the result panel. [Error messages](reference/error-messages.md) lists all messages.
 
 ## When to use it
 
@@ -19,13 +19,13 @@ None.
 1. Read the result and the detail line.
 2. Find the symptom in the tables.
 3. Do the fix.
-4. Select **Test detection** again.
+4. Select **Test Detection** again.
 
 ## Tests
 
 | Message or symptom | Cause | Fix |
 |---|---|---|
-| **Fail** with the detail `MATCH`. | The clause is detected and **Negative test** is selected. | To test for absence, keep the check box and find out why the clause is detected. Clear it only to test for presence. See [Negative test](core/negative-test.md). |
+| **Fail** with the detail `MATCH`. | The clause is detected and **Negative Test (Expect NOT Detected)** is selected. | To test for absence, keep the check box and find out why the clause is detected. Clear it only to test for presence. See [Negative test](core/negative-test.md). |
 | A key exists in Regedit and the clause fails. | The view or the hive is not the one that you looked at. | Select the other view, or HKCU. |
 | A script test shows **Fail** and no output. | The script wrote no text to the output. | Write a value to the output when the application is installed. |
 | A test passes here and fails in a deployment. | The deployment runs as System and the tool as your account. | See [Permissions](reference/permissions.md). |

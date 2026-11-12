@@ -18,20 +18,20 @@ None. See [Permissions](../reference/permissions.md) for the rights that a claus
 
 ### Choose the type
 
-1. Select the list **Detection type**.
+1. Select the list **Detection Type**.
 2. Select **RegistryKeyValue**, **RegistryKey**, **File**, **Script** or **Compound (import-only)**.
 
-![The Detection type list open](../images/type-list.png)
+![The Detection Type list open](../images/type-list.png)
 
 ### Test a registry value
 
 1. Select **HKLM** or **HKCU** for the hive.
 2. Select **64-bit** or **32-bit (WOW6432Node)** for the view.
-3. In **Key path**, enter the path below the hive, for example `SOFTWARE\Microsoft\Windows NT\CurrentVersion`.
-4. In **Value name**, enter the name of the value.
+3. In **Key Path**, enter the path below the hive, for example `SOFTWARE\Microsoft\Windows NT\CurrentVersion`.
+4. In **Value Name**, enter the name of the value.
 5. In **Operator**, select the comparison.
 6. In **Expected**, enter the value to compare.
-7. Select **Test detection**.
+7. Select **Test Detection**.
 
 ![The Operator list: IsEquals, GreaterEquals, GreaterThan, LessEquals, LessThan](../images/operator-list.png)
 
@@ -53,8 +53,8 @@ With HKCU and the 32-bit view the same key gives a different answer, because the
 
 1. Select the type **RegistryKey**.
 2. Select the hive and the view.
-3. In **Key path**, enter the path below the hive.
-4. Select **Test detection**. The clause passes when the key exists.
+3. In **Key Path**, enter the path below the hive.
+4. Select **Test Detection**. The clause passes when the key exists.
 
 ![The RegistryKey type](../images/type-registry-key.png)
 
@@ -70,7 +70,7 @@ With HKCU and the 32-bit view the same key gives a different answer, because the
 4. In the file name box, enter the file name only, for example `notepad.exe`.
 5. In the property list, select **Existence** or **Version**.
 6. For **Version**, select an operator and enter the expected version, for example `10.0.0.0`.
-7. Select **Test detection**.
+7. Select **Test Detection**.
 
 ![The File type](../images/type-file.png)
 
@@ -86,7 +86,7 @@ With HKCU and the 32-bit view the same key gives a different answer, because the
 
 1. Select the type **Script**.
 2. Enter the PowerShell script in the box. The clause passes when the script writes any text to the output.
-3. Select **Test detection**. The test runs in the background with a time limit of 30 seconds, and the window stays usable.
+3. Select **Test Detection**. The test runs in the background with a time limit of 30 seconds, and the window stays usable.
 
 ![The Script type](../images/type-script.png)
 
@@ -98,16 +98,16 @@ With HKCU and the 32-bit view the same key gives a different answer, because the
 
 A clause with a missing required field does not run. The result shows **Invalid clause** and names the field.
 
-![The result for an empty Key path](../images/test-empty.png)
+![The result for an empty Key Path](../images/test-empty.png)
 
 ## Options and settings of this page
 
 | Control | Effect |
 |---|---|
-| **Detection type** | Chooses the clause type. |
-| **Import stage-manifest...** | Fills the clause from a file. See [Import a manifest](import-manifest.md). |
-| **Negative test (expect NOT detected)** | Reverses Pass and Fail. See [Negative test](negative-test.md). |
-| **Test detection** | Runs the clause. |
+| **Detection Type** | Chooses the clause type. |
+| **Import Stage Manifest...** | Fills the clause from a file. See [Import a manifest](import-manifest.md). |
+| **Negative Test (Expect NOT Detected)** | Reverses Pass and Fail. See [Negative test](negative-test.md). |
+| **Test Detection** | Runs the clause. |
 
 The operators of RegistryKeyValue are IsEquals, GreaterEquals, GreaterThan, LessEquals and LessThan. A comparison with a number or a version uses numbers or versions. IsEquals falls back to text equality when the value is not a number.
 
@@ -121,7 +121,7 @@ The operators of RegistryKeyValue are IsEquals, GreaterEquals, GreaterThan, Less
 
 | Message | Cause | Fix |
 |---|---|---|
-| Invalid clause: Key path is required. | **Key path** is empty. | Enter the key path. |
+| Invalid clause: Key path is required. | **Key Path** is empty. | Enter the key path. |
 | Value '<name>' not found in key | The value does not exist in that hive, view and key. | Check the hive, the view and the spelling. |
 
 ## Links

@@ -329,7 +329,7 @@ $script:DTRunTest = {
         # and poll via DispatcherTimer so the UI stays responsive.
         $ctx.btnTest.IsEnabled     = $false
         $ctx.txtResultBadge.Text   = 'Running...'
-        $ctx.txtResultDetails.Text = 'Script test in flight (30s timeout). UI stays responsive.'
+        $ctx.txtResultDetails.Text = 'The script test runs in the background with a time limit of 30 seconds.'
 
         $modulePath = Join-Path $PSScriptRoot 'Module\DetectionTesterCommon.psd1'
 
@@ -373,7 +373,7 @@ $script:DTRunTest = {
                 }
             } catch {
                 $localCtx.txtResultBadge.Text   = 'Error'
-                $localCtx.txtResultDetails.Text = "Async script test failed: $($_.Exception.Message)"
+                $localCtx.txtResultDetails.Text = 'The script test failed. See the log for details.'
                 Write-Log "Script async path error: $($_.Exception.Message)" -Level ERROR -Quiet
             } finally {
                 # Cleanup failures aren't actionable; log and continue so the
@@ -409,7 +409,7 @@ $script:DTImportManifest = {
     } catch {
         # Brand: no MessageBox::Show; surface errors in the result panel where the user is already looking.
         $ctx.txtResultBadge.Text   = 'Import failed'
-        $ctx.txtResultDetails.Text = "Failed to import '$($dlg.FileName)': $($_.Exception.Message)"
+        $ctx.txtResultDetails.Text = 'The manifest could not be imported. Select a stage-manifest.json file with a Detection block.'
         Write-Log "Import-DetectionManifest failed: $($_.Exception.Message)" -Level WARN -Quiet
         return
     }
@@ -595,7 +595,7 @@ $script:DTExportHistoryCsv = {
         Export-DetectionResultsCsv -DataTable $dt -OutputPath $dlg.FileName
     } catch {
         $script:DTContext.txtResultBadge.Text   = 'Export failed'
-        $script:DTContext.txtResultDetails.Text = "Failed to export to '$($dlg.FileName)': $($_.Exception.Message)"
+        $script:DTContext.txtResultDetails.Text = 'The history could not be saved. Select a folder that you can write to.'
         Write-Log "Export CSV failed: $($_.Exception.Message)" -Level WARN -Quiet
     }
 }
@@ -612,7 +612,7 @@ $script:DTExportHistoryHtml = {
         Export-DetectionResultsHtml -DataTable $dt -OutputPath $dlg.FileName
     } catch {
         $script:DTContext.txtResultBadge.Text   = 'Export failed'
-        $script:DTContext.txtResultDetails.Text = "Failed to export to '$($dlg.FileName)': $($_.Exception.Message)"
+        $script:DTContext.txtResultDetails.Text = 'The history could not be saved. Select a folder that you can write to.'
         Write-Log "Export HTML failed: $($_.Exception.Message)" -Level WARN -Quiet
     }
 }
@@ -827,57 +827,48 @@ $btnOptions        = $window.FindName('btnOptions')
 $toggleTheme       = $window.FindName('toggleTheme')
 $txtThemeLabel     = $window.FindName('txtThemeLabel')
 
-# label set from the script header above
 # ---------------------------------------------------------------------------
-# Theme runtime brushes (XAML literal SolidColorBrush values don't flip on
-# MahApps ChangeTheme - must be set per-theme at runtime).
-# See reference_srl_wpf_brand.md S6.
+# Theme: SuiteCommon owns the palette, the sidebar buttons, the title bar and the
+# dialogs. A theme changes colors only. Font size, weight, style and decoration
+# are the same in the dark and the light theme.
 # ---------------------------------------------------------------------------
 
-$script:DarkButtonBg      = [Windows.Media.BrushConverter]::new().ConvertFrom('#1E1E1E')
-$script:DarkButtonBorder  = [Windows.Media.BrushConverter]::new().ConvertFrom('#555555')
-$script:LightButtonBg     = [Windows.Media.BrushConverter]::new().ConvertFrom('#0078D4')
-$script:LightButtonBorder = [Windows.Media.BrushConverter]::new().ConvertFrom('#006CBE')
+$script:ActiveView = 'DetectionTester'
+$script:ViewButtons = @(
+    @{ Name = 'DetectionTester'; Button = $btnDetection }
+    @{ Name = 'InstalledApps';   Button = $btnInstalled }
+)
 
-$script:TitleBarBlue         = [Windows.Media.BrushConverter]::new().ConvertFrom('#0078D4')
-$script:TitleBarBlueInactive = [Windows.Media.BrushConverter]::new().ConvertFrom('#4BA3E0')
+# Contrast fix of the SuiteCommon palette: white title text is 2.6:1 on the light
+# inactive title bar #4BA3E0, and 7.0:1 on #595959. Window.Tests.ps1 reads this
+# table, so the test checks the same value.
+$script:SuiteBrushOverride = @{
+    TitleBarInactive = '#595959'
+}
+$__brushConverter = [System.Windows.Media.BrushConverter]::new()
+$__suiteBrushes = @{}
+foreach ($__key in $script:SuiteBrushOverride.Keys) { $__suiteBrushes[$__key] = $__brushConverter.ConvertFrom($script:SuiteBrushOverride[$__key]) }
 
-$script:SidebarButtons = @('btnDetection','btnInstalled','btnOptions') |
-    ForEach-Object { $window.FindName($_) } |
-    Where-Object { $_ }
+Initialize-SuiteTheme -Window $window `
+    -IsDarkGetter { [bool]$script:Prefs.DarkMode } `
+    -ActiveViewGetter { $script:ActiveView } `
+    -ViewButtons $script:ViewButtons `
+    -OptionsButton $btnOptions `
+    -LogLabel $lblLogOutput `
+    -Brushes $__suiteBrushes
 
 # ---------------------------------------------------------------------------
 # Handler-reachable scriptblocks (shell)
 # ---------------------------------------------------------------------------
-
-$script:ApplyButtonTheme = {
-    param([bool]$IsDark)
-    $bg     = if ($IsDark) { $script:DarkButtonBg }     else { $script:LightButtonBg }
-    $border = if ($IsDark) { $script:DarkButtonBorder } else { $script:LightButtonBorder }
-    foreach ($b in $script:SidebarButtons) {
-        $b.Background  = $bg
-        $b.BorderBrush = $border
-    }
-    if ($IsDark) {
-        $window.ClearValue([MahApps.Metro.Controls.MetroWindow]::WindowTitleBrushProperty)
-        $window.ClearValue([MahApps.Metro.Controls.MetroWindow]::NonActiveWindowTitleBrushProperty)
-    } else {
-        $window.WindowTitleBrush          = $script:TitleBarBlue
-        $window.NonActiveWindowTitleBrush = $script:TitleBarBlueInactive
-    }
-}
 
 $script:ApplyTheme = {
     param([bool]$IsDark)
     $themeName = if ($IsDark) { 'Dark.Steel' } else { 'Light.Blue' }
     [ControlzEx.Theming.ThemeManager]::Current.ChangeTheme($window, $themeName) | Out-Null
     $txtThemeLabel.Text = if ($IsDark) { 'Dark Theme' } else { 'Light Theme' }
-    if ($lblLogOutput) {
-        $hex = if ($IsDark) { '#B0B0B0' } else { '#595959' }
-        $lblLogOutput.Foreground = [Windows.Media.BrushConverter]::new().ConvertFrom($hex)
-    }
-    & $script:ApplyButtonTheme -IsDark $IsDark
     $script:Prefs.DarkMode = $IsDark
+    Update-SidebarButtonTheme -IsDark $IsDark -ActiveView $script:ActiveView
+    Update-TitleBarBrushes -Window $window -IsDark $IsDark
     Write-Log ("Theme applied: {0}" -f $themeName)
 }
 
@@ -908,6 +899,8 @@ $script:ShowModule = {
         }
     }
     $script:Prefs.ActiveModule = $Name
+    $script:ActiveView = $Name
+    Update-SidebarButtonTheme
 }
 
 $script:OnClosing = {
@@ -943,6 +936,97 @@ $script:ShowOptionsDialog = {
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Steel.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!-- Contrast overrides, the same as in MainWindow.xaml. -->
+            <SolidColorBrush x:Key="MahApps.Brushes.TextBox.Border" Color="#7F7F7F"/>
+            <SolidColorBrush x:Key="MahApps.Brushes.WindowTitle.NonActive" Color="#595959"/>
+            <!-- The one button template and the one button style, the same as in MainWindow.xaml. No color literal:
+                 the colors come from the MahApps theme resources. -->
+            <ControlTemplate x:Key="ThemedButtonTemplate" TargetType="Button">
+                <Border Name="Bd"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
+                    <ContentPresenter Name="Cp"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Margin="{TemplateBinding Padding}"
+                                      RecognizesAccessKey="True"
+                                      SnapsToDevicePixels="True"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
+                    </Trigger>
+                    <Trigger Property="IsKeyboardFocused" Value="True">
+                        <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
+                        <Setter TargetName="Cp" Property="TextElement.Foreground" Value="{DynamicResource MahApps.Brushes.ThemeBackground}"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+            <Style x:Key="ThemedButtonStyle" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Square}">
+                <Setter Property="Template" Value="{StaticResource ThemedButtonTemplate}"/>
+                <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="SquareInlineButtonStyle" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
+                <Setter Property="Height" Value="28"/>
+                <Setter Property="Padding" Value="10,0,10,0"/>
+                <Setter Property="Margin" Value="0,0,8,0"/>
+            </Style>
+            <!-- The one secondary dialog style: a gray fill, the theme text color and a visible border. Cancel uses it.
+                 The primary dialog style is DialogAccentButton. No other dialog button style sets a Background. -->
+            <Style x:Key="DialogButton" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
+                <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Gray10}"/>
+                <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
+                <Setter Property="MinWidth" Value="90"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Margin" Value="0,0,8,0"/>
+            </Style>
+            <!-- The accent fill is the theme highlight (#4A5763 dark, #00589F light): white text is 7:1 on both.
+                 The border is the theme foreground: the highlight alone is 2.1:1 on the dark dialog.
+                 The plain accent fill of the light theme is 4.49:1. -->
+            <Style x:Key="DialogAccentButton" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
+                <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Highlight}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
+                <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.IdealForeground}"/>
+                <Setter Property="MinWidth" Value="90"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Margin" Value="0,0,8,0"/>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.ThemeBackground}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <!-- The navigation list: the selected page shows white text (IdealForeground) on the theme highlight. -->
+            <Style x:Key="ThemedListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource MahApps.Styles.ListBoxItem}">
+                <Setter Property="Controls:ItemHelper.DisabledForegroundBrush" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Highlight}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.IdealForeground}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="OptLabel" TargetType="TextBlock">
+                <Setter Property="FontWeight" Value="Bold"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
@@ -958,7 +1042,8 @@ $script:ShowOptionsDialog = {
 
         <!-- Left nav -->
         <Border Grid.Column="0" Grid.Row="0" Background="{DynamicResource MahApps.Brushes.Gray10}">
-            <ListBox x:Name="lstNav" SelectedIndex="0" BorderThickness="0" Padding="0,8">
+            <ListBox x:Name="lstNav" SelectedIndex="0" BorderThickness="0" Padding="0,8"
+                     ItemContainerStyle="{StaticResource ThemedListBoxItemStyle}">
                 <ListBoxItem Content="About"   Padding="14,8" FontSize="13"/>
                 <ListBoxItem Content="Logging" Padding="14,8" FontSize="13"/>
             </ListBox>
@@ -970,11 +1055,11 @@ $script:ShowOptionsDialog = {
             <Grid>
                 <!-- About -->
                 <StackPanel x:Name="paneAbout" Visibility="Visible">
-                    <TextBlock Text="Detection Tester" FontSize="18" FontWeight="SemiBold"/>
+                    <TextBlock Text="Detection Tester" FontSize="18" FontWeight="Bold"/>
                     <TextBlock x:Name="txtAboutVersion" Text="v1.2.1" FontSize="11"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}" Margin="0,2,0,12"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
-                               Text="Tests Configuration Manager application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the machine the tool is running on, without deploying through Configuration Manager. Browses ARP entries (HKLM and HKCU) for fast clause authoring."/>
+                               Text="Tests Configuration Manager application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the machine the tool is running on, without deploying through Configuration Manager. Browses ARP entries (HKLM and HKCU) for clause authoring."/>
                     <Grid Margin="0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120"/>
@@ -986,40 +1071,40 @@ $script:ShowOptionsDialog = {
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Author:"   FontWeight="SemiBold" Margin="0,3"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Author:"   Style="{StaticResource OptLabel}" Margin="0,3"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Jason Ulbright"                  Margin="0,3"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="License:"  FontWeight="SemiBold" Margin="0,3"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="License:"  Style="{StaticResource OptLabel}" Margin="0,3"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="MIT"                             Margin="0,3"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Stack:"    FontWeight="SemiBold" Margin="0,3"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Stack:"    Style="{StaticResource OptLabel}" Margin="0,3"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="PowerShell 5.1 + WPF (MahApps)"  Margin="0,3"/>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Module:"   FontWeight="SemiBold" Margin="0,3"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Module:"   Style="{StaticResource OptLabel}" Margin="0,3"/>
                         <TextBlock Grid.Row="3" Grid.Column="1" x:Name="txtAboutModule"                Margin="0,3" FontFamily="Cascadia Code, Consolas, Courier New" FontSize="11"/>
                     </Grid>
                 </StackPanel>
 
                 <!-- Logging -->
                 <StackPanel x:Name="paneLogging" Visibility="Collapsed">
-                    <TextBlock Text="Logging" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <TextBlock Text="Logging" FontSize="18" FontWeight="Bold" Margin="0,0,0,4"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}"
                                Text="A new log file is created per session under %LOCALAPPDATA%\DetectionTester\logs. Old logs accumulate; clear them manually as needed."/>
-                    <TextBlock Text="Current session log:" FontWeight="SemiBold" Margin="0,4,0,2"/>
+                    <TextBlock Text="Current Session Log:" Style="{StaticResource OptLabel}" Margin="0,4,0,2"/>
                     <TextBox x:Name="txtLogPath" IsReadOnly="True"
                              FontFamily="Cascadia Code, Consolas, Courier New" FontSize="11"
                              Margin="0,0,0,8"/>
-                    <TextBlock Text="Log folder:" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                    <TextBlock Text="Log Folder:" Style="{StaticResource OptLabel}" Margin="0,8,0,2"/>
                     <TextBox x:Name="txtLogDir"  IsReadOnly="True"
                              FontFamily="Cascadia Code, Consolas, Courier New" FontSize="11"
                              Margin="0,0,0,8"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                        <Button x:Name="btnOpenLogFolder" Content="Open log folder"
-                                Style="{DynamicResource MahApps.Styles.Button.Square}"
-                                Controls:ControlsHelper.ContentCharacterCasing="Normal"
-                                Padding="10,4" MinWidth="120" Margin="0,0,8,0"/>
-                        <Button x:Name="btnOpenAppData"   Content="Open app data folder"
-                                Style="{DynamicResource MahApps.Styles.Button.Square}"
-                                Controls:ControlsHelper.ContentCharacterCasing="Normal"
-                                Padding="10,4" MinWidth="160"/>
+                        <Button x:Name="btnOpenLogFolder" Content="Open Log Folder"
+                                Style="{StaticResource SquareInlineButtonStyle}"
+                                MinWidth="120"
+                                ToolTip="Open the log folder in Explorer."/>
+                        <Button x:Name="btnOpenAppData"   Content="Open App Data Folder"
+                                Style="{StaticResource SquareInlineButtonStyle}"
+                                MinWidth="160"
+                                ToolTip="Open the app data folder in Explorer."/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
@@ -1029,8 +1114,8 @@ $script:ShowOptionsDialog = {
         <Border Grid.Row="1" Grid.ColumnSpan="3" Padding="16,12"
                 Background="{DynamicResource MahApps.Brushes.Gray10}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="btnOK"     Content="OK"     Style="{DynamicResource MahApps.Styles.Button.Square.Accent}" Controls:ControlsHelper.ContentCharacterCasing="Normal" IsDefault="True" MinWidth="90" Height="32" Margin="0,0,8,0"/>
-                <Button x:Name="btnCancel" Content="Cancel" Style="{DynamicResource MahApps.Styles.Button.Square}"        Controls:ControlsHelper.ContentCharacterCasing="Normal" IsCancel="True"  MinWidth="90" Height="32"/>
+                <Button x:Name="btnOK"     Content="OK"     Style="{StaticResource DialogAccentButton}" IsDefault="True"/>
+                <Button x:Name="btnCancel" Content="Cancel" Style="{StaticResource DialogButton}"        IsCancel="True"/>
             </StackPanel>
         </Border>
     </Grid>
@@ -1041,18 +1126,8 @@ $script:ShowOptionsDialog = {
     $dlg = [Windows.Markup.XamlReader]::Load($reader)
     Install-TitleBarDragFallback -Window $dlg
 
-    # Theme-propagate to dialog
-    $currentTheme = [ControlzEx.Theming.ThemeManager]::Current.DetectTheme($window)
-    if ($currentTheme) {
-        [ControlzEx.Theming.ThemeManager]::Current.ChangeTheme($dlg, $currentTheme) | Out-Null
-    }
-
-    # The theme default title bar of the light theme has too little contrast with the title text. The main
-    # window sets its own brushes in ApplyButtonTheme; the dialog gets the same ones.
-    if (-not $script:Prefs.DarkMode) {
-        $dlg.WindowTitleBrush          = $script:TitleBarBlue
-        $dlg.NonActiveWindowTitleBrush = $script:TitleBarBlueInactive
-    }
+    # The dialog takes the theme of the window. SuiteCommon sets the theme and the title bar brushes.
+    Set-DialogTheme -Dialog $dlg -IsDark ([bool]$script:Prefs.DarkMode)
 
     $dlg.Owner = $window
 
