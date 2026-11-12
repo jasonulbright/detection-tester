@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Compound detection.
 
 BeforeAll {
@@ -165,7 +165,7 @@ Describe 'Test-CompoundDetection results' {
         $res = Test-CompoundDetection -Connector Or -Clauses @($Bad, $script:Yes)
         $res.ClauseResults.Count | Should -Be 2
         $res.ClauseResults[0].Detected | Should -BeFalse
-        $res.ClauseResults[0].Details | Should -BeLike 'Error:*'
+        $res.ClauseResults[0].Details | Should -Be 'The clause could not be evaluated. See the log for details.'
         $res.ClauseResults[1].Detected | Should -BeTrue
         $res.Detected | Should -BeTrue
         (Test-CompoundDetection -Connector And -Clauses @($Bad, $script:Yes)).Detected | Should -BeFalse

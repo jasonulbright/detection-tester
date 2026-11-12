@@ -75,12 +75,20 @@ $script:HarnessBootstrap = {
         $global:txtStatus = $Window.FindName('txtStatus')
         $global:lblLogOutput = $Window.FindName('lblLogOutput')
         $global:txtThemeLabel = $Window.FindName('txtThemeLabel')
-        $global:SidebarButtons = @('btnDetection', 'btnInstalled', 'btnOptions' | ForEach-Object { $Window.FindName($_) } | Where-Object { $_ })
+        $global:Prefs = @{ DarkMode = $true; ActiveModule = 'DetectionTester' }
+        $global:ActiveView = 'DetectionTester'
+        # The theme context of the shell: the same call as in the start script, with the inactive title bar brush of MainWindow.xaml.
+        $global:ViewButtons = @(
+            @{ Name = 'DetectionTester'; Button = $Window.FindName('btnDetection') }
+            @{ Name = 'InstalledApps'; Button = $Window.FindName('btnInstalled') }
+        )
+        $global:TitleBarInactiveBrush = $Window.FindResource('MahApps.Brushes.WindowTitle.NonActive')
+        $suiteBrushes = @{ TitleBarInactive = $global:TitleBarInactiveBrush }
+        Initialize-SuiteTheme -Window $Window -IsDarkGetter { [bool]$global:Prefs.DarkMode } -ActiveViewGetter { $global:ActiveView } -ViewButtons $global:ViewButtons -OptionsButton $Window.FindName('btnOptions') -LogLabel $Window.FindName('lblLogOutput') -Brushes $suiteBrushes
         $global:reportsDir = [System.IO.Path]::GetDirectoryName($LogPath)
         $global:DTRoot = $null; $global:IARoot = $null; $global:DTContext = @{}; $global:IAContext = @{}
         $global:HistoryItems = New-Object 'System.Collections.ObjectModel.ObservableCollection[psobject]'
         $global:IAItems = New-Object 'System.Collections.ObjectModel.ObservableCollection[psobject]'
-        $global:Prefs = @{ DarkMode = $true; ActiveModule = 'DetectionTester' }
     }
 
     function Invoke-Click {
@@ -100,20 +108,6 @@ $script:HarnessBootstrap = {
         return $false
     }
 
-    # The title bar brushes of a window, as the shell sets them: the theme default in the dark theme, the
-    # shell's own blue in the light theme (the theme default has too little contrast with the title text).
-    function Set-AppTitleBar {
-        param($Window, [bool]$Dark, [hashtable]$Colors)
-        $conv = [Windows.Media.BrushConverter]::new()
-        if ($Dark) {
-            $Window.ClearValue([MahApps.Metro.Controls.MetroWindow]::WindowTitleBrushProperty)
-            $Window.ClearValue([MahApps.Metro.Controls.MetroWindow]::NonActiveWindowTitleBrushProperty)
-        }
-        else {
-            $Window.WindowTitleBrush = $conv.ConvertFrom($Colors.TitleBarBlue)
-            $Window.NonActiveWindowTitleBrush = $conv.ConvertFrom($Colors.TitleBarBlueInactive)
-        }
-    }
     # Loads the XAML of one module into the content host, as the shell does, and fills it with sample data so
     # that the grids, the result texts and the detail panel are laid out with real text.
     function Show-AppView {
@@ -242,7 +236,8 @@ $script:MeasureAppScript = {
             $dw = if ($full) { 640 } else { 560 }
             $dh = if ($full) { 440 } else { 380 }
             $d = Open-TestWindow -XamlText $Arguments.DialogXaml -Dark $Arguments.Dark -Width $dw -Height $dh
-            Set-AppTitleBar -Window $d -Dark $Arguments.Dark -Colors $Arguments.Colors
+            $d.Resources['MahApps.Brushes.WindowTitle.NonActive'] = $global:TitleBarInactiveBrush
+            Set-DialogTheme -Dialog $d -IsDark $Arguments.Dark
             $d.FindName('txtAboutVersion').Text = 'v2026.11.06.0013'
             $d.FindName('txtAboutModule').Text = 'DetectionTesterCommon 2026.11.06.0013'
             $d.FindName('txtLogPath').Text = 'C:\Users\someone\AppData\Local\DetectionTester\logs\DetectionTester-20261106-101500.log'

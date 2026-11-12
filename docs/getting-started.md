@@ -38,10 +38,10 @@ The sidebar shows the version under the title, two pages (**Detection Tester** a
 
 ### Run the first test
 
-1. In **Key path**, enter `SOFTWARE\Microsoft\Windows NT\CurrentVersion`.
-2. In **Value name**, enter `CurrentBuildNumber`.
+1. In **Key Path**, enter `SOFTWARE\Microsoft\Windows NT\CurrentVersion`.
+2. In **Value Name**, enter `CurrentBuildNumber`.
 3. In **Expected**, enter the build number of this computer, for example `26200`.
-4. Select **Test detection**.
+4. Select **Test Detection**.
 
 ![The result of a passed test with the history row](images/registry-value-pass.png)
 

@@ -28,9 +28,9 @@ None.
 ### Tab order of the Detection Tester page
 
 1. The sidebar: **Detection Tester**, **Installed Applications**, **Options**.
-2. **Detection type**, **Import stage-manifest...**, **Negative test**.
-3. For RegistryKeyValue: **HKLM**, **HKCU**, **64-bit**, **32-bit (WOW6432Node)**, **Key path**, **Value name**, **Operator**, **Expected**.
-4. **Test detection**, then **Export CSV**, **Export HTML**, **Clear**.
+2. **Detection Type**, **Import Stage Manifest...**, **Negative Test (Expect NOT Detected)**.
+3. For RegistryKeyValue: **HKLM**, **HKCU**, **64-bit**, **32-bit (WOW6432Node)**, **Key Path**, **Value Name**, **Operator**, **Expected**.
+4. **Test Detection**, then **Export CSV**, **Export HTML**, **Clear**.
 5. The history grid, the log box and the theme toggle.
 
 ## Limits

@@ -158,7 +158,7 @@ function Get-ShellLoaderName {
 }
 
 # The parts of the start script that the handler tests run inside a real window (Window.Tests.ps1): the
-# handler functions and script blocks, and the theme colour assignments. Plain text, so that it can cross to
+# handler functions and script blocks. Plain text, so that it can cross to
 # the STA runspace.
 function Get-ShellRuntimePart {
     param([string[]]$FunctionName = @('Get-DTComboValue', 'Import-DTXaml', 'ConvertTo-DTHistoryDataTable', 'Format-DTAppDetails'))
@@ -173,14 +173,11 @@ function Get-ShellRuntimePart {
     $blocks = @{}
     foreach ($name in 'DTOnTypeChanged', 'DTGatherClause', 'DTValidateClause', 'DTPostTestResult', 'DTRunTest', 'DTRepopulateFromHistory', 'DTExportHistoryCsv', 'DTExportHistoryHtml',
         'DTClearHistory', 'IARefresh', 'IAApplyFilter', 'IAOnAppSelected', 'IAUseForDetection', 'IACopyDetails', 'LoadDetectionTester', 'LoadInstalledApps', 'ShowModule',
-        'ApplyButtonTheme', 'ApplyTheme') {
+        'ApplyTheme') {
         $blocks[$name] = Get-ShellBlockText -Name $name
     }
-    $assignments = @($ast.FindAll({
-                param($n)
-                $n -is [System.Management.Automation.Language.AssignmentStatementAst] -and $n.Left -is [System.Management.Automation.Language.VariableExpressionAst] -and
-                $n.Left.VariablePath.UserPath -in 'script:DarkButtonBg', 'script:DarkButtonBorder', 'script:LightButtonBg', 'script:LightButtonBorder', 'script:TitleBarBlue', 'script:TitleBarBlueInactive'
-            }, $true) | ForEach-Object { $_.Extent.Text })
+    # The shell has no palette table to copy: the inactive title bar brush comes from MainWindow.xaml.
+    $assignments = @()
     return @{ Functions = $functions; Blocks = $blocks; Assignments = $assignments }
 }
 

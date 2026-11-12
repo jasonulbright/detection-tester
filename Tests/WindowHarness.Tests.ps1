@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Invoke-WpfSta ends a script block that does not finish. These tests create an STA runspace and open no window.
 
 BeforeDiscovery {

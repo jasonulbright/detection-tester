@@ -4,7 +4,7 @@ The history grid lists every test of the session.
 
 ## What it does
 
-Each test that gives a result adds one row at the top: the time, the type, the mode, the target, the expected value, the found value and the result. A script test that ends with an error shows **Error** on the result panel and adds no row. **Use selected** puts a row back in the form. **Export CSV** and **Export HTML** save the rows. **Clear** removes them.
+Each test that gives a result adds one row at the top: the time, the type, the mode, the target, the expected value, the found value and the result. A script test that ends with an error shows **Error** on the result panel and adds no row. **Use Selected** puts a row back in the form. **Export CSV** and **Export HTML** save the rows. **Clear** removes them.
 
 ## When to use it
 
@@ -25,11 +25,11 @@ At least one test.
 
 ### Repeat a test
 
-1. Select a row. The button **Use selected** shows.
-2. Select **Use selected**. The page sets the type, the fields and the negative check box from the row.
-3. Select **Test detection**.
+1. Select a row. The button **Use Selected** shows.
+2. Select **Use Selected**. The page sets the type, the fields and the negative check box from the row.
+3. Select **Test Detection**.
 
-![The form after Use selected on a Compound row](../images/use-selected.png)
+![The form after Use Selected on a Compound row](../images/use-selected.png)
 
 ### Export the history
 
@@ -46,7 +46,7 @@ Select **Clear**. The grid is empty. Nothing asks for a confirmation.
 
 | Button | Effect |
 |---|---|
-| **Use selected** | Fills the form from the selected row. |
+| **Use Selected** | Fills the form from the selected row. |
 | **Export CSV** | Saves the rows as a CSV file. |
 | **Export HTML** | Saves the rows as a self-contained HTML page. |
 | **Clear** | Removes every row. |
@@ -62,7 +62,7 @@ Select **Clear**. The grid is empty. Nothing asks for a confirmation.
 | Message or symptom | Cause | Fix |
 |---|---|---|
 | **Export CSV** does nothing. | The history is empty. | Run a test first. |
-| **Use selected** is missing. | No row is selected. | Select a row. |
+| **Use Selected** is missing. | No row is selected. | Select a row. |
 
 ## Links
 

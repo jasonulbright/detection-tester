@@ -1,4 +1,4 @@
-#Requires -Modules Pester
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '5.1.0' }
 # Window tests. The main window, both module views and the Options dialog (built from XAML text in the
 # script) are opened off screen on an STA thread, in both themes and at 1024x720 and 1440x900, and
 # measured. The app-specific names live in WindowConfig.ps1.
@@ -48,14 +48,6 @@ BeforeAll {
                 $n -is [System.Management.Automation.Language.StringConstantExpressionAst] -and $n.Value -match '^\s*<Controls:MetroWindow'
             }, $true) | ForEach-Object { $_.Value })
 
-    # The colour literals that the shell sets at start-up and on a theme change.
-    $script:ShellColors = @{}
-    foreach ($k in 'DarkButtonBg', 'DarkButtonBorder', 'LightButtonBg', 'LightButtonBorder', 'TitleBarBlue', 'TitleBarBlueInactive') {
-        $m = [regex]::Match($script:ShellText, ('\$script:{0}\s*=\s*\[Windows\.Media\.BrushConverter\]::new\(\)\.ConvertFrom\(''(#[0-9A-Fa-f]{{6}})''\)' -f $k))
-        if ($m.Success) { $script:ShellColors[$k] = $m.Groups[1].Value }
-    }
-    $log = [regex]::Match($script:ShellText, '\$hex\s*=\s*if\s*\(\$IsDark\)\s*\{\s*''(#[0-9A-Fa-f]{6})''\s*\}\s*else\s*\{\s*''(#[0-9A-Fa-f]{6})''\s*\}')
-    if ($log.Success) { $script:ShellColors.LogDark = $log.Groups[1].Value; $script:ShellColors.LogLight = $log.Groups[2].Value }
 
     $script:ShellParts = Get-ShellRuntimePart
     $script:Measured = @{}
@@ -64,7 +56,6 @@ BeforeAll {
             @{ Dark = $false; W = 1024; H = 720 }, @{ Dark = $false; W = 1440; H = 900 })) {
         $key = '{0}|{1}x{2}' -f $(if ($case.Dark) { 'dark' } else { 'light' }), $case.W, $case.H
         $case.Config = $script:AppConfig
-        $case.Colors = $script:ShellColors
         $case.Parts = $script:ShellParts
         $case.TempDir = $TestDrive
         $case.DialogXaml = $script:DialogXaml[0]
@@ -114,13 +105,13 @@ Describe 'Main window XAML' -Skip:(-not $script:WindowGuard.Allowed) {
         }
     }
 
-    It 'finds the theme colours in the shell' {
-        foreach ($k in 'DarkButtonBg', 'DarkButtonBorder', 'LightButtonBg', 'LightButtonBorder', 'TitleBarBlue', 'TitleBarBlueInactive', 'LogDark', 'LogLight') {
-            $script:ShellColors[$k] | Should -Match '^#[0-9A-Fa-f]{6}$' -Because "the shell has a colour for $k"
-        }
+    It 'takes the inactive title bar brush from MainWindow.xaml in the shell and in the Options dialog' {
+        $script:ShellText | Should -Match 'FindResource\(''MahApps\.Brushes\.WindowTitle\.NonActive''\)'
+        $script:ShellText | Should -Match 'Resources\[''MahApps\.Brushes\.WindowTitle\.NonActive''\]\s*=\s*\$script:TitleBarInactiveBrush'
+        ([regex]::Matches($script:ShellText, 'x:Key="MahApps\.Brushes\.WindowTitle\.NonActive"')).Count | Should -Be 0 -Because 'the value is defined once, in MainWindow.xaml'
+        (Get-Content -LiteralPath $script:XamlPath -Raw) | Should -Match 'x:Key="MahApps\.Brushes\.WindowTitle\.NonActive"'
     }
 }
-
 Describe 'Module XAML' -Skip:(-not $script:WindowGuard.Allowed) {
     It 'has the control <Name> that the <Module> loader looks up' -ForEach $script:ModuleNameCases {
         $xaml = Get-Content -LiteralPath (Join-Path $script:Root $script:AppConfig.Modules[$Module].Xaml) -Raw
@@ -216,14 +207,12 @@ Describe 'Dialog windows' -Skip:(-not $script:WindowGuard.Allowed) {
         ($titles | Select-Object -Unique).Count | Should -Be $titles.Count
     }
 
-    # The theme default title bar of the light theme has 3.3:1 against the title text. The main window sets its own
-    # brushes; the dialog must set the same ones, and the harness applies them to the dialog it measures.
-    It 'gives the Options dialog the title bar brushes of the main window in the light theme' {
+    # The theme default title bar of the light theme has too little contrast with the title text. SuiteCommon sets the
+    # title bar brushes of a dialog in Set-DialogTheme, with the same palette as the main window.
+    It 'gives the Options dialog the theme and the title bar brushes of the main window through SuiteCommon' {
         $text = Get-ShellBlockText -Name 'ShowOptionsDialog'
-        $text | Should -Match '\$dlg\.WindowTitleBrush\s*=\s*\$script:TitleBarBlue\b'
-        $text | Should -Match '\$dlg\.NonActiveWindowTitleBrush\s*=\s*\$script:TitleBarBlueInactive\b'
+        $text | Should -Match 'Set-DialogTheme\s+-Dialog\s+\$dlg\b'
     }
-
     It 'shows the dialog title "Options" on the title bar' {
         $r = Invoke-WpfSta -Arguments @{ Xaml = $script:DialogXaml[0] } -Script {
             $d = Open-TestWindow -XamlText $Arguments.Xaml -Width 640 -Height 440
@@ -270,6 +259,66 @@ Describe 'Contrast <Theme>' -ForEach @(@{ Theme = 'dark' }, @{ Theme = 'light' }
     }
 }
 
+# The states that the enabled and disabled measurement does not reach: a selected row, cell, list item and combo item, and the
+# colour pairs that the hover, pressed, highlight and disabled states of the button template and the item styles use. A state that
+# is set by a trigger cannot be forced on a real control (IsPressed and IsHighlighted are read-only), so the pairs are read from the
+# resources that the triggers name. The selected states are measured on real controls with the item selected.
+Describe 'State contrast <Theme>' -ForEach @(@{ Theme = 'dark'; Dark = $true }, @{ Theme = 'light'; Dark = $false }) -Skip:(-not $script:WindowGuard.Allowed) {
+    It 'keeps white text on the selected colour and the hover, pressed and disabled pairs at the contrast limit' {
+        $r = Invoke-WpfSta -Arguments @{ Dark = $Dark; Config = $script:AppConfig; Parts = $script:ShellParts; TempDir = $TestDrive } -Script {
+            $rows = New-Object System.Collections.ArrayList
+            try {
+            $cfg = $Arguments.Config
+            $w = Open-TestWindow -XamlPath (Join-Path $Root $cfg.Xaml) -Dark $Arguments.Dark
+            Initialize-ShellRuntime -Window $w -Parts $Arguments.Parts -LogPath (Join-Path $Arguments.TempDir 'state.log')
+            & $global:ApplyTheme -IsDark $Arguments.Dark
+            $addPair = {
+                param($Name, $FgKey, $BgKey, $Min)
+                try {
+                    $f = $w.FindResource($FgKey); $b = $w.FindResource($BgKey)
+                    [void]$rows.Add([PSCustomObject]@{ Name = $Name; Ratio = (Get-ContrastRatio $f.Color $b.Color); Min = $Min })
+                }
+                catch { [void]$rows.Add([PSCustomObject]@{ Name = ('{0} threw {1}' -f $Name, $_.Exception.Message); Ratio = 0; Min = $Min }) }
+            }
+            & $addPair 'selected and highlighted text: IdealForeground on Highlight' 'MahApps.Brushes.IdealForeground' 'MahApps.Brushes.Highlight' 4.5
+            & $addPair 'pressed button text: ThemeBackground on ThemeForeground' 'MahApps.Brushes.ThemeBackground' 'MahApps.Brushes.ThemeForeground' 4.5
+            & $addPair 'hover border: ThemeForeground on ThemeBackground' 'MahApps.Brushes.ThemeForeground' 'MahApps.Brushes.ThemeBackground' 3.0
+            & $addPair 'disabled text: Gray.MouseOver on ThemeBackground' 'MahApps.Brushes.Gray.MouseOver' 'MahApps.Brushes.ThemeBackground' 4.5
+            $addElement = {
+                param($Name, $Element)
+                $fg = $null; $bg = $null
+                try { if ($Element) { $fg = Get-SolidColor $Element.Foreground; $bg = Get-SolidColor $Element.Background } } catch { $Name = ('{0} threw {1}' -f $Name, $_.Exception.Message) }
+                $ratio = 0
+                if ($fg -and $bg) { try { $ratio = Get-ContrastRatio $fg.Color $bg.Color } catch { $Name = ('{0} threw {1}' -f $Name, $_.Exception.Message) } }
+                [void]$rows.Add([PSCustomObject]@{ Name = $Name; Ratio = $ratio; Min = 4.5 })
+            }
+            $compound = @($cfg.Views | Where-Object { $_.Panel -eq 'panelCompound' })[0]
+            Show-AppView -Window $w -Config $cfg -View $compound
+            $m = $w.FindName($cfg.ContentHost).Content
+            try { $list = $m.FindName('compoundClauses'); $list.SelectedIndex = 0; Wait-Layout $w
+            & $addElement 'selected ListBoxItem' $list.ItemContainerGenerator.ContainerFromIndex(0) } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('list step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $grid = $m.FindName('dgHistory'); $grid.SelectedIndex = 0; Wait-Layout $w
+            $row = $grid.ItemContainerGenerator.ContainerFromIndex(0)
+            & $addElement 'selected HistoryGridRow' $row
+            $cell = @(Get-VisualDescendants $row | Where-Object { $_ -is [System.Windows.Controls.DataGridCell] })[0]
+            & $addElement 'selected GridCellStyle cell' $cell } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('grid step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $combo = $m.FindName('cboType'); $combo.SelectedIndex = 1; $combo.IsDropDownOpen = $true; Wait-Layout $w
+            & $addElement 'selected ComboBoxItem' $combo.ItemContainerGenerator.ContainerFromIndex(1)
+            $combo.IsDropDownOpen = $false } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('combo step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $apps = @($cfg.Views | Where-Object { $_.Module -eq 'InstalledApps' })[0]
+            Show-AppView -Window $w -Config $cfg -View $apps
+            $appGrid = $w.FindName($cfg.ContentHost).Content.FindName('dgApps'); $appGrid.SelectedIndex = 0; Wait-Layout $w
+            & $addElement 'selected row of the installed applications grid' $appGrid.ItemContainerGenerator.ContainerFromIndex(0) } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('apps step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            }
+            catch { [void]$rows.Add([PSCustomObject]@{ Name = ('script threw at line {0}: {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
+            try { $w.Close() } catch { $null = $_ }
+            , @($rows.ToArray())
+        }
+        @($r).Count | Should -BeGreaterOrEqual 9
+        $bad = @($r | Where-Object { $_.Ratio -lt $_.Min } | ForEach-Object { '{0} = {1:N2} (needs {2})' -f $_.Name, $_.Ratio, $_.Min })
+        $bad | Should -BeNullOrEmpty
+    }
+}
 # The handlers of the start script run here on the real controls of a real window. The shell's own script blocks
 # (loaders, click handlers, theme code) are cut out of the script and defined in the same STA runspace, and the tests
 # click the buttons and read the result back. Only the dialogs of the operating system are left out, because they
@@ -533,31 +582,74 @@ Describe 'Handlers on the real controls' -Skip:(-not $script:WindowGuard.Allowed
             $r[1].Subtitle | Should -Not -BeNullOrEmpty
         }
 
-        It 'applies the <Name> theme with the theme name, the label, the log colour and the sidebar colours' -ForEach @(
-            @{ Name = 'light'; Dark = $false; Theme = 'Light.Blue'; Label = 'Light Theme'; Log = '#FF595959'; Button = '#FF0078D4'; Border = '#FF006CBE'; Title = '#FF0078D4' }
-            @{ Name = 'dark'; Dark = $true; Theme = 'Dark.Steel'; Label = 'Dark Theme'; Log = '#FFB0B0B0'; Button = '#FF1E1E1E'; Border = '#FF555555'; Title = $null }
+        It 'applies the <Name> theme with the theme name, the label, the log colour, the sidebar colours and the text colours' -ForEach @(
+            @{ Name = 'light'; Dark = $false; Theme = 'Light.Blue'; Label = 'Light Theme'; Log = '#FF595959'; ActiveButton = '#FF005A9E'; IdleButton = '#FF0078D4'; Border = '#FF006CBE'; Title = '#FF0078D4'; TitleInactive = '#FF595959'; Text = '#FFFFFFFF' }
+            @{ Name = 'dark'; Dark = $true; Theme = 'Dark.Steel'; Label = 'Dark Theme'; Log = '#FFB0B0B0'; ActiveButton = '#FF3A3A3A'; IdleButton = '#FF1E1E1E'; Border = '#FF8C8C8C'; Title = $null; TitleInactive = $null; Text = $null }
         ) {
             $r = Invoke-WpfSta -Arguments @{ Dark = $Dark } -Script {
+                $global:Prefs.DarkMode = $Arguments.Dark
                 & $global:ApplyTheme -IsDark $Arguments.Dark
                 Wait-Layout $global:HW
+                $active = $global:HW.FindName('btnDetection'); $idle = $global:HW.FindName('btnInstalled'); $opt = $global:HW.FindName('btnOptions')
                 [PSCustomObject]@{
                     Theme = [ControlzEx.Theming.ThemeManager]::Current.DetectTheme($global:HW).Name
                     Label = $global:txtThemeLabel.Text
                     Log = $global:lblLogOutput.Foreground.Color.ToString()
-                    Button = $global:HW.FindName('btnDetection').Background.Color.ToString()
-                    Border = $global:HW.FindName('btnOptions').BorderBrush.Color.ToString()
+                    ActiveButton = $active.Background.Color.ToString()
+                    IdleButton = $idle.Background.Color.ToString()
+                    Border = $opt.BorderBrush.Color.ToString()
+                    ActiveText = $(if ($active.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -is [System.Windows.Media.SolidColorBrush]) { $active.Foreground.Color.ToString() })
+                    OptionsText = $(if ($opt.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -is [System.Windows.Media.SolidColorBrush]) { $opt.Foreground.Color.ToString() })
                     TitleLocal = $global:HW.ReadLocalValue([MahApps.Metro.Controls.MetroWindow]::WindowTitleBrushProperty) -is [System.Windows.Media.SolidColorBrush]
                     Title = $(if ($global:HW.WindowTitleBrush -is [System.Windows.Media.SolidColorBrush]) { $global:HW.WindowTitleBrush.Color.ToString() })
+                    TitleInactive = $(if ($global:HW.NonActiveWindowTitleBrush -is [System.Windows.Media.SolidColorBrush] -and $global:HW.ReadLocalValue([MahApps.Metro.Controls.MetroWindow]::NonActiveWindowTitleBrushProperty) -is [System.Windows.Media.SolidColorBrush]) { $global:HW.NonActiveWindowTitleBrush.Color.ToString() })
                     Pref = $global:Prefs.DarkMode
                 }
             }
             $r.Theme | Should -Be $Theme
             $r.Label | Should -Be $Label
             $r.Log | Should -Be $Log
-            $r.Button | Should -Be $Button
+            $r.ActiveButton | Should -Be $ActiveButton
+            $r.IdleButton | Should -Be $IdleButton
             $r.Border | Should -Be $Border
             $r.Pref | Should -Be $Dark
-            if ($Dark) { $r.TitleLocal | Should -BeFalse } else { $r.Title | Should -Be $Title }
+            # The light theme paints the sidebar buttons blue: they show white text. The dark theme sets no local text color.
+            $r.ActiveText | Should -Be $Text
+            $r.OptionsText | Should -Be $Text
+            if ($Dark) { $r.TitleLocal | Should -BeFalse } else { $r.Title | Should -Be $Title; $r.TitleInactive | Should -Be $TitleInactive }
+        }
+
+        It 'Set-ThemeForeground paints a real button white in the light theme and clears its own value in the dark theme' {
+            $r = Invoke-WpfSta -Script {
+                $b = New-Object System.Windows.Controls.Button
+                $white = [Windows.Media.BrushConverter]::new().ConvertFrom('#FFFFFF')
+                # Set-ThemeForeground is internal to SuiteCommon: call it in the module scope.
+                $module = Get-Module SuiteCommon
+                & $module { param($c, $w) Set-ThemeForeground -Control $c -IsDark $false -OnBlue $w } $b $white
+                $lightLocal = ($b.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -is [System.Windows.Media.SolidColorBrush])
+                $lightColor = $b.Foreground.Color.ToString()
+                & $module { param($c, $w) Set-ThemeForeground -Control $c -IsDark $true -OnBlue $w } $b $white
+                [PSCustomObject]@{ LightLocal = $lightLocal; LightColor = $lightColor; DarkCleared = ($b.ReadLocalValue([System.Windows.Controls.Control]::ForegroundProperty) -eq [System.Windows.DependencyProperty]::UnsetValue) }
+            }
+            $r.LightLocal | Should -BeTrue
+            $r.LightColor | Should -Be '#FFFFFFFF'
+            $r.DarkCleared | Should -BeTrue
+        }
+        It 'marks the module that is shown as the active view in the sidebar' {
+            $r = Invoke-WpfSta -Script {
+                $global:Prefs.DarkMode = $true
+                & $global:ApplyTheme -IsDark $true
+                & $global:ShowModule 'InstalledApps'
+                Wait-Layout $global:HW
+                $installed = $global:HW.FindName('btnInstalled').Background.Color.ToString()
+                $detection = $global:HW.FindName('btnDetection').Background.Color.ToString()
+                & $global:ShowModule 'DetectionTester'
+                Wait-Layout $global:HW
+                [PSCustomObject]@{ Installed = $installed; Detection = $detection; After = $global:HW.FindName('btnDetection').Background.Color.ToString() }
+            }
+            $r.Installed | Should -Be '#FF3A3A3A'
+            $r.Detection | Should -Be '#FF1E1E1E'
+            $r.After | Should -Be '#FF3A3A3A'
         }
     }
 }

@@ -38,7 +38,7 @@ $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $failed = $false
 
-Import-Module Pester -MinimumVersion 5.0 -MaximumVersion 5.99.99 -ErrorAction Stop
+Import-Module Pester -MinimumVersion 5.1.0 -MaximumVersion 5.99.99 -ErrorAction Stop
 
 # ---- 1. Lint ---------------------------------------------------------------
 if (-not $SkipLint) {
@@ -71,8 +71,9 @@ if (-not $guard.Allowed) { Write-Host 'Window tests skipped: SUITE_ALLOW_WINDOW_
 
 # ---- 2. Tests and coverage -------------------------------------------------
 $cfg = New-PesterConfiguration
+# The filter works on the path relative to the repository root. A worktree of this repository lives below .claude, so a filter on the full path would exclude every test.
 $testFiles = @(Get-ChildItem -LiteralPath $root -Recurse -Filter '*.Tests.ps1' -File |
-        Where-Object { $_.FullName -notlike '*\.git\*' })
+        Where-Object { $_.FullName.Substring($root.TrimEnd('\').Length + 1) -notmatch '^(\.claude|\.git)(\\|/|$)' })
 if ($testFiles.Count -eq 0) { Write-Host 'No test file found.'; exit 1 }
 if ($SkipWindow) { $testFiles = @($testFiles | Where-Object { $_.Name -notin 'Window.Tests.ps1', 'WindowHarness.Tests.ps1' }) }
 $cfg.Run.Path = $testFiles.FullName
