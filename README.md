@@ -13,6 +13,8 @@ Configuration Manager application packagers define detection methods (registry k
 
 ![Detection Method Tester](docs/images/start-first-run.png)
 
+The footer shows the status text of the tool. The tool tests detection methods on the local computer and has no Configuration Manager connection, so the footer shows no site code and no site server.
+
 ## User guide
 
 The user guide is in [docs/index.md](docs/index.md). It has one page for each part of the window, a settings page, reference pages and troubleshooting. Every image in it is a capture of the running window.
