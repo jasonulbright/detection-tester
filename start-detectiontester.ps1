@@ -1022,6 +1022,9 @@ $script:ShowOptionsDialog = {
             <Style x:Key="OptLabel" TargetType="TextBlock">
                 <Setter Property="FontWeight" Value="Bold"/>
             </Style>
+            <Style x:Key="KeyLabelStyle" TargetType="TextBlock">
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
@@ -1050,7 +1053,7 @@ $script:ShowOptionsDialog = {
             <Grid>
                 <!-- About -->
                 <StackPanel x:Name="paneAbout" Visibility="Visible">
-                    <TextBlock Text="Detection Tester" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="Detection Tester" FontSize="18" FontWeight="SemiBold"/>
                     <TextBlock x:Name="txtAboutVersion" Text="v1.2.1" FontSize="11"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}" Margin="0,2,0,12"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
@@ -1066,20 +1069,20 @@ $script:ShowOptionsDialog = {
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Author:"   Style="{StaticResource OptLabel}" Margin="0,3"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Author:"   Style="{StaticResource KeyLabelStyle}" Margin="0,3"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Jason Ulbright"                  Margin="0,3"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="License:"  Style="{StaticResource OptLabel}" Margin="0,3"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="License:"  Style="{StaticResource KeyLabelStyle}" Margin="0,3"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="MIT"                             Margin="0,3"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Stack:"    Style="{StaticResource OptLabel}" Margin="0,3"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Stack:"    Style="{StaticResource KeyLabelStyle}" Margin="0,3"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="PowerShell 5.1 + WPF (MahApps)"  Margin="0,3"/>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Module:"   Style="{StaticResource OptLabel}" Margin="0,3"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Module:"   Style="{StaticResource KeyLabelStyle}" Margin="0,3"/>
                         <TextBlock Grid.Row="3" Grid.Column="1" x:Name="txtAboutModule"                Margin="0,3" FontFamily="Cascadia Code, Consolas, Courier New" FontSize="11"/>
                     </Grid>
                 </StackPanel>
 
                 <!-- Logging -->
                 <StackPanel x:Name="paneLogging" Visibility="Collapsed">
-                    <TextBlock Text="Logging" FontSize="18" FontWeight="Bold" Margin="0,0,0,4"/>
+                    <TextBlock Text="Logging" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}"
                                Text="A new log file is created per session under %LOCALAPPDATA%\DetectionTester\logs. Old logs accumulate; clear them manually as needed."/>

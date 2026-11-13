@@ -237,7 +237,7 @@
                        Margin="14,0,0,0"
                        VerticalAlignment="Center"
                        FontSize="13"
-                       FontWeight="Bold"
+                       FontWeight="SemiBold"
                        Text=""/>
         </DockPanel>
     </Border>
@@ -256,7 +256,7 @@
         <DockPanel>
             <Border DockPanel.Dock="Top" Background="{DynamicResource MahApps.Brushes.Gray10}" Padding="8,6">
                 <DockPanel>
-                    <TextBlock Text="History" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="History" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="btnRepopulate"   Content="Use Selected"   Style="{DynamicResource SquareInlineButtonStyle}" Visibility="Collapsed" ToolTip="Fill the clause from the selected history row."/>
                         <Button x:Name="btnExportCsv"    Content="Export CSV"    Style="{DynamicResource SquareInlineButtonStyle}" ToolTip="Save the history rows as a CSV file."/>

@@ -1056,7 +1056,7 @@ Describe 'Start script source' {
         $shell = Get-Content -LiteralPath (Join-Path $script:AppRoot 'start-detectiontester.ps1') -TotalCount 80
         $shellVersion = ($shell | Where-Object { $_ -match '^\s*Version\s*:\s*([0-9][0-9\.]*[0-9])\s*$' } | Select-Object -First 1) -replace '^\s*Version\s*:\s*', ''
         $psd1 = Import-PowerShellDataFile -LiteralPath (Join-Path $script:AppRoot 'Module\DetectionTesterCommon.psd1')
-        $changelog = Get-Content -LiteralPath (Join-Path $script:AppRoot 'CHANGELOG.md') | Where-Object { $_ -match '^## \[' } | Select-Object -First 1
+        $changelog = Get-Content -LiteralPath (Join-Path $script:AppRoot 'CHANGELOG.md') | Where-Object { $_ -match '^## \[' -and $_ -notmatch '^## \[Unreleased\]' } | Select-Object -First 1
         $shellVersion | Should -Not -BeNullOrEmpty
         $psd1.ModuleVersion | Should -Be $shellVersion
         $changelog.StartsWith("## [$shellVersion] - ") | Should -BeTrue -Because 'the top heading of the changelog names the version'
