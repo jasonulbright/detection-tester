@@ -57,12 +57,12 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="lblRkvHive" Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <RadioButton x:Name="rkvHiveHKLM" Content="HKLM" IsChecked="True" GroupName="rkvHive" Margin="0,0,12,0"/>
                         <RadioButton x:Name="rkvHiveHKCU" Content="HKCU"                  GroupName="rkvHive"/>
                     </StackPanel>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="lblRkvView" Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="4" Orientation="Horizontal">
                         <RadioButton x:Name="rkvView64" Content="64-bit" IsChecked="True" GroupName="rkvView" Margin="0,0,12,0"/>
                         <RadioButton x:Name="rkvView32" Content="32-bit (WOW6432Node)"     GroupName="rkvView"/>
@@ -107,12 +107,12 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="lblRkHive" Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <RadioButton x:Name="rkHiveHKLM" Content="HKLM" IsChecked="True" GroupName="rkHive" Margin="0,0,12,0"/>
                         <RadioButton x:Name="rkHiveHKCU" Content="HKCU"                  GroupName="rkHive"/>
                     </StackPanel>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="lblRkView" Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="4" Orientation="Horizontal">
                         <RadioButton x:Name="rkView64" Content="64-bit" IsChecked="True" GroupName="rkView" Margin="0,0,12,0"/>
                         <RadioButton x:Name="rkView32" Content="32-bit (WOW6432Node)"     GroupName="rkView"/>
@@ -135,7 +135,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="lblFileView" Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <RadioButton x:Name="fileView64" Content="64-bit"        IsChecked="True" GroupName="fileView" Margin="0,0,12,0"
                                      ToolTip="Evaluate the path as a 64-bit Configuration Manager client does."/>
