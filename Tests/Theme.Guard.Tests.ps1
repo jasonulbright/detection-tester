@@ -367,8 +367,32 @@ Describe 'Fonts do not depend on the theme (b)' {
         foreach ($strName in 'txtSiteCode', 'txtSmsProvider', 'txtProvider', 'txtSiteServer') { $arrName | Should -Contain $strName }
     }
 
-    It 'uses no SemiBold title or label in <_.Source>, so that every title and field label is bold' -ForEach $script:arrOwnXamlDocD {
-        $_.Text | Should -Not -Match 'FontWeight(=|" Value=)"SemiBold"'
+    It 'keeps the page title, the log header, the result badge, the history header and the section headers SemiBold, and the app title Bold' {
+        $hashMain = @($script:arrOwnXamlDoc | Where-Object { $_.Source -eq 'MainWindow.xaml' })[0]
+        $hashPage = @($script:arrOwnXamlDoc | Where-Object { $_.Source -eq 'DetectionTester.xaml' })[0]
+        foreach ($hashCase in @(
+                @{ Doc = $hashMain; Name = 'txtAppTitle'; Weight = 'Bold' }
+                @{ Doc = $hashMain; Name = 'txtModuleTitle'; Weight = 'SemiBold' }
+                @{ Doc = $hashMain; Name = 'lblLogOutput'; Weight = 'SemiBold' }
+                @{ Doc = $hashPage; Name = 'txtResultBadge'; Weight = 'SemiBold' }
+            )) {
+            [xml]$xml = $hashCase.Doc.Text
+            $objElement = $xml.SelectSingleNode(("//*[@*[local-name()='Name']='{0}']" -f $hashCase.Name))
+            $objElement | Should -Not -BeNullOrEmpty -Because $hashCase.Name
+            $objElement.GetAttribute('FontWeight') | Should -Be $hashCase.Weight -Because $hashCase.Name
+        }
+        [xml]$xmlMain = $hashMain.Text
+        $objSection = $xmlMain.SelectSingleNode("//*[local-name()='Style'][@*[local-name()='Key']='SectionHeaderStyle']")
+        $objSection.SelectSingleNode("*[@Property='FontWeight']").GetAttribute('Value') | Should -Be 'SemiBold'
+        $objKey = $xmlMain.SelectSingleNode("//*[local-name()='Style'][@*[local-name()='Key']='KeyLabelStyle']")
+        $objKey.SelectSingleNode("*[@Property='FontWeight']").GetAttribute('Value') | Should -Be 'SemiBold'
+    }
+
+    It 'gives the key labels of a key and value list the SemiBold key label style' {
+        $strDetails = (@($script:arrOwnXamlDoc | Where-Object { $_.Source -eq 'InstalledApps.xaml' })[0]).Text
+        [regex]::Matches($strDetails, 'Style="\{DynamicResource KeyLabelStyle\}"').Count | Should -Be 9
+        $strShell = Get-Content -LiteralPath $script:strShellPath -Raw
+        [regex]::Matches($strShell, 'Style="\{StaticResource KeyLabelStyle\}"').Count | Should -Be 4
     }
 
     It 'uses no theme trigger on a font property in <_.Source>' -ForEach $script:arrXamlDocD {

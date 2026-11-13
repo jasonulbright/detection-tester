@@ -80,23 +80,23 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="DisplayName:"          Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="DisplayName:"          Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="dtlDisplayName"      FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Publisher:"            Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Publisher:"            Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="dtlPublisher"        FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="DisplayVersion:"       Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="DisplayVersion:"       Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="dtlDisplayVersion"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Architecture and Scope:" Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Architecture and Scope:" Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="dtlArchScope"        FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="RegistryKey:"          Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="RegistryKey:"          Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="4" Grid.Column="1" x:Name="dtlRegistryKey"      FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="UninstallString:"      Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="UninstallString:"      Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="5" Grid.Column="1" x:Name="dtlUninstallString"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="QuietUninstallString:" Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="QuietUninstallString:" Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="6" Grid.Column="1" x:Name="dtlQuietUninstall"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="InstallLocation:"      Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="7" Grid.Column="0" Text="InstallLocation:"      Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="7" Grid.Column="1" x:Name="dtlInstallLocation"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2" TextWrapping="Wrap"/>
-                <TextBlock Grid.Row="8" Grid.Column="0" Text="InstallDate:"          Style="{DynamicResource FieldLabelStyle}" Margin="0,2,8,2"/>
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="InstallDate:"          Style="{DynamicResource KeyLabelStyle}" Margin="0,2,8,2"/>
                 <TextBlock Grid.Row="8" Grid.Column="1" x:Name="dtlInstallDate"      FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
             </Grid>
         </ScrollViewer>

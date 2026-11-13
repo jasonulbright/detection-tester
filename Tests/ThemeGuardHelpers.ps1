@@ -609,7 +609,7 @@ function Test-TitleCase {
 }
 
 # The titles of a XAML document that must be in Title Case: button content, check box and radio button content, data grid
-# column headers, window titles, and the text of field labels (FieldLabelStyle, OptLabel). A binding (text that starts with a
+# column headers, window titles, and the text of field labels (FieldLabelStyle, OptLabel, KeyLabelStyle). A binding (text that starts with a
 # brace) and the words On and Off stay out.
 function Get-XamlTitle {
     param([string]$Text)
@@ -621,7 +621,7 @@ function Get-XamlTitle {
         elseif ($strName -in 'DataGridTextColumn', 'DataGridCheckBoxColumn', 'DataGridTemplateColumn') { $strValue = $objElement.GetAttribute('Header') }
         elseif ($strName -eq 'ToggleSwitch') { $strValue = $objElement.GetAttribute('Header') }
         elseif ($strName -eq 'MetroWindow' -or $strName -eq 'Window') { $strValue = $objElement.GetAttribute('Title') }
-        elseif ($strName -eq 'TextBlock' -and ($objElement.GetAttribute('Style') -match 'FieldLabelStyle|OptLabel' -or $objElement.ParentNode.LocalName -eq 'TabItem.Header')) { $strValue = $objElement.GetAttribute('Text') }
+        elseif ($strName -eq 'TextBlock' -and ($objElement.GetAttribute('Style') -match 'FieldLabelStyle|OptLabel|KeyLabelStyle' -or $objElement.ParentNode.LocalName -eq 'TabItem.Header')) { $strValue = $objElement.GetAttribute('Text') }
         if ($strValue -and $strValue -notmatch '^\{' -and $strValue -notmatch '^(On|Off)$') { $strValue }
     }
 }
