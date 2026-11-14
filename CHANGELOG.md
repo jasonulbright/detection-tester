@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.14.0018] - 2026-11-14
@@ -20,6 +22,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.13.0017] - 2026-11-13
@@ -47,6 +51,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.12.0016] - 2026-11-12
@@ -74,6 +80,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.07.0015] - 2026-11-07
@@ -113,6 +121,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.07.0014] - 2026-11-07
@@ -127,6 +137,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.06.0013] - 2026-11-06
@@ -144,6 +156,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.10.12.0012] - 2026-10-12
@@ -158,6 +172,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.10.11.0011] - 2026-10-11
@@ -172,6 +188,8 @@
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.10.11.0010] - 2026-10-11
@@ -189,6 +207,8 @@ file.
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.10.07.0009] - 2026-10-07
@@ -201,6 +221,8 @@ file.
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.09.21.0008] - 2026-09-21
@@ -213,6 +235,8 @@ file.
 
 ### Fixed
 
+- Show button borders at 1 px in gray, with no heavy border in the text color.
+- Add guards for button styles, muted text brushes and the dialog theme call.
 - Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.09.21.0007] - 2026-09-21
