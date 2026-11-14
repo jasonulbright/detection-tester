@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2026.11.14.0020] - 2026-11-14
+
+## 3 new guard tests
+
+### Added
+
+- Add guard tests for encoding, button styles and theme source.
+
 ## [2026.11.14.0019] - 2026-11-14
 
 ## 3 fixes for button borders, guards and plain ASCII sources
