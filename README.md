@@ -37,12 +37,12 @@ The shell has two modules accessible from the sidebar:
 
 Author and test detection clauses. Pick a type, fill in the parameters, click **Test Detection**. Results appear in a Pass/Fail badge with details. Every test is logged to the history grid below.
 
-- **Hive selector** — HKLM or HKCU on registry types. HKCU covers per-user installs (Adobe Reader DC, Chrome user-mode, OneDrive).
-- **View selector** — explicit 64-bit / 32-bit (WOW6432Node) for registry keys, removing the "why did my clause fail" ambiguity around architecture-split paths.
-- **Negative test mode** — flip pass/fail logic so "not detected" is a passing test. Useful for verifying that an uninstall removed the ARP entry.
-- **Import Stage Manifest** — load a `stage-manifest.json` from Application Packager and auto-populate the fields. Compound detections come in as a read-only clause list with a connector (And/Or).
-- **Use Selected** — clicking a history row repopulates the input panel, so you can re-run a clause after the original ARP entry has been uninstalled.
-- **Export CSV / Export HTML** — write the history to a self-contained report under `%LOCALAPPDATA%\DetectionTester\reports\`.
+- **Hive selector** - HKLM or HKCU on registry types. HKCU covers per-user installs (Adobe Reader DC, Chrome user-mode, OneDrive).
+- **View selector** - explicit 64-bit / 32-bit (WOW6432Node) for registry keys, removing the "why did my clause fail" ambiguity around architecture-split paths.
+- **Negative test mode** - flip pass/fail logic so "not detected" is a passing test. Useful for verifying that an uninstall removed the ARP entry.
+- **Import Stage Manifest** - load a `stage-manifest.json` from Application Packager and auto-populate the fields. Compound detections come in as a read-only clause list with a connector (And/Or).
+- **Use Selected** - clicking a history row repopulates the input panel, so you can re-run a clause after the original ARP entry has been uninstalled.
+- **Export CSV / Export HTML** - write the history to a self-contained report under `%LOCALAPPDATA%\DetectionTester\reports\`.
 
 ### Installed Applications
 
@@ -69,7 +69,7 @@ No admin rights and no Configuration Manager connection required.
    ```
 3. Pick a detection type, fill in parameters, click **Test Detection**.
 
-The Options dialog (sidebar → Options) shows the log path and a button to open the per-app data folder under `%LOCALAPPDATA%\DetectionTester\`.
+The Options dialog (sidebar -> Options) shows the log path and a button to open the per-app data folder under `%LOCALAPPDATA%\DetectionTester\`.
 
 ## License
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
+
 ## [2026.11.14.0018] - 2026-11-14
 
 ## 4.5:1 contrast for the inactive title bar in both themes
@@ -9,6 +15,12 @@
 - Show inactive title bar text in white at 4.5:1 contrast or more in both themes.
 - Use shared border and disabled-text styles for text boxes, combo boxes and grid headers.
 - Show test windows at 80,80 when SUITE_VISIBLE_WINDOWS is 1, for visible runs.
+
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.13.0017] - 2026-11-13
 
@@ -31,6 +43,12 @@
 - Tighten the field title rule of FontWeightGuardHelpers.ps1. A label counts as a field title only when an input follows or precedes it directly, or shares its grid row.
 - Update the README text. Retake the images of the user guide and of the README.
 
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
+
 ## [2026.11.12.0016] - 2026-11-12
 
 ## 1 shared themed style for every button in both themes
@@ -51,6 +69,12 @@
 - Update the shared SuiteCommon module to 2026.11.12.0081.
 - Retake the images of the user guide.
 - Add tests that check the theme rules.
+
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.07.0015] - 2026-11-07
 
@@ -85,6 +109,12 @@
 - Update the shared SuiteCommon module to 2026.11.07.0075.
 - Run window tests only when the SUITE_ALLOW_WINDOW_TESTS opt-in is set.
 
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
+
 ## [2026.11.07.0014] - 2026-11-07
 
 ## 1 user guide ships with the release
@@ -92,6 +122,12 @@
 ### Added
 
 - Add the user guide (docs/index.md) with images of the running window.
+
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.11.06.0013] - 2026-11-06
 
@@ -104,6 +140,12 @@
 - Widen the Architecture column of Installed Applications so that its header is not cut.
 - Clear the old result when a clause is filled from an installed application or from a manifest. The result of an earlier failed import stayed on the page.
 
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
+
 ## [2026.10.12.0012] - 2026-10-12
 
 ## 1 PowerShell 7 fix
@@ -112,6 +154,12 @@
 
 - Keep the PowerShell 7 module roots when the tool runs under PowerShell 7.
 
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
+
 ## [2026.10.11.0011] - 2026-10-11
 
 ## 1 window fix
@@ -119,6 +167,12 @@
 ### Fixed
 
 - Double-click the title bar to maximize or restore the window.
+
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.10.11.0010] - 2026-10-11
 
@@ -131,17 +185,35 @@
 All notable changes to Detection Method Tester are documented in this
 file.
 
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
+
 ## [2026.10.07.0009] - 2026-10-07
 
 ### Changed
 
 - Sync the shared SuiteCommon module to 2026.10.07.0049.
 
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
+
 ## [2026.09.21.0008] - 2026-09-21
 
 ### Changed
 
 - Update the README screenshot.
+
+## [Unreleased]
+
+### Fixed
+
+- Make the PowerShell sources and the files they read plain ASCII, and add the encoding guard.
 
 ## [2026.09.21.0007] - 2026-09-21
 
@@ -211,22 +283,22 @@ app through MECM. Ships as a release zip; extract and run
 
 ### Features
 
-- **Detection Tester** module — authors the five MECM detection types
+- **Detection Tester** module - authors the five MECM detection types
   and evaluates them locally: RegistryKeyValue (Exists / IsEquals /
   GreaterEquals / etc.), RegistryKey existence, File path + version
   comparison, Script (PowerShell body), and Compound (AND / OR
   connector across clauses). Dynamic input panels swap based on the
   selected type; result panel shows pass / fail and the actual values
   observed on the host.
-- **Hive selector** on registry detection types — HKLM or HKCU. HKCU
+- **Hive selector** on registry detection types - HKLM or HKCU. HKCU
   covers per-user installs (Adobe Reader DC, Chrome user-mode,
   OneDrive).
-- **Explicit 32 / 64-bit view selector** on registry detection types —
+- **Explicit 32 / 64-bit view selector** on registry detection types -
   removes ambiguity around WOW6432Node-vs-native paths.
-- **Negative-test mode** — flips pass / fail logic so "not detected"
+- **Negative-test mode** - flips pass / fail logic so "not detected"
   is a passing test. Useful for verifying that an uninstall removed
   the ARP entry the clause targets.
-- **Installed Applications** module — reads HKLM (x64 + WOW6432Node)
+- **Installed Applications** module - reads HKLM (x64 + WOW6432Node)
   and HKCU ARP hives. Filter by name, scope by Machine / User. "Use
   for detection" populates the Detection Tester registry fields with
   hive, architecture, key path, and DisplayVersion in one click.
@@ -234,20 +306,20 @@ app through MECM. Ships as a release zip; extract and run
   Architecture, Scope, RegistryKey, UninstallString,
   QuietUninstallString, InstallLocation, InstallDate. Copy-details to
   clipboard.
-- **Test history** grid — every evaluated clause logged with time,
+- **Test history** grid - every evaluated clause logged with time,
   type, mode (Positive / Negative), target, expected, found, and
   result. Export to CSV / HTML; the "Use selected" button repopulates
   the input panel from the selected row.
-- **Import stage-manifest** — loads `stage-manifest.json` from
+- **Import stage-manifest** - loads `stage-manifest.json` from
   Application Packager and populates the clause authoring fields,
   including compound detection (AND / OR).
-- **Options dialog** — About panel (version, license, module version)
+- **Options dialog** - About panel (version, license, module version)
   and Logging panel (current log path, log folder, Open log folder /
   Open app data folder buttons).
 - Dark / Light theme toggle on the sidebar; live swap, no restart.
   Per-app data (logs, prefs, window state) lives under
   `%LOCALAPPDATA%\DetectionTester\`.
-- **Title-bar drag fallback** — native `WM_NCHITTEST` hook plus a
+- **Title-bar drag fallback** - native `WM_NCHITTEST` hook plus a
   managed `DragMove` for the main window and modal Options dialog,
   so the title bar drags reliably under any host.
 
