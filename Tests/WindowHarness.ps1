@@ -5,15 +5,14 @@
 # object cannot cross to the Pester thread. The windows are shown off screen at
 # -32000 so layout, templates and triggers run for real.
 #
-# One STA runspace serves a whole test file. A runspace per call hangs: the
-# theme manager keeps handlers of closed windows from earlier threads, and the
-# next theme change waits on their dead dispatchers. Call Close-WpfSession in
-# AfterAll.
+# One STA runspace serves a whole Pester run, all window test files (the session is in $global:HarnessSession). A runspace per call or per
+# file hangs: the theme manager keeps handlers of closed windows from earlier threads, and the next theme change waits on their dead
+# dispatchers. Close-WpfSession in AfterAll does nothing; only Close-WpfSession -Force closes the session.
 
 $script:HarnessRoot = Split-Path -Parent $PSScriptRoot
 . "$PSScriptRoot\WindowMeasure.ps1"
 
-$script:HarnessSession = $null
+if (-not (Test-Path variable:global:HarnessSession)) { $global:HarnessSession = $null }
 
 # Window tests open a window only when SUITE_ALLOW_WINDOW_TESTS is 1.
 function Test-WindowTestsAllowed {
@@ -263,7 +262,7 @@ $script:MeasureAppScript = {
 }
 
 function Get-WpfSession {
-    if ($script:HarnessSession -and $script:HarnessSession.RunspaceStateInfo.State -eq 'Opened') { return $script:HarnessSession }
+    if ($global:HarnessSession -and $global:HarnessSession.RunspaceStateInfo.State -eq 'Opened') { return $global:HarnessSession }
     $rs = [runspacefactory]::CreateRunspace()
     $rs.ApartmentState = 'STA'
     $rs.ThreadOptions = 'ReuseThread'
@@ -283,12 +282,15 @@ function Get-WpfSession {
         throw
     }
     $ps.Dispose()
-    $script:HarnessSession = $rs
+    $global:HarnessSession = $rs
     return $rs
 }
 
+# The session is shared by every window test file of one Pester run (a new session after a closed one hangs on the theme manager
+# handlers of the closed windows), so a plain call keeps it open. -Force closes it.
 function Close-WpfSession {
-    if ($script:HarnessSession) { $script:HarnessSession.Dispose(); $script:HarnessSession = $null }
+    param([switch]$Force)
+    if ($Force -and $global:HarnessSession) { $global:HarnessSession.Dispose(); $global:HarnessSession = $null }
 }
 
 function Invoke-WpfSta {
@@ -307,7 +309,7 @@ function Invoke-WpfSta {
         $async = $ps.BeginInvoke()
         if (-not $async.AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds($TimeoutSeconds))) {
             try { [void]$ps.BeginStop($null, $null).AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds(10)) } catch { Write-Verbose "Stop failed: $_" }
-            Close-WpfSession
+            Close-WpfSession -Force
             throw "STA script block did not finish within $TimeoutSeconds seconds."
         }
         $out = @($ps.EndInvoke($async))

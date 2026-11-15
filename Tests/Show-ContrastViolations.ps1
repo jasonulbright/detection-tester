@@ -25,4 +25,4 @@ try {
         Write-Host (($keys | ForEach-Object { "'" + ($_ -replace "'", "''") + "'" }) -join ', ')
     }
 }
-finally { Close-WpfSession; Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
+finally { Close-WpfSession -Force; Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
