@@ -37,6 +37,7 @@ $script:HarnessBootstrap = {
     # Opens a window from a XAML file, or from XAML text, off screen with the theme applied.
     function Open-TestWindow {
         param([string]$XamlPath, [string]$XamlText, [bool]$Dark = $true, [double]$Width = 1440, [double]$Height = 900)
+        $global:HarnessDark = $Dark
         if (-not $XamlText) { $XamlText = Get-Content -LiteralPath $XamlPath -Raw -Encoding UTF8 }
         [xml]$xaml = $XamlText
         $reader = New-Object System.Xml.XmlNodeReader $xaml
@@ -79,14 +80,12 @@ $script:HarnessBootstrap = {
         $global:txtThemeLabel = $Window.FindName('txtThemeLabel')
         $global:Prefs = @{ DarkMode = $true; ActiveModule = 'DetectionTester' }
         $global:ActiveView = 'DetectionTester'
-        # The theme context of the shell: the same call as in the start script, with the inactive title bar brush of MainWindow.xaml.
+        # The theme context of the shell: the same call as in the start script.
         $global:ViewButtons = @(
             @{ Name = 'DetectionTester'; Button = $Window.FindName('btnDetection') }
             @{ Name = 'InstalledApps'; Button = $Window.FindName('btnInstalled') }
         )
-        $global:TitleBarInactiveBrush = $Window.FindResource('MahApps.Brushes.WindowTitle.NonActive')
-        $suiteBrushes = @{ TitleBarInactive = $global:TitleBarInactiveBrush }
-        Initialize-SuiteTheme -Window $Window -IsDarkGetter { [bool]$global:Prefs.DarkMode } -ActiveViewGetter { $global:ActiveView } -ViewButtons $global:ViewButtons -OptionsButton $Window.FindName('btnOptions') -LogLabel $Window.FindName('lblLogOutput') -Brushes $suiteBrushes
+        Initialize-SuiteTheme -Window $Window -IsDarkGetter { [bool]$global:Prefs.DarkMode } -ActiveViewGetter { $global:ActiveView } -ViewButtons $global:ViewButtons -OptionsButton $Window.FindName('btnOptions') -LogLabel $Window.FindName('lblLogOutput')
         $global:reportsDir = [System.IO.Path]::GetDirectoryName($LogPath)
         $global:DTRoot = $null; $global:IARoot = $null; $global:DTContext = @{}; $global:IAContext = @{}
         $global:HistoryItems = New-Object 'System.Collections.ObjectModel.ObservableCollection[psobject]'
@@ -218,46 +217,49 @@ $script:MeasureAppScript = {
             $full = $Arguments.W -ge 1440
             $out = @()
             Initialize-ShellRuntime -Window $w -Parts $Arguments.Parts -LogPath (Join-Path $Arguments.TempDir 'measure.log')
-            foreach ($view in $cfg.Views) {
-                Show-AppView -Window $w -Config $cfg -View $view
-                # The shell's own theme code: theme, log label colour, sidebar button colours and title bar brushes.
-                & $global:ApplyTheme -IsDark $Arguments.Dark
-                Wait-Layout $w
-                $out += [PSCustomObject]@{
-                    View        = $view.Name
-                    Text        = if ($full) { @(Get-TextContrast $w) } else { @() }
-                    Clipped     = @(Get-ClippedText $w)
-                    Offscreen   = @(Get-OffscreenControls $w)
-                    Interactive = if ($full) { @(Get-InteractiveContrast $w) } else { @() }
-                    TitleBar    = if ($full) { Get-TitleBarContrast $w } else { $null }
+            try {
+                foreach ($view in $cfg.Views) {
+                    Show-AppView -Window $w -Config $cfg -View $view
+                    # The shell's own theme code: theme, log label colour, sidebar button colours and title bar brushes.
+                    & $global:ApplyTheme -IsDark $Arguments.Dark
+                    Wait-Layout $w
+                    $out += [PSCustomObject]@{
+                        View        = $view.Name
+                        Text        = if ($full) { @(Get-TextContrast $w) } else { @() }
+                        Clipped     = @(Get-ClippedText $w)
+                        Offscreen   = @(Get-OffscreenControls $w)
+                        Interactive = if ($full) { @(Get-InteractiveContrast $w) } else { @() }
+                        TitleBar    = if ($full) { Get-TitleBarContrast $w } else { $null }
+                    }
                 }
             }
-            $w.Close()
+            finally { $w.Close() }
 
             # The Options dialog at its default size (1440x900 pass) and at its minimum size (1024x720 pass).
             $dw = if ($full) { 640 } else { 560 }
             $dh = if ($full) { 440 } else { 380 }
             $d = Open-TestWindow -XamlText $Arguments.DialogXaml -Dark $Arguments.Dark -Width $dw -Height $dh
-            $d.Resources['MahApps.Brushes.WindowTitle.NonActive'] = $global:TitleBarInactiveBrush
             Set-DialogTheme -Dialog $d -IsDark $Arguments.Dark
-            $d.FindName('txtAboutVersion').Text = 'v2026.11.06.0013'
-            $d.FindName('txtAboutModule').Text = 'DetectionTesterCommon 2026.11.06.0013'
-            $d.FindName('txtLogPath').Text = 'C:\Users\someone\AppData\Local\DetectionTester\logs\DetectionTester-20261106-101500.log'
-            $d.FindName('txtLogDir').Text = 'C:\Users\someone\AppData\Local\DetectionTester\logs'
-            foreach ($pane in @(@{ Name = 'Options dialog: About'; Show = 'paneAbout'; Hide = 'paneLogging' }, @{ Name = 'Options dialog: Logging'; Show = 'paneLogging'; Hide = 'paneAbout' })) {
-                $d.FindName($pane.Show).Visibility = 'Visible'
-                $d.FindName($pane.Hide).Visibility = 'Collapsed'
-                Wait-Layout $d
-                $out += [PSCustomObject]@{
-                    View        = $pane.Name
-                    Text        = if ($full) { @(Get-TextContrast $d) } else { @() }
-                    Clipped     = @(Get-ClippedText $d)
-                    Offscreen   = @(Get-OffscreenControls $d)
-                    Interactive = if ($full) { @(Get-InteractiveContrast $d) } else { @() }
-                    TitleBar    = if ($full) { Get-TitleBarContrast $d } else { $null }
+            try {
+                $d.FindName('txtAboutVersion').Text = 'v2026.11.06.0013'
+                $d.FindName('txtAboutModule').Text = 'DetectionTesterCommon 2026.11.06.0013'
+                $d.FindName('txtLogPath').Text = 'C:\Users\someone\AppData\Local\DetectionTester\logs\DetectionTester-20261106-101500.log'
+                $d.FindName('txtLogDir').Text = 'C:\Users\someone\AppData\Local\DetectionTester\logs'
+                foreach ($pane in @(@{ Name = 'Options dialog: About'; Show = 'paneAbout'; Hide = 'paneLogging' }, @{ Name = 'Options dialog: Logging'; Show = 'paneLogging'; Hide = 'paneAbout' })) {
+                    $d.FindName($pane.Show).Visibility = 'Visible'
+                    $d.FindName($pane.Hide).Visibility = 'Collapsed'
+                    Wait-Layout $d
+                    $out += [PSCustomObject]@{
+                        View        = $pane.Name
+                        Text        = if ($full) { @(Get-TextContrast $d) } else { @() }
+                        Clipped     = @(Get-ClippedText $d)
+                        Offscreen   = @(Get-OffscreenControls $d)
+                        Interactive = if ($full) { @(Get-InteractiveContrast $d) } else { @() }
+                        TitleBar    = if ($full) { Get-TitleBarContrast $d } else { $null }
+                    }
                 }
             }
-            $d.Close()
+            finally { $d.Close() }
             , $out
 }
 
@@ -320,5 +322,16 @@ function Invoke-WpfSta {
     }
     finally {
         $ps.Dispose()
+        # Close every window that the script block left open (a test that failed before its own Close), on the thread that owns them.
+        if ($rs.RunspaceStateInfo.State -eq 'Opened' -and -not $global:HarnessKeepWindows) {
+            $cleanup = [powershell]::Create()
+            try {
+                $cleanup.Runspace = $rs
+                [void]$cleanup.AddScript('if (Get-Command Close-SuiteOpenWindow -ErrorAction SilentlyContinue) { [void](Close-SuiteOpenWindow) }', $false)
+                [void]$cleanup.Invoke()
+            }
+            catch { Write-Verbose "Window cleanup failed: $_" }
+            finally { $cleanup.Dispose() }
+        }
     }
 }

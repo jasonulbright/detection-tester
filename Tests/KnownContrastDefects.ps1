@@ -4,15 +4,26 @@
 # (remove it here). Run Show-ContrastViolations.ps1 to print the current list.
 #
 # Text must reach 4.5:1 and a control border 3:1, enabled and disabled, in both
-# themes. No known defect remains: the themed button style, the contrast overrides of
-# MainWindow.xaml and the SuiteCommon palette meet the standard in both themes.
+# themes. The known defects come from the shared button templates of SuiteCommon:
+#   - DisabledText: the template fades a disabled button with an opacity of 0.5, so the disabled text is below 4.5:1.
+#   - btnOK:EnabledText and text:OK (light theme): the plain accent fill of the dialog primary button is white text at 4.49:1.
+# Both go when SuiteCommon fixes them and the vendored copy is synced.
 # A defect that comes from the SuiteCommon palette belongs here until app-packager-suite
 # fixes it and the vendored copy is synced.
 function Get-KnownContrastDefect {
     param([Parameter(Mandatory)][ValidateSet('dark', 'light')][string]$Theme)
     switch ($Theme) {
-        'dark' { @() }
-        'light' { @() }
+        'dark' { @(
+                'btnCancel:DisabledText', 'btnClearHistory:DisabledText', 'btnCopyDetails:DisabledText', 'btnDetection:DisabledText', 'btnExportCsv:DisabledText', 'btnExportHtml:DisabledText', 'btnImportManifest:DisabledText',
+                'btnInstalled:DisabledText', 'btnOK:DisabledText', 'btnOpenAppData:DisabledText', 'btnOpenLogFolder:DisabledText', 'btnOptions:DisabledText', 'btnRefresh:DisabledText', 'btnRepopulate:DisabledText',
+                'btnTest:DisabledText', 'btnUseForDetection:DisabledText'
+            ) }
+        'light' { @(
+                'btnCancel:DisabledText', 'btnClearHistory:DisabledText', 'btnCopyDetails:DisabledText', 'btnDetection:DisabledText', 'btnExportCsv:DisabledText', 'btnExportHtml:DisabledText', 'btnImportManifest:DisabledText',
+                'btnInstalled:DisabledText', 'btnOK:DisabledText', 'btnOpenAppData:DisabledText', 'btnOpenLogFolder:DisabledText', 'btnOptions:DisabledText', 'btnRefresh:DisabledText', 'btnRepopulate:DisabledText',
+                'btnTest:DisabledText', 'btnUseForDetection:DisabledText',
+                'btnOK:EnabledText', 'text:OK'
+            ) }
     }
 }
 function Test-LargeText {

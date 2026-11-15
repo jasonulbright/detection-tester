@@ -46,10 +46,10 @@ BeforeAll {
             finally { $w.Close() }
             $d = Open-TestWindow -XamlText $Arguments.DialogXaml -Dark $Arguments.Dark -Width 640 -Height 440
             try {
-                $d.Resources['MahApps.Brushes.WindowTitle.NonActive'] = $global:TitleBarInactiveBrush
-                Set-DialogTheme -Dialog $d -IsDark $Arguments.Dark
+                # The way the script gives the theme: no -IsDark, the theme context of the app answers.
+                Set-DialogTheme -Dialog $d
                 Wait-Layout $d
-                foreach ($r in @(Get-SuiteButtonStateReport -Window $d -Dark $Arguments.Dark)) { $r | Add-Member -NotePropertyName Source -NotePropertyValue 'options' -Force; $rows += $r }
+                foreach ($r in @(Get-SuiteButtonStateReport -Window $d -Dark $Arguments.Dark)) { $r | Add-Member -NotePropertyName Source -NotePropertyValue 'dialog' -Force; $rows += $r }
             }
             finally { $d.Close() }
             $rows
@@ -78,6 +78,33 @@ Describe 'Button states <Theme>' -ForEach $script:ThemeCases -Skip:(-not $script
         $bad | Should -BeNullOrEmpty
     }
 
+    It 'keeps a blue button blue in hover and pressed and never black; a dialog button moves one visible step in each state' {
+        $bad = @()
+        foreach ($r in $script:Rows) {
+            if (-not $r.States['normal'].Blue) { continue }
+            foreach ($s in 'hover', 'pressed') {
+                $st = $r.States[$s]
+                if (-not $st.Blue) { $bad += ('{0} {1} {2}: fill {3} is not blue' -f $r.Source, $r.Name, $s, $st.Fill) }
+                if ($st.FillLuminance -lt 0.03) { $bad += ('{0} {1} {2}: fill {3} luminance {4} is black' -f $r.Source, $r.Name, $s, $st.Fill, $st.FillLuminance) }
+                $step = ([math]::Max($st.FillLuminance, $r.States['normal'].FillLuminance) + 0.05) / ([math]::Min($st.FillLuminance, $r.States['normal'].FillLuminance) + 0.05)
+                if ($r.Source -eq 'dialog' -and $step -lt 1.05) { $bad += ('{0} {1} {2}: fill {3} is the same as normal {4}' -f $r.Source, $r.Name, $s, $st.Fill, $r.States['normal'].Fill) }
+            }
+        }
+        $bad | Should -BeNullOrEmpty
+    }
+
+    It 'never flips a neutral button to black or to white in hover and pressed' {
+        $bad = @()
+        foreach ($r in $script:Rows) {
+            if ($r.States['normal'].Blue) { continue }
+            $n = $r.States['normal'].FillLuminance
+            foreach ($s in 'hover', 'pressed') {
+                $l = $r.States[$s].FillLuminance
+                if (-not $r.States[$s].Blue -and (($l -lt 0.03 -and $n -gt 0.1) -or ($l -gt 0.9 -and $n -lt 0.1))) { $bad += ('{0} {1} {2}: fill {3} flips from {4}' -f $r.Source, $r.Name, $s, $r.States[$s].Fill, $r.States['normal'].Fill) }
+            }
+        }
+        $bad | Should -BeNullOrEmpty
+    }
     It 'lists the measured values' {
         foreach ($r in $script:Rows) { Write-Host ('{0} {1} {2}: ' -f $Theme, $r.Source, $r.Name) -NoNewline; Write-Host (($r.States.Keys | ForEach-Object { '{0} text {1} edge {2}' -f $_, $r.States[$_].Text, $r.States[$_].Edge }) -join ' | ') }
         $script:Rows.Count | Should -BeGreaterThan 0

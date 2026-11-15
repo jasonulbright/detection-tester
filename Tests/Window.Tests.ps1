@@ -69,8 +69,8 @@ Describe 'Main window XAML' -Skip:(-not $script:WindowGuard.Allowed) {
     It 'loads as a MetroWindow with the app title and a minimum size that fits 1024x720' {
         $r = Invoke-WpfSta -Arguments @{ Xaml = $script:AppConfig.Xaml } -Script {
             $w = Open-TestWindow -XamlPath (Join-Path $Root $Arguments.Xaml)
-            $o = [PSCustomObject]@{ Type = $w.GetType().FullName; Title = $w.Title; MinW = $w.MinWidth; MinH = $w.MinHeight }
-            $w.Close(); $o
+            try { [PSCustomObject]@{ Type = $w.GetType().FullName; Title = $w.Title; MinW = $w.MinWidth; MinH = $w.MinHeight } }
+            finally { $w.Close() }
         }
         $r.Type | Should -Be 'MahApps.Metro.Controls.MetroWindow'
         $r.Title | Should -Be $script:AppConfig.Title
@@ -105,11 +105,9 @@ Describe 'Main window XAML' -Skip:(-not $script:WindowGuard.Allowed) {
         }
     }
 
-    It 'takes the inactive title bar brush from MainWindow.xaml in the shell and in the Options dialog' {
-        $script:ShellText | Should -Match 'FindResource\(''MahApps\.Brushes\.WindowTitle\.NonActive''\)'
-        $script:ShellText | Should -Match 'Resources\[''MahApps\.Brushes\.WindowTitle\.NonActive''\]\s*=\s*\$script:TitleBarInactiveBrush'
-        ([regex]::Matches($script:ShellText, 'x:Key="MahApps\.Brushes\.WindowTitle\.NonActive"')).Count | Should -Be 0 -Because 'the value is defined once, in MainWindow.xaml'
-        (Get-Content -LiteralPath $script:XamlPath -Raw) | Should -Match 'x:Key="MahApps\.Brushes\.WindowTitle\.NonActive"'
+    It 'leaves the inactive title bar brush to SuiteCommon: no app override in the shell or in MainWindow.xaml' {
+        $script:ShellText | Should -Not -Match 'MahApps\.Brushes\.WindowTitle\.NonActive'
+        (Get-Content -LiteralPath $script:XamlPath -Raw) | Should -Not -Match 'MahApps\.Brushes\.WindowTitle\.NonActive'
     }
 }
 Describe 'Module XAML' -Skip:(-not $script:WindowGuard.Allowed) {
@@ -216,7 +214,8 @@ Describe 'Dialog windows' -Skip:(-not $script:WindowGuard.Allowed) {
     It 'shows the dialog title "Options" on the title bar' {
         $r = Invoke-WpfSta -Arguments @{ Xaml = $script:DialogXaml[0] } -Script {
             $d = Open-TestWindow -XamlText $Arguments.Xaml -Width 640 -Height 440
-            $o = $d.Title; $d.Close(); $o
+            try { $d.Title }
+            finally { $d.Close() }
         }
         $r | Should -Be 'Options'
     }
@@ -254,8 +253,8 @@ Describe 'Contrast <Theme>' -ForEach @(@{ Theme = 'dark' }, @{ Theme = 'light' }
         $found = @(Get-ContrastViolationKey -Views @($script:Measured['{0}|1440x900' -f $Theme]))
         $new = @($found | Where-Object { $known -notcontains $_ })
         $fixed = @($known | Where-Object { $found -notcontains $_ })
-        $new | Should -BeNullOrEmpty -Because 'a new contrast violation appeared'
-        $fixed | Should -BeNullOrEmpty -Because 'a known defect is fixed: remove it from Get-KnownContrastDefect'
+        $new | Should -BeNullOrEmpty -Because ('a new contrast violation appeared: ' + ($new -join ', '))
+        $fixed | Should -BeNullOrEmpty -Because ('a known defect is fixed: remove it from Get-KnownContrastDefect: ' + ($fixed -join ', '))
     }
 }
 
@@ -310,8 +309,7 @@ Describe 'State contrast <Theme>' -ForEach @(@{ Theme = 'dark'; Dark = $true }, 
             $appGrid = $w.FindName($cfg.ContentHost).Content.FindName('dgApps'); $appGrid.SelectedIndex = 0; Wait-Layout $w
             & $addElement 'selected row of the installed applications grid' $appGrid.ItemContainerGenerator.ContainerFromIndex(0) } catch { [void]$rows.Add([PSCustomObject]@{ Name = ('apps step threw ' + $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
             }
-            catch { [void]$rows.Add([PSCustomObject]@{ Name = ('script threw at line {0}: {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message); Ratio = 0; Min = 4.5 }) }
-            try { $w.Close() } catch { $null = $_ }
+            catch { [void]$rows.Add([PSCustomObject]@{ Name = ('script threw at line {0}: {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message); Ratio = 0; Min = 4.5 }) } finally { try { $w.Close() } catch { $null = $_ } }
             , @($rows.ToArray())
         }
         @($r).Count | Should -BeGreaterOrEqual 9
@@ -326,6 +324,8 @@ Describe 'State contrast <Theme>' -ForEach @(@{ Theme = 'dark'; Dark = $true }, 
 # this one file, because a second STA runspace in the same process hangs the theme manager.
 Describe 'Handlers on the real controls' -Skip:(-not $script:WindowGuard.Allowed) {
     BeforeAll {
+        # The window stays open for the Its of this Describe; Invoke-WpfSta closes stray windows unless this flag is set.
+        $global:HarnessKeepWindows = $true
         $null = Invoke-WpfSta -Arguments @{ Parts = $script:ShellParts; TempDir = $TestDrive } -Script {
             $global:HW = Open-TestWindow -XamlPath (Join-Path $Root 'MainWindow.xaml')
             Initialize-ShellRuntime -Window $global:HW -Parts $Arguments.Parts -LogPath (Join-Path $Arguments.TempDir 'handlers.log')
@@ -336,6 +336,7 @@ Describe 'Handlers on the real controls' -Skip:(-not $script:WindowGuard.Allowed
         Set-Content -LiteralPath (Join-Path $script:Dir 'a.txt') -Value 'x'
     }
     AfterAll {
+        $global:HarnessKeepWindows = $false
         $null = Invoke-WpfSta -Script { if ($global:HW) { $global:HW.Close() } }
     }
 
@@ -583,7 +584,7 @@ Describe 'Handlers on the real controls' -Skip:(-not $script:WindowGuard.Allowed
         }
 
         It 'applies the <Name> theme with the theme name, the label, the log colour, the sidebar colours and the text colours' -ForEach @(
-            @{ Name = 'light'; Dark = $false; Theme = 'Light.Blue'; Label = 'Light Theme'; Log = '#FF595959'; ActiveButton = '#FF005A9E'; IdleButton = '#FF0078D4'; Border = '#FF006CBE'; Title = '#FF0078D4'; TitleInactive = '#FF595959'; Text = '#FFFFFFFF' }
+            @{ Name = 'light'; Dark = $false; Theme = 'Light.Blue'; Label = 'Light Theme'; Log = '#FF595959'; ActiveButton = '#FF005A9E'; IdleButton = '#FF0078D4'; Border = '#FF006CBE'; Title = '#FF0078D4'; TitleInactive = '#FF4BA3E0'; Text = '#FFFFFFFF' }
             @{ Name = 'dark'; Dark = $true; Theme = 'Dark.Steel'; Label = 'Dark Theme'; Log = '#FFB0B0B0'; ActiveButton = '#FF3A3A3A'; IdleButton = '#FF1E1E1E'; Border = '#FF8C8C8C'; Title = $null; TitleInactive = $null; Text = $null }
         ) {
             $r = Invoke-WpfSta -Arguments @{ Dark = $Dark } -Script {
