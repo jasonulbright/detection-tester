@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add a guide capture tool for the main window and the Options dialog, in both themes.
+- Add guard tests for the README and guide images and for the capture tool.
+
 ### Fixed
 
 - Close stray windows of the window tests after each STA call.

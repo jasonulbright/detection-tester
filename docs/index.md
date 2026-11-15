@@ -24,6 +24,7 @@ Detection Tester tests Configuration Manager application detection methods on th
 - [Keyboard](reference/keyboard.md): the Tab order and the keys.
 - [Error messages](reference/error-messages.md): message, cause and fix.
 - [Glossary](reference/glossary.md): the terms of the tool.
+- [Capture the guide images](reference/capture-images.md): retake the images with the capture tool.
 
 ## External references
 
