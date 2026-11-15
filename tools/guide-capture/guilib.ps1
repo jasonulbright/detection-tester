@@ -7,6 +7,7 @@ using System; using System.Runtime.InteropServices;
 public class NativeUi {
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
   [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+  [DllImport("user32.dll")] public static extern void mouse_event(uint f, int dx, int dy, uint d, UIntPtr e);
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
   [DllImport("user32.dll")] public static extern bool MoveWindow(IntPtr h, int x, int y, int w, int ht, bool r);
 }
@@ -52,6 +53,11 @@ function Shot($Win, [string]$Name) {
     # The mouse leaves the window, so that no button shows its hover state in the image.
     [void][NativeUi]::SetCursorPos(1900, 1060)
     Start-Sleep -Milliseconds 1300
+    # A tooltip of the last button stays for a few seconds: wait until none shows. When one stays, touch a neutral point of the title bar and leave again.
+    $tipCond = New-Object System.Windows.Automation.PropertyCondition($AE::ControlTypeProperty, [System.Windows.Automation.ControlType]::ToolTip)
+    $end = (Get-Date).AddSeconds(8)
+    while ((Get-Date) -lt $end -and $root.FindFirst('Descendants', $tipCond)) { Start-Sleep -Milliseconds 400 }
+    if ($root.FindFirst('Descendants', $tipCond)) { [void][NativeUi]::SetCursorPos(700, 16); Start-Sleep -Milliseconds 400; [void][NativeUi]::SetCursorPos(1900, 1060); Start-Sleep -Seconds 2 }
     $r = $Win.Current.BoundingRectangle
     $x = [int][Math]::Max(0, $r.X); $y = [int][Math]::Max(0, $r.Y)
     $w = [int][Math]::Min($r.Width, [System.Windows.Forms.SystemInformation]::VirtualScreen.Width - $x)
@@ -75,4 +81,37 @@ function Section([string]$Name, [scriptblock]$Body) {
     if ($selected.Count -and $Name -notin $selected) { Log ('== ' + $Name + ' not selected'); return }
     Log ('== ' + $Name)
     try { & $Body } catch { Log ('ERROR in ' + $Name + ': ' + $_.Exception.Message + ' @ ' + $_.InvocationInfo.ScriptLineNumber) }
+}
+function Set-Text($El, [string]$Text) { $El.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).SetValue($Text) }
+function Expand-El($El) { $El.GetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern).Expand() }
+function Collapse-El($El) { $El.GetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern).Collapse() }
+function Get-ElText($El) { try { $El.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value } catch { $El.Current.Name } }
+function Click-At([int]$x, [int]$y) { [void][NativeUi]::SetCursorPos($x, $y); Start-Sleep -Milliseconds 150; [NativeUi]::mouse_event(2, 0, 0, 0, [UIntPtr]::Zero); [NativeUi]::mouse_event(4, 0, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 250 }
+function Click-El($El) { $r = $El.Current.BoundingRectangle; Click-At ([int]($r.X + $r.Width / 2)) ([int]($r.Y + $r.Height / 2)) }
+function Send-Keys([string]$k) { [System.Windows.Forms.SendKeys]::SendWait($k); Start-Sleep -Milliseconds 400 }
+function Focus-Win($Win) { try { [void][NativeUi]::SetForegroundWindow([IntPtr]$Win.Current.NativeWindowHandle) } catch { $null = $_ }; Start-Sleep -Milliseconds 300 }
+function Close-Win($Win) { $Win.GetCurrentPattern([System.Windows.Automation.WindowPattern]::Pattern).Close() }
+function Find-All([string]$Name) {
+    $cond = New-Object System.Windows.Automation.AndCondition((New-Object System.Windows.Automation.PropertyCondition($AE::NameProperty, $Name)), (New-Object System.Windows.Automation.PropertyCondition($AE::ControlTypeProperty, [System.Windows.Automation.ControlType]::Window)))
+    @($root.FindAll('Descendants', $cond))
+}
+function File-Dialog([string]$Title, [string]$Path) {
+    # Wait for the file dialog. Stop the capture when it does not show, so that a file that was never chosen cannot count as a success.
+    $d = $null; $end = (Get-Date).AddSeconds(20)
+    while (-not $d -and (Get-Date) -lt $end) {
+        $d = @(Find-All $Title) | Select-Object -First 1
+        if (-not $d) { $d = @($root.FindAll('Children', [System.Windows.Automation.Condition]::TrueCondition)) | Where-Object { $_.Current.ClassName -eq '#32770' } | Select-Object -First 1 }
+        if (-not $d) { Start-Sleep -Milliseconds 400 }
+    }
+    if (-not $d) { Shot-Screen ('fail-dialog-' + ($Title -replace '\W', '_')); throw ('The file dialog did not show: ' + $Title) }
+    Start-Sleep -Milliseconds 800
+    Focus-Win $d
+    Send-Keys ($Path -replace '([+^%~{}\[\]()])', '{$1}')
+    Send-Keys '{ENTER}'; Start-Sleep -Seconds 2
+}
+function Dump-Tree($Scope, [string]$Name) {
+    $out = foreach ($e in $Scope.FindAll('Descendants', [System.Windows.Automation.Condition]::TrueCondition)) {
+        $c = $e.Current; if ($c.Name -or $c.AutomationId) { '{0}|{1}|{2}|{3}' -f $c.ControlType.ProgrammaticName.Replace('ControlType.', ''), $c.AutomationId, $c.Name, $c.ClassName }
+    }
+    $out | Set-Content (Join-Path $OutDir ($Name + '.tree.txt'))
 }

@@ -9,12 +9,11 @@
     exist in docs\images are replaced (-AddNew also adds new ones). When the run log
     has an error, or a named image is missing, the script stops and replaces no image.
 
-    The steps take the dark theme and the light theme: the first-run page, the Installed
-    Applications page, and the About and Logging panes of the Options dialog. They
-    cover part of the images in docs\images. The images of the detection tests (the
-    Registry, File, Script and Compound results) are not taken yet, and a run without -Image
-    leaves them alone. The steps only read: they register no detection method and they
-    change nothing on the workstation except the app preferences of the lab account.
+    The steps take every image of docs\images: the detection tests (RegistryKeyValue, RegistryKey, File,
+    Script and Compound), the history, the import, the negative test, the Installed Applications
+    page, the Options dialog and the light theme. A run without -Section stops and replaces no image
+    when an image of docs\images was not taken. The steps run detection tests on the workstation and
+    change nothing there except the app preferences of the lab account and the history exports of the run.
 
     One capture runs at a time on a lab computer. The script takes the lock file
     C:\guide\capture.lock (New-Item fails when the file exists) and waits while another
@@ -222,6 +221,10 @@ try {
         $missing = @($wanted | Where-Object { $captured.BaseName -notcontains $_ })
         if ($missing.Count) { throw ("The capture did not produce these named images. No image was replaced.`n" + ($missing -join "`n")) }
         $captured = @($captured | Where-Object { $wanted -contains $_.BaseName })
+    }
+    elseif (-not $Section) {
+        $missing = @(Get-ChildItem $images -Filter *.png | Where-Object { -not $capturedNames.Contains($_.Name) } | ForEach-Object { $_.Name })
+        if ($missing.Count) { throw ("The capture did not produce these guide images. No image was replaced.`n" + ($missing -join "`n")) }
     }
     # Stage the new files first and move them in one pass. A failed move restores the old files.
     $staging = Join-Path $tmp 'staging'

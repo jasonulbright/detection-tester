@@ -39,3 +39,24 @@ Describe 'Guide capture tool' {
         @([regex]::Matches($steps, "(?m)^Section '([^']+)'")).Count | Should -BeGreaterThan 1
     }
 }
+
+Describe 'Guide capture steps cover every guide image' {
+    BeforeAll {
+        $steps = Get-Content -LiteralPath (Join-Path $script:Dir 'steps-guide.ps1') -Raw
+        $script:Taken = @([regex]::Matches($steps, "Shot\s+\S+\s+'([^']+)'") | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+        # An image that no step takes is listed here with the reason. The list is empty: the steps take every image.
+        $script:NotTaken = @{}
+        $script:Images = @(Get-ChildItem -LiteralPath (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs\images') -Filter '*.png' -File | ForEach-Object { $_.BaseName })
+    }
+
+    It 'takes every image under docs\images in a step, or lists it with a reason' {
+        $script:Images.Count | Should -BeGreaterThan 30
+        $bad = @($script:Images | Where-Object { $script:Taken -notcontains $_ -and -not $script:NotTaken.ContainsKey($_) })
+        $bad | Should -BeNullOrEmpty -Because ('no step takes: ' + ($bad -join ', '))
+    }
+
+    It 'lists no image that a step takes or that does not exist' {
+        $bad = @($script:NotTaken.Keys | Where-Object { $script:Taken -contains $_ -or $script:Images -notcontains $_ })
+        $bad | Should -BeNullOrEmpty
+    }
+}
