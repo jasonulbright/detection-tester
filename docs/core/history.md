@@ -19,7 +19,7 @@ At least one test.
 ### Read the history
 
 1. Run some tests.
-2. Read the grid below the result. The columns are **Time**, **Type**, **Mode** (Positive or Negative), **Target**, **Expected**, **Found** and **Result**.
+2. Read the grid below the result. The columns are **Time**, **Type**, **Mode** (Positive or Negative), **Target**, **Expected**, **Found** and **Result**. The window shows the column headers in capital letters.
 
 ![The history after several tests](../images/history-filled.png)
 
@@ -30,6 +30,8 @@ At least one test.
 3. Select **Test Detection**.
 
 ![The form after Use Selected on a Compound row](../images/use-selected.png)
+
+For a Compound row, the list **Clauses** shows each clause as JSON text, not as the `RK:` and `FILE:` lines of the import.
 
 ### Export the history
 

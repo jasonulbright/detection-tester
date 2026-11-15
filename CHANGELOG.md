@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [2026.11.15.0023] - 2026-11-15
+
+## 38 guide images from one capture command
+
+### Added
+
+- Add capture steps for the 31 guide images that the capture tool did not take.
+- Check that a step takes every image under docs\images.
+
+### Fixed
+
+- Wait for tooltips to close before the capture takes an image.
+
 ## [2026.11.15.0022] - 2026-11-15
 
 ## 975 tests and a capture tool for 7 guide images
