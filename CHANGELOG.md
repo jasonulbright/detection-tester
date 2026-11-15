@@ -8,6 +8,10 @@
 - Share one window test session across all window test files.
 - Update the vendored SuiteCommon with the shared window test helpers.
 
+### Changed
+
+- Update the vendored SuiteCommon to give dialog buttons 1 px borders.
+
 ## [2026.11.14.0020] - 2026-11-14
 
 ## 3 new guard tests
