@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [2026.11.15.0022] - 2026-11-15
+
+## 975 tests and a capture tool for 7 guide images
 ### Added
 
 - Add a guide capture tool for the main window and the Options dialog, in both themes.
