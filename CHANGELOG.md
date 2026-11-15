@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add window tests for the hover, focus and pressed states of the buttons and for the chrome of the Options dialog, in both themes.
+- Share one window test session across all window test files.
+- Update the vendored SuiteCommon with the shared window test helpers.
+
 ## [2026.11.14.0020] - 2026-11-14
 
 ## 3 new guard tests
