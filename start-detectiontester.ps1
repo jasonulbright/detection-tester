@@ -839,18 +839,12 @@ $script:ViewButtons = @(
     @{ Name = 'InstalledApps';   Button = $btnInstalled }
 )
 
-# The inactive title bar of the light theme has one value: the brush MahApps.Brushes.WindowTitle.NonActive of MainWindow.xaml
-# (white title text is 7.0:1 on it; the SuiteCommon default #4BA3E0 is 2.6:1). SuiteCommon reads it here, and the Options dialog takes the same brush.
-$script:TitleBarInactiveBrush = $window.FindResource('MahApps.Brushes.WindowTitle.NonActive')
-$__suiteBrushes = @{ TitleBarInactive = $script:TitleBarInactiveBrush }
-
 Initialize-SuiteTheme -Window $window `
     -IsDarkGetter { [bool]$script:Prefs.DarkMode } `
     -ActiveViewGetter { $script:ActiveView } `
     -ViewButtons $script:ViewButtons `
     -OptionsButton $btnOptions `
-    -LogLabel $lblLogOutput `
-    -Brushes $__suiteBrushes
+    -LogLabel $lblLogOutput
 
 # ---------------------------------------------------------------------------
 # Handler-reachable scriptblocks (shell)
@@ -931,7 +925,7 @@ $script:ShowOptionsDialog = {
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Steel.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <!-- Contrast override of the text box border, the same as in MainWindow.xaml. The inactive title bar brush comes from MainWindow.xaml too (set in code). -->
+            <!-- Contrast override of the text box border, the same as in MainWindow.xaml. -->
             <SolidColorBrush x:Key="MahApps.Brushes.TextBox.Border" Color="#7F7F7F"/>
             <!-- The one button template and the one button style, the same as in MainWindow.xaml. No color literal:
                  the colors come from the MahApps theme resources. -->
@@ -962,9 +956,8 @@ $script:ShowOptionsDialog = {
                 </ControlTemplate.Triggers>
             </ControlTemplate>
             <Style x:Key="ThemedButtonStyle" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Square}">
-
+                <Setter Property="Template" Value="{DynamicResource SuiteNeutralButtonTemplate}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
-                <Setter Property="Template" Value="{StaticResource ThemedButtonTemplate}"/>
                 <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -993,11 +986,11 @@ $script:ShowOptionsDialog = {
                 <Setter Property="Height" Value="32"/>
                 <Setter Property="Margin" Value="0,0,8,0"/>
             </Style>
-            <!-- The accent fill is the theme highlight (#4A5763 dark, #00589F light): white text is 7:1 on both.
-                 The border is the theme foreground: the highlight alone is 2.1:1 on the dark dialog.
-                 The plain accent fill of the light theme is 4.49:1. -->
+            <!-- The accent fill is MahApps.Brushes.AccentBase. SuiteAccentButtonTemplate sets the hover and pressed fills from it, one visible step each.
+                 The plain accent fill of the light theme is 4.49:1 with white text: Tests\KnownContrastDefects.ps1 lists it. -->
             <Style x:Key="DialogAccentButton" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
-                <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Highlight}"/>
+                <Setter Property="Template" Value="{DynamicResource SuiteAccentButtonTemplate}"/>
+                <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.AccentBase}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
                 <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.IdealForeground}"/>
                 <Setter Property="MinWidth" Value="90"/>
@@ -1125,7 +1118,6 @@ $script:ShowOptionsDialog = {
     Install-TitleBarDragFallback -Window $dlg
 
     # The dialog takes the theme of the window. SuiteCommon sets the theme and the title bar brushes.
-    $dlg.Resources['MahApps.Brushes.WindowTitle.NonActive'] = $script:TitleBarInactiveBrush
     Set-DialogTheme -Dialog $dlg -IsDark ([bool]$script:Prefs.DarkMode)
 
     $dlg.Owner = $window

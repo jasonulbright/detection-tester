@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Close stray windows of the window tests after each STA call.
+- Keep pressed buttons blue instead of black, in both themes.
+- Use the light blue inactive title bar of SuiteCommon, with dark caption text.
+
+### Changed
+
+- Check dialog bodies, input colors and title bars against the theme in both themes.
+- Sync the vendored SuiteCommon with the shared button templates and title bar helpers.
+
 ## [2026.11.14.0021] - 2026-11-14
 
 ## 933 tests, with window tests for button states

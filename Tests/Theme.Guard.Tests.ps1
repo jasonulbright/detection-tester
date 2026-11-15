@@ -300,7 +300,7 @@ Describe 'Theme helpers of SuiteCommon behave and are used (a, b)' {
         $arrInit = @(Get-AstCommand -Ast $objShell -Name 'Initialize-SuiteTheme')
         $arrInit.Count | Should -Be 1
         (Get-CommandParameterValue -Command $arrInit[0] -Name 'LogLabel') | Should -Be '$lblLogOutput'
-        (Get-CommandParameterValue -Command $arrInit[0] -Name 'Brushes') | Should -Not -BeNullOrEmpty
+        (Get-CommandParameterValue -Command $arrInit[0] -Name 'Brushes') | Should -BeNullOrEmpty -Because 'the inactive title bar is the SuiteCommon value, with no app override'
         $objApply = Get-AssignedScriptBlock -Ast $objShell -Variable 'script:ApplyTheme'
         $objApply | Should -Not -BeNullOrEmpty
         @(Get-AstCommand -Ast $objApply -Name 'Update-SidebarButtonTheme').Count | Should -BeGreaterThan 0
@@ -680,10 +680,9 @@ Describe 'Module style keys resolve against MainWindow.xaml (d)' {
 Describe 'Static XAML guards: button size, Opacity, resource brushes, Pester requirement (d)' {
     BeforeAll {
         # The hex colors that a brush resource may hold: contrast overrides of MahApps theme brushes. Each key has one exact value.
-        # #7F7F7F is 4.0:1 on white and 3.8:1 on #252525 (a control border needs 3:1). #595959 is 7.0:1 with white title text.
+        # #7F7F7F is 4.0:1 on white and 3.8:1 on #252525 (a control border needs 3:1).
         $script:hashBrushAllow = @{
             'MahApps.Brushes.TextBox.Border'        = '#7F7F7F'
-            'MahApps.Brushes.WindowTitle.NonActive' = '#595959'
         }
     }
 
@@ -698,7 +697,7 @@ Describe 'Static XAML guards: button size, Opacity, resource brushes, Pester req
         }
         $intButton | Should -BeGreaterThan 12
         $intStyle | Should -BeGreaterThan 15
-        $intBrush | Should -BeGreaterOrEqual 3
+        $intBrush | Should -BeGreaterOrEqual 2
     }
 
     It 'sets no size or padding on a Button element in <_.Source>' -ForEach $script:arrOwnXamlDocD {
@@ -723,7 +722,6 @@ Describe 'Static XAML guards: button size, Opacity, resource brushes, Pester req
             foreach ($objBrush in @($xml.SelectNodes("//*[@Color and @*[local-name()='Key']]"))) { [void]$arrFound.Add((Get-XamlKey $objBrush)) }
         }
         $arrFound | Should -Contain 'MahApps.Brushes.TextBox.Border'
-        $arrFound | Should -Contain 'MahApps.Brushes.WindowTitle.NonActive'
         @($arrFound | Where-Object { -not $script:hashBrushAllow.ContainsKey($_) }) | Should -BeNullOrEmpty
     }
 

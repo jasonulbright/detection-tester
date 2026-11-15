@@ -69,9 +69,9 @@ Describe 'Test-WindowTestsAllowed signature' {
 
 Describe 'Window test files' {
     It 'checks the guard in every test file that opens a window' {
-        $self = 'WindowGuard.Tests.ps1'
+        $self = 'WindowGuard.Tests.ps1', 'WindowCleanup.Guard.Tests.ps1'
         $pattern = 'Invoke-WpfSta|New-WpfWindow|Open-TestWindow|\.ShowDialog\(|\.Show\(\)'
-        $files = @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter '*.Tests.ps1' -File | Where-Object { $_.Name -ne $self })
+        $files = @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter '*.Tests.ps1' -File | Where-Object { $_.Name -notin $self })
         $files.Count | Should -BeGreaterThan 0
         $missing = @($files | Where-Object {
                 $text = Get-Content -LiteralPath $_.FullName -Raw

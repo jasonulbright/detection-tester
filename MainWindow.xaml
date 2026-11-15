@@ -24,10 +24,8 @@
                  below with DynamicResource, so every style of the app is defined here once.
 
                  Contrast overrides of the MahApps theme brushes. One value passes in both themes:
-                 #7F7F7F is 4.0:1 on white and 3.8:1 on #252525 (control borders need 3:1);
-                 white title text is 7.0:1 on #595959 (the inactive title bar). -->
+                 #7F7F7F is 4.0:1 on white and 3.8:1 on #252525 (control borders need 3:1). -->
             <SolidColorBrush x:Key="MahApps.Brushes.TextBox.Border" Color="#7F7F7F"/>
-            <SolidColorBrush x:Key="MahApps.Brushes.WindowTitle.NonActive" Color="#595959"/>
 
             <!-- The one button template and the one button style. Every Button of the window takes ThemedButtonStyle
                  or a style that is based on it. No color literal is allowed here: the colors come from the MahApps
@@ -62,9 +60,8 @@
             </ControlTemplate>
 
             <Style x:Key="ThemedButtonStyle" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Square}">
-
+                <Setter Property="Template" Value="{DynamicResource SuiteNeutralButtonTemplate}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
-                <Setter Property="Template" Value="{StaticResource ThemedButtonTemplate}"/>
                 <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -114,6 +111,8 @@
 
             <!-- The sidebar buttons. SuiteCommon sets their colors for the theme (Update-SidebarButtonTheme). -->
             <Style x:Key="ViewButtonStyle" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
+                <!-- The light theme paints the sidebar buttons blue (Update-SidebarButtonTheme), so they take the accent template: hover and pressed stay blue. -->
+                <Setter Property="Template" Value="{DynamicResource SuiteAccentButtonTemplate}"/>
                 <Setter Property="Height" Value="42"/>
                 <Setter Property="Margin" Value="8,3,8,3"/>
                 <Setter Property="Padding" Value="12,0,12,0"/>
@@ -133,6 +132,7 @@
             <!-- The one primary button style: the theme highlight (#4A5763 dark, #00589F light) with white text, 7:1 on both.
                  The border is the theme foreground, because the highlight alone is 2.1:1 on the dark window. -->
             <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
+                <Setter Property="Template" Value="{DynamicResource SuiteAccentButtonTemplate}"/>
                 <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Highlight}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
                 <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.IdealForeground}"/>
