@@ -256,6 +256,15 @@ Describe 'Contrast <Theme>' -ForEach @(@{ Theme = 'dark' }, @{ Theme = 'light' }
         $new | Should -BeNullOrEmpty -Because ('a new contrast violation appeared: ' + ($new -join ', '))
         $fixed | Should -BeNullOrEmpty -Because ('a known defect is fixed: remove it from Get-KnownContrastDefect: ' + ($fixed -join ', '))
     }
+
+    It 'dims every disabled control clearly: enabled text over disabled text is 1.25 or more, and the disabled text stays readable (1.5 or more)' {
+        # A disabled control is exempt from 4.5:1 (WCAG 1.4.3). It must look disabled, and its label must not vanish.
+        $rows = @(@($script:Measured['{0}|1440x900' -f $Theme]) | ForEach-Object { $_.Interactive } | Where-Object { $null -ne $_.EnabledText -and $null -ne $_.DisabledText })
+        $rows.Count | Should -BeGreaterThan 5
+        $bad = @($rows | Where-Object { ($_.EnabledText / [math]::Max($_.DisabledText, 0.01)) -lt 1.25 -or $_.DisabledText -lt 1.5 } |
+                ForEach-Object { '{0}: enabled {1}, disabled {2}' -f $_.Name, $_.EnabledText, $_.DisabledText })
+        $bad | Should -BeNullOrEmpty -Because ('these controls do not look dimmed, or the label vanishes: ' + ($bad -join ', '))
+    }
 }
 
 # The states that the enabled and disabled measurement does not reach: a selected row, cell, list item and combo item, and the

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Treat disabled controls as exempt from 4.5:1 text contrast and require them to look dimmed.
+
+### Fixed
+
+- Dim the text of disabled text boxes and combo boxes.
+
 ## [2026.11.15.0023] - 2026-11-15
 
 ## 38 guide images from one capture command
