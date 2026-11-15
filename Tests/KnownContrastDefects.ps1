@@ -3,27 +3,17 @@
 # violation is not listed (a new defect) and when a listed one no longer happens
 # (remove it here). Run Show-ContrastViolations.ps1 to print the current list.
 #
-# Text must reach 4.5:1 and a control border 3:1, enabled and disabled, in both
-# themes. The known defects come from the shared button templates of SuiteCommon:
-#   - DisabledText: the template fades a disabled button with an opacity of 0.5, so the disabled text is below 4.5:1.
-#   - btnOK:EnabledText and text:OK (light theme): the plain accent fill of the dialog primary button is white text at 4.49:1.
-# Both go when SuiteCommon fixes them and the vendored copy is synced.
-# A defect that comes from the SuiteCommon palette belongs here until app-packager-suite
-# fixes it and the vendored copy is synced.
+# Text must reach 4.5:1 and a control border 3:1 when the control is enabled, in both themes. A disabled control is exempt:
+# WCAG 1.4.3 (Contrast Minimum) exempts inactive user interface components, so the disabled text and the disabled border
+# have no target. The shared button templates of SuiteCommon dim a disabled button by opacity 0.5. The window test requires
+# that a disabled control stays clearly dimmed (see the test Disabled controls in Window.Tests.ps1).
+# The known defect that remains comes from the SuiteCommon palette: btnOK:EnabledText and text:OK (light theme), the plain accent
+# fill of the dialog primary button with white text at 4.49:1. It goes when SuiteCommon fixes it and the vendored copy is synced.
 function Get-KnownContrastDefect {
     param([Parameter(Mandatory)][ValidateSet('dark', 'light')][string]$Theme)
     switch ($Theme) {
-        'dark' { @(
-                'btnCancel:DisabledText', 'btnClearHistory:DisabledText', 'btnCopyDetails:DisabledText', 'btnDetection:DisabledText', 'btnExportCsv:DisabledText', 'btnExportHtml:DisabledText', 'btnImportManifest:DisabledText',
-                'btnInstalled:DisabledText', 'btnOK:DisabledText', 'btnOpenAppData:DisabledText', 'btnOpenLogFolder:DisabledText', 'btnOptions:DisabledText', 'btnRefresh:DisabledText', 'btnRepopulate:DisabledText',
-                'btnTest:DisabledText', 'btnUseForDetection:DisabledText'
-            ) }
-        'light' { @(
-                'btnCancel:DisabledText', 'btnClearHistory:DisabledText', 'btnCopyDetails:DisabledText', 'btnDetection:DisabledText', 'btnExportCsv:DisabledText', 'btnExportHtml:DisabledText', 'btnImportManifest:DisabledText',
-                'btnInstalled:DisabledText', 'btnOK:DisabledText', 'btnOpenAppData:DisabledText', 'btnOpenLogFolder:DisabledText', 'btnOptions:DisabledText', 'btnRefresh:DisabledText', 'btnRepopulate:DisabledText',
-                'btnTest:DisabledText', 'btnUseForDetection:DisabledText',
-                'btnOK:EnabledText', 'text:OK'
-            ) }
+        'dark' { @() }
+        'light' { @('btnOK:EnabledText', 'text:OK') }
     }
 }
 function Test-LargeText {
@@ -44,7 +34,8 @@ function Get-ContrastViolationKey {
             if ($r.Ratio -lt $min) { [void]$keys.Add(('text:{0}' -f $r.Text)) }
         }
         foreach ($c in $v.Interactive) {
-            foreach ($metric in 'EnabledText', 'DisabledText', 'EnabledBorder', 'DisabledBorder') {
+            # A disabled control is exempt from the text and border targets (WCAG 1.4.3, inactive components). Its dimming is checked apart.
+            foreach ($metric in 'EnabledText', 'EnabledBorder') {
                 $value = $c.$metric
                 if ($null -eq $value) { continue }
                 $min = if ($metric -like '*Text') { 4.5 } else { 3.0 }

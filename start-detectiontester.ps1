@@ -927,6 +927,24 @@ $script:ShowOptionsDialog = {
             </ResourceDictionary.MergedDictionaries>
             <!-- Contrast override of the text box border, the same as in MainWindow.xaml. -->
             <SolidColorBrush x:Key="MahApps.Brushes.TextBox.Border" Color="#7F7F7F"/>
+            <!-- Text boxes and combo boxes: the same gray border as the SuiteCommon implicit style, and a disabled control shows dimmed text.
+                 A disabled control is exempt from 4.5:1 (WCAG 1.4.3), and the window test requires that it looks dimmed. -->
+            <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style TargetType="ComboBox" BasedOn="{StaticResource MahApps.Styles.ComboBox}">
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
             <!-- The one button template and the one button style, the same as in MainWindow.xaml. No color literal:
                  the colors come from the MahApps theme resources. -->
             <ControlTemplate x:Key="ThemedButtonTemplate" TargetType="Button">

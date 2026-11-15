@@ -27,6 +27,25 @@
                  #7F7F7F is 4.0:1 on white and 3.8:1 on #252525 (control borders need 3:1). -->
             <SolidColorBrush x:Key="MahApps.Brushes.TextBox.Border" Color="#7F7F7F"/>
 
+            <!-- Text boxes and combo boxes: the same gray border as the SuiteCommon implicit style, and a disabled control shows dimmed text.
+                 A disabled control is exempt from 4.5:1 (WCAG 1.4.3), and the window test requires that it looks dimmed. -->
+            <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style TargetType="ComboBox" BasedOn="{StaticResource MahApps.Styles.ComboBox}">
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
             <!-- The one button template and the one button style. Every Button of the window takes ThemedButtonStyle
                  or a style that is based on it. No color literal is allowed here: the colors come from the MahApps
                  theme resources, so the same markup works in the dark and the light theme. Hover shows the theme foreground as border color.
