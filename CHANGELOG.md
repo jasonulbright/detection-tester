@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2026.11.14.0021] - 2026-11-14
+
+## 933 tests, with window tests for button states
+
 ### Added
 
 - Add window tests for the hover, focus and pressed states of the buttons and for the chrome of the Options dialog, in both themes.
