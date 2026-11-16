@@ -49,6 +49,13 @@ function Size-Win($Win, [int]$W = 1440, [int]$H = 900) {
     $w2 = [Math]::Min($W, $sw.Width); $h2 = [Math]::Min($H, $sw.Height - 40)
     [void][NativeUi]::MoveWindow($hh, 0, 0, $w2, $h2, $true); Start-Sleep -Milliseconds 900
 }
+function Maximize-Win($Win) {
+    # The design size is the work area of a maximized window on a 1080p screen (D-20): the window fills it, nothing is hardcoded.
+    $Win.GetCurrentPattern([System.Windows.Automation.WindowPattern]::Pattern).SetWindowVisualState([System.Windows.Automation.WindowVisualState]::Maximized)
+    Start-Sleep -Milliseconds 1500
+    $wa = [System.Windows.Forms.SystemInformation]::WorkingArea
+    Log ('work area {0}x{1}' -f $wa.Width, $wa.Height)
+}
 function Shot($Win, [string]$Name) {
     # The mouse leaves the window, so that no button shows its hover state in the image.
     [void][NativeUi]::SetCursorPos(1900, 1060)
@@ -64,6 +71,11 @@ function Shot($Win, [string]$Name) {
     $h = [int][Math]::Min($r.Height, [System.Windows.Forms.SystemInformation]::VirtualScreen.Height - $y)
     $bmp = New-Object System.Drawing.Bitmap $w, $h; $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.CopyFromScreen($x, $y, 0, 0, (New-Object System.Drawing.Size $w, $h)); $g.Dispose()
+    # The check of this shot (D-21): the mean luminance of a grid of pixels, and a warning for a blank image.
+    $lum = 0.0; $cnt = 0; $same = 0; $first = $bmp.GetPixel(2, 2)
+    for ($sy = 8; $sy -lt $h; $sy += 40) { for ($sx = 8; $sx -lt $w; $sx += 40) { $c = $bmp.GetPixel($sx, $sy); $lum += (0.2126 * $c.R + 0.7152 * $c.G + 0.0722 * $c.B) / 255; $cnt++; if ($c.ToArgb() -eq $first.ToArgb()) { $same++ } } }
+    Log ('SAMPLE {0} meanLuminance {1:N2}' -f $Name, ($lum / [Math]::Max(1, $cnt)))
+    if ($cnt -gt 0 -and ($same / $cnt) -gt 0.98) { Log ('WARN {0} looks blank' -f $Name) }
     $bmp.Save((Join-Path $OutDir ($Name + '.png')), [System.Drawing.Imaging.ImageFormat]::Png); $bmp.Dispose()
     Log ('shot {0} {1}x{2}' -f $Name, $w, $h)
 }

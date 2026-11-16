@@ -11,7 +11,7 @@ function Reset-AppFiles { foreach ($f in 'prefs.json', 'windowstate.json') { Rem
 Stop-App 'start-detectiontester.ps1'
 Reset-AppFiles
 $win = Start-App 'start-detectiontester.ps1' 'Detection Tester'
-Size-Win $win 1440 900
+Maximize-Win $win
 $win = Find-Top 'Detection Tester' 10
 
 # ---- helpers -------------------------------------------------------------------------------------------------------------------
@@ -156,7 +156,7 @@ Section 'restart' {
     Start-Sleep -Seconds 2
     Stop-App 'start-detectiontester.ps1'
     $script:win = Start-App 'start-detectiontester.ps1' 'Detection Tester'
-    Size-Win $script:win 1440 900
+    Maximize-Win $script:win
     $script:win = Find-Top 'Detection Tester' 10
     Wait-InstalledRows
     Shot $script:win 'start-reopen'

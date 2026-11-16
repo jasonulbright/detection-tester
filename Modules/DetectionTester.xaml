@@ -80,20 +80,20 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="0" Grid.Column="0" Text="Key Path:"      VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="rkvKeyPath"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="1" Grid.Column="0" Text="Value Name:"    VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="rkvValueName" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="2" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,4"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="rkvOperator"  SelectedIndex="0" Margin="0,4">
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="0" Grid.Column="0" Text="Key Path:"      VerticalAlignment="Center" Margin="0,2"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="rkvKeyPath" Height="26"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="1" Grid.Column="0" Text="Value Name:"    VerticalAlignment="Center" Margin="0,2"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="rkvValueName" Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="2" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,2"/>
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="rkvOperator"  SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="IsEquals"/>
                         <ComboBoxItem Content="GreaterEquals"/>
                         <ComboBoxItem Content="GreaterThan"/>
                         <ComboBoxItem Content="LessEquals"/>
                         <ComboBoxItem Content="LessThan"/>
                     </ComboBox>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="3" Grid.Column="0" Text="Expected:"      VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="rkvExpected"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="3" Grid.Column="0" Text="Expected:"      VerticalAlignment="Center" Margin="0,2"/>
+                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="rkvExpected" Height="26"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                 </Grid>
             </StackPanel>
 
@@ -124,7 +124,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Key Path:"     VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Column="1" x:Name="rkKeyPath"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
+                    <TextBox   Grid.Column="1" x:Name="rkKeyPath" Height="26"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                 </Grid>
             </StackPanel>
 
@@ -155,26 +155,26 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="0" Grid.Column="0" Text="File Path:"     VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="fileFilePath" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="0" Grid.Column="0" Text="File Path:"     VerticalAlignment="Center" Margin="0,2"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="fileFilePath" Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"
                                ToolTip="Enter the folder path. A variable such as %ProgramFiles% expands."/>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="1" Grid.Column="0" Text="File Name:"     VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="fileFileName" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"/>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="2" Grid.Column="0" Text="Property Type:" VerticalAlignment="Center" Margin="0,4"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="filePropType" SelectedIndex="0" Margin="0,4">
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="1" Grid.Column="0" Text="File Name:"     VerticalAlignment="Center" Margin="0,2"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="fileFileName" Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="2" Grid.Column="0" Text="Property Type:" VerticalAlignment="Center" Margin="0,2"/>
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="filePropType" SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="Existence"/>
                         <ComboBoxItem Content="Version"/>
                     </ComboBox>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="3" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,4"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="3" Grid.Column="1" x:Name="fileOperator" SelectedIndex="0" Margin="0,4">
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="3" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,2"/>
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="3" Grid.Column="1" x:Name="fileOperator" SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="GreaterEquals"/>
                         <ComboBoxItem Content="GreaterThan"/>
                         <ComboBoxItem Content="IsEquals"/>
                         <ComboBoxItem Content="LessEquals"/>
                         <ComboBoxItem Content="LessThan"/>
                     </ComboBox>
-                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="4" Grid.Column="0" Text="Expected:"      VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="fileExpected" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,4"
+                    <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="4" Grid.Column="0" Text="Expected:"      VerticalAlignment="Center" Margin="0,2"/>
+                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="fileExpected" Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"
                                ToolTip="Enter the expected version. The tool uses it only for the Version property type."/>
                 </Grid>
             </StackPanel>
@@ -213,7 +213,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Connector:" VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Column="1" x:Name="compoundConnector" IsReadOnly="True" Margin="0,4"
+                    <TextBox   Grid.Column="1" x:Name="compoundConnector" Height="26" IsReadOnly="True" Margin="0,2"
                                FontFamily="Cascadia Code, Consolas, Courier New"/>
                 </Grid>
                 <TextBlock Style="{DynamicResource FieldLabelStyle}" Text="Clauses:" Margin="0,8,0,4"/>

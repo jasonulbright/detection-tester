@@ -159,7 +159,7 @@ Describe 'Window state' {
         Mock Write-Log {}
         $script:wsPath = Join-Path $TestDrive ('ws-' + [guid]::NewGuid().ToString('N') + '.json')
         $script:window = [pscustomobject]@{
-            Width = 1100; Height = 750; Left = 10; Top = 10; ActualWidth = 1100; ActualHeight = 750
+            Width = 1920; Height = 1032; Left = 10; Top = 10; ActualWidth = 1920; ActualHeight = 1032
             WindowState = [System.Windows.WindowState]::Normal; WindowStartupLocation = [System.Windows.WindowStartupLocation]::CenterScreen
             RestoreBounds = New-Object System.Windows.Rect(50, 60, 1000, 700)
         }
@@ -167,9 +167,10 @@ Describe 'Window state' {
         $script:vsTop = [System.Windows.SystemParameters]::VirtualScreenTop
     }
 
-    It 'changes nothing when there is no saved state' {
+    It 'opens maximized and changes no size when there is no saved state' {
         Restore-DTWindowState
-        $script:window.Width | Should -Be 1100
+        $script:window.WindowState | Should -Be ([System.Windows.WindowState]::Maximized)
+        $script:window.Width | Should -Be 1920
         $script:window.WindowStartupLocation | Should -Be ([System.Windows.WindowStartupLocation]::CenterScreen)
     }
 
@@ -204,8 +205,8 @@ Describe 'Window state' {
     ) {
         Set-Content -LiteralPath $script:wsPath -Value (@{ Left = $script:vsLeft + 20; Top = $script:vsTop + 20; Width = $Width; Height = $Height; Maximized = $false } | ConvertTo-Json)
         Restore-DTWindowState
-        if ($Width -le 600) { $script:window.Width | Should -Be 1100 } else { $script:window.Width | Should -Be $Width }
-        if ($Height -le 400) { $script:window.Height | Should -Be 750 } else { $script:window.Height | Should -Be $Height }
+        if ($Width -le 600) { $script:window.Width | Should -Be 1920 } else { $script:window.Width | Should -Be $Width }
+        if ($Height -le 400) { $script:window.Height | Should -Be 1032 } else { $script:window.Height | Should -Be $Height }
     }
 
     It 'maximizes the window when the saved state says so' {
@@ -218,7 +219,7 @@ Describe 'Window state' {
         Set-Content -LiteralPath $script:wsPath -Value 'not json'
         { Restore-DTWindowState } | Should -Not -Throw
         Should -Invoke Write-Log -Times 1 -Exactly -ParameterFilter { $Message -like 'Restore-DTWindowState:*' }
-        $script:window.Width | Should -Be 1100
+        $script:window.Width | Should -Be 1920
     }
 
     It 'saves the size of a normal window' {

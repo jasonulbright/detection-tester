@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     Run it when the window test reports a new or a fixed violation, to see the
-    current list. Opens the windows off screen at 1440x900, as Window.Tests.ps1 does.
+    current list. Opens the windows off screen at the design size (the work area of the session), as Window.Tests.ps1 does.
 #>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Justification='Console tool.')]
 param()
@@ -19,7 +19,7 @@ try {
     $ast = Get-ShellAst
     $dialogXaml = @($ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.StringConstantExpressionAst] -and $n.Value -match '^\s*<Controls:MetroWindow' }, $true) | ForEach-Object { $_.Value })
     foreach ($dark in $true, $false) {
-        $r = Invoke-WpfSta -Arguments @{ Dark = $dark; W = 1440; H = 900; Config = $script:AppConfig; DialogXaml = $dialogXaml[0]; Parts = (Get-ShellRuntimePart); TempDir = $tempDir } -Script $script:MeasureAppScript
+        $r = Invoke-WpfSta -Arguments @{ Dark = $dark; W = (Get-DesignSize).W; H = (Get-DesignSize).H; Config = $script:AppConfig; DialogXaml = $dialogXaml[0]; Parts = (Get-ShellRuntimePart); TempDir = $tempDir } -Script $script:MeasureAppScript
         $keys = Get-ContrastViolationKey -Views @($r)
         Write-Host ("== {0}" -f $(if ($dark) { 'dark' } else { 'light' }))
         Write-Host (($keys | ForEach-Object { "'" + ($_ -replace "'", "''") + "'" }) -join ', ')

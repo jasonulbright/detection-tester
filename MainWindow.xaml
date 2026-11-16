@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
     Title="Detection Tester"
-    Width="1100" Height="750"
+    Width="1920" Height="1032"
     MinWidth="900" MinHeight="600"
     WindowStartupLocation="CenterScreen"
     TitleCharacterCasing="Normal"
@@ -39,6 +39,7 @@
             </Style>
             <Style TargetType="ComboBox" BasedOn="{StaticResource MahApps.Styles.ComboBox}">
                 <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
+                <Setter Property="Height" Value="26"/>
                 <Style.Triggers>
                     <Trigger Property="IsEnabled" Value="False">
                         <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray.MouseOver}"/>
@@ -132,8 +133,8 @@
             <Style x:Key="ViewButtonStyle" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
                 <!-- The light theme paints the sidebar buttons blue (Update-SidebarButtonTheme), so they take the accent template: hover and pressed stay blue. -->
                 <Setter Property="Template" Value="{DynamicResource SuiteAccentButtonTemplate}"/>
-                <Setter Property="Height" Value="42"/>
-                <Setter Property="Margin" Value="8,3,8,3"/>
+                <Setter Property="Height" Value="36"/>
+                <Setter Property="Margin" Value="8,2,8,2"/>
                 <Setter Property="Padding" Value="12,0,12,0"/>
                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
                 <Setter Property="FontSize" Value="13"/>
@@ -143,7 +144,7 @@
             <Style x:Key="OptionsButtonStyle" TargetType="Button" BasedOn="{StaticResource ViewButtonStyle}"/>
 
             <Style x:Key="SquareInlineButtonStyle" TargetType="Button" BasedOn="{StaticResource ThemedButtonStyle}">
-                <Setter Property="Height" Value="28"/>
+                <Setter Property="Height" Value="26"/>
                 <Setter Property="Padding" Value="10,0,10,0"/>
                 <Setter Property="Margin" Value="4,0,4,0"/>
             </Style>
@@ -155,7 +156,7 @@
                 <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Highlight}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray2}"/>
                 <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.IdealForeground}"/>
-                <Setter Property="Height" Value="32"/>
+                <Setter Property="Height" Value="28"/>
                 <Setter Property="Padding" Value="14,0,14,0"/>
                 <Setter Property="Margin" Value="4,0,4,0"/>
                 <Style.Triggers>
@@ -197,7 +198,8 @@
                 <Setter Property="GridLinesVisibility" Value="Horizontal"/>
                 <Setter Property="RowHeaderWidth" Value="0"/>
                 <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="ColumnHeaderHeight" Value="30"/>
+                <Setter Property="ColumnHeaderHeight" Value="26"/>
+                <Setter Property="RowHeight" Value="24"/>
                 <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.ThemeBackground}"/>
                 <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.ThemeForeground}"/>
                 <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource MahApps.Brushes.Gray8}"/>

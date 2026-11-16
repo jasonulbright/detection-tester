@@ -14,6 +14,16 @@ $script:HarnessRoot = Split-Path -Parent $PSScriptRoot
 
 if (-not (Test-Path variable:global:HarnessSession)) { $global:HarnessSession = $null }
 
+# The design size of the main window: the work area of a maximized window in this session (a 1080p screen at 100 percent
+# scaling gives 1920x1032). The tests read it here and hardcode no pixel size except the 1024x720 minimum-size case.
+function Get-DesignSize {
+    Add-Type -AssemblyName PresentationFramework -ErrorAction SilentlyContinue
+    $wa = [System.Windows.SystemParameters]::WorkArea
+    # A session with a work area as small as the 1024x720 minimum-size case (a CI runner) gets a floor of 1280x800, so that the two cases differ.
+    $w = [Math]::Max(1280, [int]$wa.Width); $h = [Math]::Max(800, [int]$wa.Height)
+    [pscustomobject]@{ W = $w; H = $h; Key = ('{0}x{1}' -f $w, $h) }
+}
+
 # Window tests open a window only when SUITE_ALLOW_WINDOW_TESTS is 1.
 function Test-WindowTestsAllowed {
     [CmdletBinding()]
@@ -36,7 +46,7 @@ $script:HarnessBootstrap = {
 
     # Opens a window from a XAML file, or from XAML text, off screen with the theme applied.
     function Open-TestWindow {
-        param([string]$XamlPath, [string]$XamlText, [bool]$Dark = $true, [double]$Width = 1440, [double]$Height = 900)
+        param([string]$XamlPath, [string]$XamlText, [bool]$Dark = $true, [double]$Width = 0, [double]$Height = 0)
         $global:HarnessDark = $Dark
         if (-not $XamlText) { $XamlText = Get-Content -LiteralPath $XamlPath -Raw -Encoding UTF8 }
         [xml]$xaml = $XamlText
@@ -47,6 +57,7 @@ $script:HarnessBootstrap = {
         $visible = ($env:SUITE_VISIBLE_WINDOWS -eq '1')
         $w.Left = $(if ($visible) { 80 } else { -32000 }); $w.Top = $(if ($visible) { 80 } else { -32000 })
         $w.ShowInTaskbar = $visible
+        if ($Width -le 0 -or $Height -le 0) { $wa = [System.Windows.SystemParameters]::WorkArea; $Width = [Math]::Max(1280, [int]$wa.Width); $Height = [Math]::Max(800, [int]$wa.Height) }
         $w.Width = $Width; $w.Height = $Height
         [void][ControlzEx.Theming.ThemeManager]::Current.ChangeTheme($w, $(if ($Dark) { 'Dark.Steel' } else { 'Light.Blue' }))
         $w.Show()
@@ -208,13 +219,13 @@ $script:HarnessBootstrap = {
 }
 
 # Measures the main window with every configured view, and the Options dialog with its two panes, in one theme and at one
-# size. Runs on the STA thread (Invoke-WpfSta). Contrast is read only at 1440x900; clipped text and off-screen controls
+# size. Runs on the STA thread (Invoke-WpfSta). Contrast is read only at the design size; clipped text and off-screen controls
 # are read at both sizes.
 $script:MeasureAppScript = {
             $cfg = $Arguments.Config
             $w = Open-TestWindow -XamlPath (Join-Path $Root $cfg.Xaml) -Dark $Arguments.Dark -Width $Arguments.W -Height $Arguments.H
-            # Contrast is read only at 1440x900. Clipped text and off-screen controls are read at both sizes.
-            $full = $Arguments.W -ge 1440
+            # Contrast is read only at the design size (the work area). Clipped text and off-screen controls are read at both sizes.
+            $full = -not ($Arguments.W -eq 1024 -and $Arguments.H -eq 720)
             $out = @()
             Initialize-ShellRuntime -Window $w -Parts $Arguments.Parts -LogPath (Join-Path $Arguments.TempDir 'measure.log')
             try {
@@ -235,7 +246,7 @@ $script:MeasureAppScript = {
             }
             finally { $w.Close() }
 
-            # The Options dialog at its default size (1440x900 pass) and at its minimum size (1024x720 pass).
+            # The Options dialog at its default size (design size pass) and at its minimum size (1024x720 pass).
             $dw = if ($full) { 640 } else { 560 }
             $dh = if ($full) { 440 } else { 380 }
             $d = Open-TestWindow -XamlText $Arguments.DialogXaml -Dark $Arguments.Dark -Width $dw -Height $dh

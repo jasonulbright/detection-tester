@@ -84,7 +84,11 @@ function Get-DTPrefs {
 }
 
 function Restore-DTWindowState {
-    if (-not (Test-Path -LiteralPath $wsPath)) { return }
+    # The first start, with no saved window state, opens maximized: the design size is a 1080p work area.
+    if (-not (Test-Path -LiteralPath $wsPath)) {
+        try { $window.WindowState = [System.Windows.WindowState]::Maximized } catch { Write-Log "Restore-DTWindowState: $($_.Exception.Message)" -Quiet }
+        return
+    }
     try {
         $s = Get-Content -LiteralPath $wsPath -Raw | ConvertFrom-Json
         $w = if ($null -ne $s.Width  -and [double]$s.Width  -gt 600) { [double]$s.Width  } else { $window.Width }
