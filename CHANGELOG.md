@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add density and vacant-space window tests, and a guard that every guide image has a producing run.
+
+### Changed
+
+- Open at the 1920x1032 work area of a 1080p screen, maximized on first start.
+- Use compact density: 36 px sidebar buttons, 26 px inline buttons and boxes, 24 px grid rows.
+- Capture the guide images maximized, and list the images that a run produced in a manifest.
+
 ## [2026.11.15.0024] - 2026-11-15
 
 ## 21 disabled controls now dim

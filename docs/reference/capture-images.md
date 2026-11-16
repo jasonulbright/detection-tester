@@ -32,3 +32,9 @@ A section uses the state that the sections before it leave: the history rows and
 - A run without `-Section` stops and replaces no image when a step did not take an image of `docs/images`.
 - The steps reset the preferences of the lab account (`%LOCALAPPDATA%\DetectionTester\prefs.json`) before and after the run. They remove the history exports that the run wrote.
 - The test `Tests\GuideCapture.Guard.Tests.ps1` fails when an image under `docs/images` has no step.
+
+## One pass: check and capture
+
+The capture run is also the check run. It starts the app maximized on a 1080p session (the work area is 1920x1032 at 100 percent), shoots every window in both themes, and samples each shot: the mean luminance, and a warning for a blank image. The run ends with one line, for example `Capture verdict: PASS. Images produced 38, probe samples 38, warnings 0, errors 0.` It writes `tools\guide-capture\produced-images.json`, the list of the images that the run produced. The test `Tests\GuideImages.Guard.Tests.ps1` fails when an image under `docs/images` is not in that list.
+
+The window tests (`Tests\Density.Window.Tests.ps1` and the others) measure the layout at the work area of the session. Run them with `Tests\Run-VisibleProbe.ps1` in the same session when you change a size.
