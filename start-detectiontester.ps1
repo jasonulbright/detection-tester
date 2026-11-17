@@ -205,6 +205,9 @@ $script:DTOnTypeChanged = {
             $panels[$k].Visibility = if ($k -eq $sel) { 'Visible' } else { 'Collapsed' }
         }
     }
+    # The result on screen belongs to the clause of the previous type. A new type starts with no result.
+    if ($ctx.txtResultBadge)   { $ctx.txtResultBadge.Text   = '' }
+    if ($ctx.txtResultDetails) { $ctx.txtResultDetails.Text = '' }
 }
 
 $script:DTGatherClause = {
