@@ -12,6 +12,10 @@
 - Use compact density: 36 px sidebar buttons, 26 px inline buttons and boxes, 24 px grid rows.
 - Capture the guide images maximized, and list the images that a run produced in a manifest.
 
+### Fixed
+
+- Guard the buttons of the vendored SuiteCommon dialogs: the check no longer skips them, and the vendored SuiteCommon gives its dialogs ThemedButtonStyle.
+
 ## [2026.11.15.0024] - 2026-11-15
 
 ## 21 disabled controls now dim
