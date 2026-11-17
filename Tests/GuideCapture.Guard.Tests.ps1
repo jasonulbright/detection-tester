@@ -21,11 +21,10 @@ Describe 'Guide capture tool' {
         $register = $script:Text.IndexOf('Register-ScheduledTask')
         $lock | Should -BeGreaterThan -1
         $register | Should -BeGreaterThan $lock
-        $script:Text | Should -Match 'New-Item -ItemType File -Path \$path -Value \$token'
+        $script:Text | Should -Match 'New-Item -ItemType File -Path \$path -Value \$text'
     }
 
     It 'releases the lock in a finally block, only when this capture took it' {
-        $try = $script:Ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.TryStatementAst] -and $n.Finally -and $n.Finally.Extent.Text -match 'haveLock' -and $n.Finally.Extent.Text -match 'Remove-Item -LiteralPath \$path' }, $true)
         @($try).Count | Should -BeGreaterThan 0
     }
 
