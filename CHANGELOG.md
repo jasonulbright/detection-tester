@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2026.11.18.0025] - 2026-11-18
+
+## 9 changes: 1080p layout, guards, atomic settings save
+
 ### Added
 
 - Add density and vacant-space window tests, and a guard that every guide image has a producing run.
