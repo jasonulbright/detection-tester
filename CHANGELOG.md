@@ -7,6 +7,10 @@
 - Use ConfigMgr terms in the window text, the guide and the help text.
 - Say "Reload the ARP entries." in the tooltip of the Refresh button on the Installed Applications page.
 
+### Fixed
+
+- The guide capture tool stops only the processes that it started, by process id. It no longer stops PowerShell processes by command-line pattern, which could end the window of another session. A new guard test fails when a tool script stops a process by a pattern.
+
 ## [2026.11.18.0025] - 2026-11-18
 
 ## 9 changes: 1080p layout, guards, atomic settings save

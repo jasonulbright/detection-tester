@@ -79,13 +79,24 @@ function Shot($Win, [string]$Name) {
     $bmp.Save((Join-Path $OutDir ($Name + '.png')), [System.Drawing.Imaging.ImageFormat]::Png); $bmp.Dispose()
     Log ('shot {0} {1}x{2}' -f $Name, $w, $h)
 }
+# The capture stops only the processes that it started, by process id (vault: testing-policy, "Process rules on a lab VM").
+# Each run records its processes in a ledger in its own run folder. No process is ever stopped by a command-line pattern.
+$script:RunLedger = Join-Path $PSScriptRoot 'run.pids'
+$script:AppProcs = @{}
+function Register-RunProcess($Process, [string]$Key) {
+    $script:AppProcs[$Key] = $Process
+    ('{0}|{1}' -f $Process.Id, $Process.StartTime.Ticks) | Add-Content -LiteralPath $script:RunLedger
+}
 function Start-App([string]$Script, [string]$Title) {
     [void][NativeUi]::SetCursorPos(1900, 1060)
     $script:proc = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-STA', '-File', (Join-Path $appDir $Script)) -PassThru
+    Register-RunProcess $script:proc $Script
     $null = Find-Top $Title 60; Start-Sleep -Seconds 3; Find-Top $Title 10
 }
 function Stop-App([string]$Script) {
-    Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.CommandLine -like "*$Script*" } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    # Stop only the process that Start-App started for this script, by its process id.
+    $p = $script:AppProcs[$Script]
+    if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 }
 function Section([string]$Name, [scriptblock]$Body) {
     # A run with -Section lists the sections to run in $Capture.Sections.
