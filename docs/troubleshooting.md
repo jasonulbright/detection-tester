@@ -16,7 +16,7 @@ None.
 
 ## Steps
 
-1. Read the result and the detail line.
+1. Review the result and the detail line.
 2. Find the symptom in the tables.
 3. Do the fix.
 4. Select **Test Detection** again.

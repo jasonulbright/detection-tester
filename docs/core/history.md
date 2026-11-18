@@ -16,10 +16,10 @@ At least one test.
 
 ## Steps
 
-### Read the history
+### View the history
 
 1. Run some tests.
-2. Read the grid below the result. The columns are **Time**, **Type**, **Mode** (Positive or Negative), **Target**, **Expected**, **Found** and **Result**. The window shows the column headers in capital letters.
+2. Review the grid below the result. The columns are **Time**, **Type**, **Mode** (Positive or Negative), **Target**, **Expected**, **Found** and **Result**. The window shows the column headers in capital letters.
 
 ![The history after several tests](../images/history-filled.png)
 

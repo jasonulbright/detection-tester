@@ -4,7 +4,7 @@ The images in `docs/images` show the main window and the Options dialog. `tools/
 
 ## What the tool takes
 
-The tool copies the app to a lab workstation, starts it in an interactive session, drives it with UI Automation and copies the PNG files back. The steps run detection tests on the workstation: they read the registry and the file system, and they run one PowerShell script. They register no detection method.
+The tool copies the app to a lab computer, starts it in an interactive session, drives it with UI Automation and copies the PNG files back. The steps run detection tests on the computer: they read the registry and the file system, and they run one PowerShell script. They register no detection method.
 
 | Section | Images |
 |---|---|
@@ -25,8 +25,8 @@ A section uses the state that the sections before it leave: the history rows and
 .\tools\guide-capture\Invoke-GuideCapture.ps1 -CredentialScript <credential script> -Target <workstation> -LogonUser <domain\account>
 ```
 
-- The workstation needs an interactive session of the account in `-LogonUser`.
-- One capture runs at a time on a workstation. The script takes the lock `C:\guide\capture.lock` and waits up to `-LockWaitMinutes` (default 90) for another capture.
+- The lab computer needs an interactive session of the account in `-LogonUser`.
+- One capture runs at a time on a lab computer. The script takes the lock `C:\guide\capture.lock` and waits up to `-LockWaitMinutes` (default 90) for another capture.
 - `-Section 'light theme'` runs one section. `-Image options-about` copies only that image into `docs/images`.
 - Only images that already exist in `docs/images` are replaced. `-AddNew` also adds new ones.
 - A run without `-Section` stops and replaces no image when a step did not take an image of `docs/images`.
