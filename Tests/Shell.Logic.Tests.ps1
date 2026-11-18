@@ -278,6 +278,15 @@ Describe 'DTOnTypeChanged' {
         foreach ($p in 'panelRegistryKeyValue', 'panelRegistryKey', 'panelFile', 'panelScript', 'panelCompound') { $script:DTContext[$p].Visibility | Should -Be 'Collapsed' }
     }
 
+    It 'clears the result of the previous type' {
+        $script:DTContext.txtResultBadge = [pscustomobject]@{ Text = 'Fail' }
+        $script:DTContext.txtResultDetails = [pscustomobject]@{ Text = 'File not found' }
+        $script:DTContext.cboType.SelectedIndex = 3
+        & $script:DTOnTypeChanged
+        $script:DTContext.txtResultBadge.Text | Should -Be ''
+        $script:DTContext.txtResultDetails.Text | Should -Be ''
+    }
+
     It 'does nothing before the controls exist' {
         $script:DTContext = @{}
         { & $script:DTOnTypeChanged } | Should -Not -Throw

@@ -187,6 +187,12 @@
                 <Setter Property="Controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
             </Style>
 
+            <!-- The same rule as an implicit style: a grid in a module view that does not pick GridHeaderStyle through its grid style
+                 (the Installed Applications grid drew DISPLAYNAME) still keeps the case of its header text. -->
+            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}">
+                <Setter Property="Controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+            </Style>
+
             <Style x:Key="HistoryGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MahApps.Styles.DataGrid}">
                 <Setter Property="AutoGenerateColumns" Value="False"/>
                 <Setter Property="CanUserAddRows" Value="False"/>
