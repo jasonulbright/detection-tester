@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Main window of Detection Method Tester, a tool that tests Configuration Manager application detection methods on the local machine.
+    Main window of Detection Method Tester, a tool that tests Configuration Manager application detection methods on the local computer.
 
 .DESCRIPTION
     Loads the MahApps WPF shell and dispatches to the Detection Tester and
@@ -8,7 +8,7 @@
     Module\DetectionTesterCommon.psm1 (GUI-independent).
 
     Tests ConfigMgr application detection methods (RegistryKeyValue, RegistryKey,
-    File, Script, Compound) against the local machine without deploying
+    File, Script, Compound) against the local computer without deploying
     through ConfigMgr. Also browses ARP entries (HKLM and HKCU) for quick
     clause authoring.
 
@@ -1077,7 +1077,7 @@ $script:ShowOptionsDialog = {
                     <TextBlock x:Name="txtAboutVersion" Text="v1.2.1" FontSize="11"
                                Foreground="{DynamicResource MahApps.Brushes.Gray1}" Margin="0,2,0,12"/>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
-                               Text="Tests Configuration Manager application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the machine the tool is running on, without deploying through Configuration Manager. Browses ARP entries (HKLM and HKCU) for clause authoring."/>
+                               Text="Tests Configuration Manager application detection methods (RegistryKeyValue, RegistryKey, File, Script, Compound) against the computer that runs the tool, without deploying through Configuration Manager. Browses ARP entries (HKLM and HKCU) for clause authoring."/>
                     <Grid Margin="0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120"/>

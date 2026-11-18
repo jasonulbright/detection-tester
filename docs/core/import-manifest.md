@@ -20,7 +20,7 @@ A JSON file with a `Detection` block.
 
 1. Select **Import Stage Manifest...**. The Open dialog is titled **Import stage-manifest.json**.
 2. Select the file and select **Open**.
-3. Read the fields. For a single clause, they show the clause. For a Compound detection, the type is **Compound (import-only)**, the **Connector** shows `And` or `Or`, and the list **Clauses** shows one line for each clause.
+3. Review the fields. For a single clause, they show the clause. For a Compound detection, the type is **Compound (import-only)**, the **Connector** shows `And` or `Or`, and the list **Clauses** shows one line for each clause.
 
 ![A Compound detection after the import](../images/import-compound.png)
 

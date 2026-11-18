@@ -23,7 +23,7 @@ None.
 | Script | The rights of the account. The script runs in a new PowerShell runspace on this computer. |
 | Installed Applications | Read access to the three ARP keys. |
 
-A Configuration Manager client runs a detection method as the System account for a machine deployment. A clause can pass here and fail there, or the other way. Start the tool as the same account to compare.
+A Configuration Manager client runs a detection method as the System account for a deployment that targets a device. A clause can pass here and fail there, or the other way. Start the tool as the same account to compare.
 
 ## Steps
 

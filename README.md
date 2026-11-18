@@ -5,7 +5,7 @@
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D4)](#prerequisites)
 [![License](https://img.shields.io/github/license/jasonulbright/detection-tester)](LICENSE)
 
-Test Configuration Manager application detection methods against the local machine without deploying through Configuration Manager.
+Test Configuration Manager application detection methods against the local computer without deploying through Configuration Manager.
 
 ## What It Does
 
@@ -13,7 +13,7 @@ Configuration Manager application packagers define detection methods (registry k
 
 ![Detection Method Tester](docs/images/start-first-run.png)
 
-The footer shows the status text of the tool. The tool tests detection methods on the local computer and has no Configuration Manager connection, so the footer shows no site code and no site server.
+The footer shows the status text of the tool. The tool tests detection methods on the local computer and has no Configuration Manager connection, so the footer shows no site code and no SMS Provider.
 
 ## User guide
 
@@ -23,7 +23,7 @@ The user guide is in [docs/index.md](docs/index.md). It has one page for each pa
 
 | Type | What It Checks |
 |---|---|
-| **RegistryKeyValue** | Opens a registry key (HKLM or HKCU), reads a value, compares with operator (IsEquals, GreaterEquals, etc.) |
+| **RegistryKeyValue** | Opens a registry key (HKLM or HKCU), reads a value, compares with operator (IsEquals, GreaterEquals, and so on) |
 | **RegistryKey** | Checks if a registry key exists (HKLM or HKCU) |
 | **File** | Checks file existence, optionally compares file version |
 | **Script** | Executes a PowerShell scriptblock; any non-empty stdout = detected |
@@ -35,20 +35,20 @@ The shell has two modules accessible from the sidebar:
 
 ### Detection Tester
 
-Author and test detection clauses. Pick a type, fill in the parameters, click **Test Detection**. Results appear in a Pass/Fail badge with details. Every test is logged to the history grid below.
+Author and test detection clauses. Pick a type, fill in the parameters, select **Test Detection**. Results appear in a Pass/Fail badge with details. Every test is logged to the history grid below.
 
 - **Hive selector** - HKLM or HKCU on registry types. HKCU covers per-user installs (Adobe Reader DC, Chrome user-mode, OneDrive).
 - **View selector** - explicit 64-bit / 32-bit (WOW6432Node) for registry keys, removing the "why did my clause fail" ambiguity around architecture-split paths.
 - **Negative test mode** - flip pass/fail logic so "not detected" is a passing test. Useful for verifying that an uninstall removed the ARP entry.
 - **Import Stage Manifest** - load a `stage-manifest.json` from Application Packager and auto-populate the fields. Compound detections come in as a read-only clause list with a connector (And/Or).
-- **Use Selected** - clicking a history row repopulates the input panel, so you can re-run a clause after the original ARP entry has been uninstalled.
+- **Use Selected** - selecting a history row repopulates the input panel, so you can re-run a clause after the original ARP entry has been uninstalled.
 - **Export CSV / Export HTML** - write the history to a self-contained report under `%LOCALAPPDATA%\DetectionTester\reports\`.
 
 ### Installed Applications
 
-Browse all installed applications from both ARP registry hives (HKLM x64, HKLM WOW6432Node, HKCU). Filter by name, scope by Machine / User. Double-click or click **Use for Detection** to switch to the Detection Tester module with the registry key and version pre-filled.
+Browse all installed applications from both ARP registry hives (HKLM x64, HKLM WOW6432Node, HKCU). Filter by name, scope by Machine / User. Double-click or select **Use for Detection** to switch to the Detection Tester module with the registry key and version pre-filled.
 
-Select any application to see full ARP details: DisplayName, Publisher, DisplayVersion, Architecture, Scope, RegistryKey, UninstallString, QuietUninstallString, InstallLocation, InstallDate. Click **Copy Details** to copy all fields to clipboard.
+Select any application to see full ARP details: DisplayName, Publisher, DisplayVersion, Architecture, Scope, RegistryKey, UninstallString, QuietUninstallString, InstallLocation, InstallDate. Select **Copy Details** to copy all fields to the clipboard.
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ No admin rights and no Configuration Manager connection required.
    ```powershell
    .\start-detectiontester.ps1
    ```
-3. Pick a detection type, fill in parameters, click **Test Detection**.
+3. Pick a detection type, fill in parameters, select **Test Detection**.
 
 The Options dialog (sidebar -> Options) shows the log path and a button to open the per-app data folder under `%LOCALAPPDATA%\DetectionTester\`.
 

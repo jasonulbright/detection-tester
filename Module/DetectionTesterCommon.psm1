@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Provides:
-      - Structured logging via the vendored SuiteCommon module (Lib\SuiteCommon)
+      - Structured logging by using the vendored SuiteCommon module (Lib\SuiteCommon)
       - Detection tests (Test-RegistryKeyValueDetection, Test-RegistryKeyDetection,
         Test-FileDetection, Test-ScriptDetection, Test-CompoundDetection)
       - ARP enumeration (Get-InstalledApplications)
@@ -192,7 +192,7 @@ function Get-DTHiveDisplayPrefix {
 function ConvertTo-DTHiveName {
     <#
     .SYNOPSIS
-        Normalizes hive aliases (HKLM, HKCU, HKEY_LOCAL_MACHINE, etc.) to
+        Normalizes hive aliases (HKLM, HKCU, HKEY_LOCAL_MACHINE, and so on) to
         the canonical .NET names ('LocalMachine' or 'CurrentUser').
     .OUTPUTS
         [string] one of 'LocalMachine' or 'CurrentUser'.
@@ -252,7 +252,7 @@ function Get-DTHiveFromPath {
 function Test-RegistryKeyValueDetection {
     <#
     .SYNOPSIS
-        Tests a RegistryKeyValue detection rule against the local machine.
+        Tests a RegistryKeyValue detection rule against the local computer.
     .OUTPUTS
         [hashtable] with keys: Detected, KeyExists, ValueFound, ActualValue, ExpectedValue, Operator, Details
     #>
@@ -345,7 +345,7 @@ function Test-RegistryKeyValueDetection {
 function Test-RegistryKeyDetection {
     <#
     .SYNOPSIS
-        Tests a RegistryKey existence detection rule against the local machine.
+        Tests a RegistryKey existence detection rule against the local computer.
     .OUTPUTS
         [hashtable] with keys: Detected, KeyExists, Details
     #>
@@ -409,7 +409,7 @@ function Test-RegistryKeyDetection {
 function Test-FileDetection {
     <#
     .SYNOPSIS
-        Tests a File detection rule against the local machine.
+        Tests a File detection rule against the local computer.
     .OUTPUTS
         [hashtable] with keys: Detected, FileExists, ActualValue, ExpectedValue, Operator, Details
     #>

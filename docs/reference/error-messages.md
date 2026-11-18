@@ -28,7 +28,7 @@ None.
 | Import failed: The manifest could not be imported. Select a stage-manifest.json file with a Detection block. | The manifest could not be read. The log has the reason. See [Import a manifest](../core/import-manifest.md). | Fix the file. |
 | Export failed: The history could not be saved. Select a folder that you can write to. | The export could not write the file. The log has the reason. | Select another folder. |
 | Running... | A script test runs. | Wait. The time limit is 30 seconds. |
-| Error | A script test failed. | Read the detail line and the log. |
+| Error | A script test failed. | Review the detail line and the log. |
 
 ### Log
 
