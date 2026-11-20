@@ -30,7 +30,7 @@
                        ToolTip="Match text in DisplayName, Publisher and DisplayVersion."/>
 
             <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="Scope:"    VerticalAlignment="Center" Margin="0,0,8,0"/>
-            <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Column="4" x:Name="cboScope" SelectedIndex="0">
+            <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Column="4" x:Name="cboScope" ToolTip="Select which entries to list: both hives, only HKLM, or only HKCU." SelectedIndex="0">
                 <ComboBoxItem Content="All"/>
                 <ComboBoxItem Content="Machine (HKLM)"/>
                 <ComboBoxItem Content="User (HKCU)"/>
@@ -43,7 +43,7 @@
     </Border>
 
     <!-- ====================  GRID  ==================== -->
-    <DataGrid Grid.Row="1" x:Name="dgApps"
+    <DataGrid Grid.Row="1" x:Name="dgApps" ToolTip="Select an entry to fill a detection clause from it or to copy its details."
               Margin="0,8,0,0"
               Style="{DynamicResource HistoryGridStyle}"
               CellStyle="{DynamicResource GridCellStyle}">

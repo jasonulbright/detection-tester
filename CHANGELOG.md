@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add tooltips to 20 controls: the detection type, hive, view, key path, value name, operator, expected value, file name, property type and script boxes on the Detection Tester page, and the scope list and the grid on the Installed Applications page. A guard test checks them.
+
 ### Changed
 
 - Use ConfigMgr terms in the window text, the guide and the help text.
