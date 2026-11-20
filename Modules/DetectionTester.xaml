@@ -85,7 +85,7 @@
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="1" Grid.Column="0" Text="Value Name:"    VerticalAlignment="Center" Margin="0,2"/>
                     <TextBox   Grid.Row="1" Grid.Column="1" x:Name="rkvValueName" ToolTip="Enter the name of the registry value to read." Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="2" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,2"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="rkvOperator" ToolTip="Select how the registry value is compared with the expected value. The ordering operators compare version numbers or whole numbers."  SelectedIndex="0" Margin="0,2">
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="rkvOperator" ToolTip="Select how the registry value is compared with the expected value, by version number or whole number for the ordering operators."  SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="IsEquals"/>
                         <ComboBoxItem Content="GreaterEquals"/>
                         <ComboBoxItem Content="GreaterThan"/>
@@ -166,7 +166,7 @@
                         <ComboBoxItem Content="Version"/>
                     </ComboBox>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="3" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,2"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="3" Grid.Column="1" x:Name="fileOperator" ToolTip="Select how the file version is compared with the expected version. The tool uses it only for the Version property type." SelectedIndex="0" Margin="0,2">
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="3" Grid.Column="1" x:Name="fileOperator" ToolTip="Select how the file version is compared with the expected version, for the Version property type only." SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="GreaterEquals"/>
                         <ComboBoxItem Content="GreaterThan"/>
                         <ComboBoxItem Content="IsEquals"/>
@@ -190,7 +190,7 @@
                            TextWrapping="Wrap"
                            FontSize="11"
                            Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>
-                <TextBox x:Name="scriptText" ToolTip="Enter the body of the PowerShell scriptblock. The clause is detected when the script writes any output."
+                <TextBox x:Name="scriptText" ToolTip="Enter the PowerShell scriptblock body, which detects the clause when it writes any output."
                          Height="180"
                          AcceptsReturn="True"
                          AcceptsTab="True"

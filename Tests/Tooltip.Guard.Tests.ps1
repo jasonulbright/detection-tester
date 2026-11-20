@@ -3,7 +3,7 @@
 #
 # Rules:
 #   1. Every control in the audited list has a ToolTip.
-#   2. The ToolTip text is ASCII, is not longer than 200 characters and ends in a period.
+#   2. The ToolTip text is ASCII, is not longer than 160 characters and ends in a period.
 #
 # The list holds the controls that Q-103 gave a tooltip. A new input control, check box, radio button, combo box or
 # action button belongs in the list when it needs one. Controls that are skipped on purpose: OK and Cancel buttons,
@@ -23,7 +23,7 @@ BeforeAll {
     $script:TtRepoRoot = Split-Path -Parent $PSScriptRoot
     $script:TtNamespace = 'http://schemas.microsoft.com/winfx/2006/xaml/presentation'
     $script:TtKeyNamespace = 'http://schemas.microsoft.com/winfx/2006/xaml'
-    $script:TtExcluded = '^(\.claude|\.git|Tests|tools|Logs|Lib)([\/]|$)'
+    $script:TtExcluded = '^(\.claude|\.git|Tests|tools|Logs|Lib)([\\/]|$)'
 
     function Get-TtRelativePath {
         param([string]$FullName)
@@ -85,6 +85,7 @@ Describe 'Tooltips of the audited controls' {
         $tip = $script:TtElement[$Name].GetAttribute('ToolTip')
         $tip | Should -Match '^[\x20-\x7e]+$' -Because "$Name tooltip is ASCII"
         $tip | Should -Match '\.$' -Because "$Name tooltip ends in a period"
-        $tip.Length | Should -BeLessOrEqual 200 -Because "$Name tooltip is short"
+        $tip | Should -Not -Match '\.\s+\S' -Because "$Name tooltip is one sentence"
+        $tip.Length | Should -BeLessOrEqual 160 -Because "$Name tooltip is short"
     }
 }
