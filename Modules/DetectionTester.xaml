@@ -24,7 +24,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Detection Type:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-            <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Column="1" x:Name="cboType" SelectedIndex="0">
+            <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Column="1" x:Name="cboType" ToolTip="Select the type of detection method to test." SelectedIndex="0">
                 <ComboBoxItem Content="RegistryKeyValue"/>
                 <ComboBoxItem Content="RegistryKey"/>
                 <ComboBoxItem Content="File"/>
@@ -59,13 +59,13 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="lblRkvHive" Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <RadioButton x:Name="rkvHiveHKLM" Content="HKLM" IsChecked="True" GroupName="rkvHive" Margin="0,0,12,0"/>
-                        <RadioButton x:Name="rkvHiveHKCU" Content="HKCU"                  GroupName="rkvHive"/>
+                        <RadioButton x:Name="rkvHiveHKLM" ToolTip="Query the key under HKEY_LOCAL_MACHINE." Content="HKLM" IsChecked="True" GroupName="rkvHive" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkvHiveHKCU" ToolTip="Query the key under HKEY_CURRENT_USER of the user who runs this tool." Content="HKCU"                  GroupName="rkvHive"/>
                     </StackPanel>
                     <TextBlock x:Name="lblRkvView" Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="4" Orientation="Horizontal">
-                        <RadioButton x:Name="rkvView64" Content="64-bit" IsChecked="True" GroupName="rkvView" Margin="0,0,12,0"/>
-                        <RadioButton x:Name="rkvView32" Content="32-bit (WOW6432Node)"     GroupName="rkvView"/>
+                        <RadioButton x:Name="rkvView64" ToolTip="Query the key as a 64-bit Configuration Manager client does." Content="64-bit" IsChecked="True" GroupName="rkvView" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkvView32" ToolTip="Query the key as a 32-bit client does, from the WOW6432Node view." Content="32-bit (WOW6432Node)"     GroupName="rkvView"/>
                     </StackPanel>
                 </Grid>
                 <Grid Margin="0,4,0,4">
@@ -81,11 +81,11 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="0" Grid.Column="0" Text="Key Path:"      VerticalAlignment="Center" Margin="0,2"/>
-                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="rkvKeyPath" Height="26"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="rkvKeyPath" ToolTip="Enter the key path under the hive, without the hive name, such as SOFTWARE\Contoso\App." Height="26"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="1" Grid.Column="0" Text="Value Name:"    VerticalAlignment="Center" Margin="0,2"/>
-                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="rkvValueName" Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="rkvValueName" ToolTip="Enter the name of the registry value to read." Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="2" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,2"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="rkvOperator"  SelectedIndex="0" Margin="0,2">
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="rkvOperator" ToolTip="Select how the registry value is compared with the expected value, by version number or whole number for the ordering operators."  SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="IsEquals"/>
                         <ComboBoxItem Content="GreaterEquals"/>
                         <ComboBoxItem Content="GreaterThan"/>
@@ -93,7 +93,7 @@
                         <ComboBoxItem Content="LessThan"/>
                     </ComboBox>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="3" Grid.Column="0" Text="Expected:"      VerticalAlignment="Center" Margin="0,2"/>
-                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="rkvExpected" Height="26"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="rkvExpected" ToolTip="Enter the value to compare with the registry value." Height="26"  FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                 </Grid>
             </StackPanel>
 
@@ -109,13 +109,13 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="lblRkHive" Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Hive:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <RadioButton x:Name="rkHiveHKLM" Content="HKLM" IsChecked="True" GroupName="rkHive" Margin="0,0,12,0"/>
-                        <RadioButton x:Name="rkHiveHKCU" Content="HKCU"                  GroupName="rkHive"/>
+                        <RadioButton x:Name="rkHiveHKLM" ToolTip="Test for the key under HKEY_LOCAL_MACHINE." Content="HKLM" IsChecked="True" GroupName="rkHive" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkHiveHKCU" ToolTip="Test for the key under HKEY_CURRENT_USER of the user who runs this tool." Content="HKCU"                  GroupName="rkHive"/>
                     </StackPanel>
                     <TextBlock x:Name="lblRkView" Style="{DynamicResource FieldLabelStyle}" Grid.Column="3" Text="View:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel Grid.Column="4" Orientation="Horizontal">
-                        <RadioButton x:Name="rkView64" Content="64-bit" IsChecked="True" GroupName="rkView" Margin="0,0,12,0"/>
-                        <RadioButton x:Name="rkView32" Content="32-bit (WOW6432Node)"     GroupName="rkView"/>
+                        <RadioButton x:Name="rkView64" ToolTip="Test for the key as a 64-bit Configuration Manager client does." Content="64-bit" IsChecked="True" GroupName="rkView" Margin="0,0,12,0"/>
+                        <RadioButton x:Name="rkView32" ToolTip="Test for the key as a 32-bit client does, in the WOW6432Node view." Content="32-bit (WOW6432Node)"     GroupName="rkView"/>
                     </StackPanel>
                 </Grid>
                 <Grid Margin="0,4">
@@ -124,7 +124,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Column="0" Text="Key Path:"     VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox   Grid.Column="1" x:Name="rkKeyPath" Height="26"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBox   Grid.Column="1" x:Name="rkKeyPath" ToolTip="Enter the key path under the hive, without the hive name, such as SOFTWARE\Contoso\App." Height="26"   FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                 </Grid>
             </StackPanel>
 
@@ -159,14 +159,14 @@
                     <TextBox   Grid.Row="0" Grid.Column="1" x:Name="fileFilePath" Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"
                                ToolTip="Enter the folder path. A variable such as %ProgramFiles% expands."/>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="1" Grid.Column="0" Text="File Name:"     VerticalAlignment="Center" Margin="0,2"/>
-                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="fileFileName" Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="fileFileName" ToolTip="Enter the file name, such as app.exe." Height="26" FontFamily="Cascadia Code, Consolas, Courier New" Margin="0,2"/>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="2" Grid.Column="0" Text="Property Type:" VerticalAlignment="Center" Margin="0,2"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="filePropType" SelectedIndex="0" Margin="0,2">
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="2" Grid.Column="1" x:Name="filePropType" ToolTip="Select Existence to test that the file exists, or Version to compare its file version." SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="Existence"/>
                         <ComboBoxItem Content="Version"/>
                     </ComboBox>
                     <TextBlock Style="{DynamicResource FieldLabelStyle}" Grid.Row="3" Grid.Column="0" Text="Operator:"      VerticalAlignment="Center" Margin="0,2"/>
-                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="3" Grid.Column="1" x:Name="fileOperator" SelectedIndex="0" Margin="0,2">
+                    <ComboBox  ItemContainerStyle="{DynamicResource ThemedComboBoxItemStyle}" Grid.Row="3" Grid.Column="1" x:Name="fileOperator" ToolTip="Select how the file version is compared with the expected version, for the Version property type only." SelectedIndex="0" Margin="0,2">
                         <ComboBoxItem Content="GreaterEquals"/>
                         <ComboBoxItem Content="GreaterThan"/>
                         <ComboBoxItem Content="IsEquals"/>
@@ -190,7 +190,7 @@
                            TextWrapping="Wrap"
                            FontSize="11"
                            Foreground="{DynamicResource MahApps.Brushes.Gray1}"/>
-                <TextBox x:Name="scriptText"
+                <TextBox x:Name="scriptText" ToolTip="Enter the PowerShell scriptblock body, which detects the clause when it writes any output."
                          Height="180"
                          AcceptsReturn="True"
                          AcceptsTab="True"

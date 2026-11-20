@@ -4,7 +4,11 @@
 
 ## [2026.11.20.0026] - 2026-11-20
 
-## 3 changes: ConfigMgr wording, Refresh tooltip
+## 4 changes: ConfigMgr wording, Refresh tooltip
+
+### Added
+
+- Add tooltips to buttons and fields.
 
 ### Changed
 
