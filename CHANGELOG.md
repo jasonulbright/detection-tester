@@ -2,18 +2,22 @@
 
 ## [Unreleased]
 
+## [2026.11.20.0026] - 2026-11-20
+
+## 4 changes: ConfigMgr wording, Refresh tooltip
+
 ### Added
 
-- Add tooltips to 20 controls: the detection type, hive, view, key path, value name, operator, expected value, file name, property type and script boxes on the Detection Tester page, and the scope list and the grid on the Installed Applications page. A guard test checks them.
+- Add tooltips to buttons and fields.
 
 ### Changed
 
-- Use ConfigMgr terms in the window text, the guide and the help text.
-- Say "Reload the ARP entries." in the tooltip of the Refresh button on the Installed Applications page.
+- Use ConfigMgr terms in window text, guide and help text.
+- Reword the Refresh tooltip on Installed Applications to Reload the ARP entries.
 
 ### Fixed
 
-- The guide capture tool stops only the processes that it started, by process id. It no longer stops PowerShell processes by command-line pattern, which could end the window of another session. A new guard test fails when a tool script stops a process by a pattern.
+- Stop only the processes the guide capture tool started.
 
 ## [2026.11.18.0025] - 2026-11-18
 
