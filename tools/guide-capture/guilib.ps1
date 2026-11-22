@@ -57,18 +57,27 @@ function Maximize-Win($Win) {
     Log ('work area {0}x{1}' -f $wa.Width, $wa.Height)
 }
 # A real mouse move, not only SetCursorPos: WPF raises MouseLeave and closes a tooltip only after a real move. Then wait until no tooltip shows.
-function Move-MouseAway {
+# A tooltip that stays (the keyboard focus of a clicked control can hold one) goes away when the mouse touches the title bar of the window and leaves again.
+function Move-MouseAway($Win) {
     [void][NativeUi]::SetCursorPos(1900, 1060); Start-Sleep -Milliseconds 100
     [NativeUi]::mouse_event(1, 3, 3, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 100
     [NativeUi]::mouse_event(1, -3, -3, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 300
     $tipCond = New-Object System.Windows.Automation.PropertyCondition($AE::ControlTypeProperty, [System.Windows.Automation.ControlType]::ToolTip)
-    $end = (Get-Date).AddSeconds(8)
+    $end = (Get-Date).AddSeconds(4)
     while ((Get-Date) -lt $end -and $root.FindFirst('Descendants', $tipCond)) { Start-Sleep -Milliseconds 400 }
+    if ($Win -and $root.FindFirst('Descendants', $tipCond)) {
+        $r = $Win.Current.BoundingRectangle
+        [void][NativeUi]::SetCursorPos([int]($r.X + $r.Width / 2), [int]($r.Y + 14)); Start-Sleep -Milliseconds 300
+        [NativeUi]::mouse_event(1, 2, 2, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 400
+        [void][NativeUi]::SetCursorPos(1900, 1060); Start-Sleep -Milliseconds 100
+        [NativeUi]::mouse_event(1, 3, 3, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 100
+        [NativeUi]::mouse_event(1, -3, -3, 0, [UIntPtr]::Zero); Start-Sleep -Seconds 2
+    }
     if ($root.FindFirst('Descendants', $tipCond)) { Log 'TOOLTIP still shown after the mouse moved away; the next shot holds it' }
 }
 function Shot($Win, [string]$Name) {
     # The mouse leaves the window, so that no button shows its hover state in the image.
-    Move-MouseAway
+    Move-MouseAway $Win
     Start-Sleep -Milliseconds 1300
     # A tooltip of the last button stays for a few seconds: wait until none shows. When one stays, touch a neutral point of the title bar and leave again.
     $tipCond = New-Object System.Windows.Automation.PropertyCondition($AE::ControlTypeProperty, [System.Windows.Automation.ControlType]::ToolTip)
