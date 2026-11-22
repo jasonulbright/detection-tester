@@ -6,6 +6,10 @@ This page lists every folder and file that Detection Tester writes.
 
 The tool writes its own files in `%LOCALAPPDATA%\DetectionTester` and in the folder that you choose for an export. It writes nothing in the registry and nothing in the folder of the script. A script that you test can write to the registry and to every file that the starting account can write.
 
+## Sites
+
+Detection Tester keeps no data per ConfigMgr site. The AppPackager Suite launcher chooses a site and stores each site's data under `%LOCALAPPDATA%\AppPackagerData\sites\<SITE>\tools\<tool>`. This tool writes nothing there. Its preferences and reports are the same for every site.
+
 ## When to use it
 
 Use it to find a log or an export, or to clean up.
