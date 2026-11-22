@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [2026.11.22.0027] - 2026-11-22
+
+## 1 shared module synchronized: no per-site data
+
+### Changed
+
+- Synchronize the shared SuiteCommon module for the per-site data layout.
+- State that the tool keeps no data per site.
+
 ## [2026.11.20.0026] - 2026-11-20
 
 ## 4 changes: ConfigMgr wording, Refresh tooltip
