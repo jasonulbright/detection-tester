@@ -88,14 +88,9 @@ function Move-MouseAway($Win) {
     if ($root.FindFirst('Descendants', $tipCond)) { Log 'TOOLTIP still shown after the mouse moved away; the next shot holds it' }
 }
 function Shot($Win, [string]$Name) {
-    # The mouse leaves the window, so that no button shows its hover state in the image.
+    # The mouse leaves the window and no tooltip shows (Move-MouseAway), so that no button shows its hover state in the image.
     Move-MouseAway $Win
     Start-Sleep -Milliseconds 1300
-    # A tooltip of the last button stays for a few seconds: wait until none shows. When one stays, touch a neutral point of the title bar and leave again.
-    $tipCond = New-Object System.Windows.Automation.PropertyCondition($AE::ControlTypeProperty, [System.Windows.Automation.ControlType]::ToolTip)
-    $end = (Get-Date).AddSeconds(8)
-    while ((Get-Date) -lt $end -and $root.FindFirst('Descendants', $tipCond)) { Start-Sleep -Milliseconds 400 }
-    if ($root.FindFirst('Descendants', $tipCond)) { [void][NativeUi]::SetCursorPos(700, 16); Start-Sleep -Milliseconds 400; [void][NativeUi]::SetCursorPos(1900, 1060); Start-Sleep -Seconds 2 }
     $r = $Win.Current.BoundingRectangle
     $x = [int][Math]::Max(0, $r.X); $y = [int][Math]::Max(0, $r.Y)
     $w = [int][Math]::Min($r.Width, [System.Windows.Forms.SystemInformation]::VirtualScreen.Width - $x)
