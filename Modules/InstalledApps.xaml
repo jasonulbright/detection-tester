@@ -48,9 +48,9 @@
               Style="{DynamicResource HistoryGridStyle}"
               CellStyle="{DynamicResource GridCellStyle}">
         <DataGrid.Columns>
-            <DataGridTextColumn Header="DisplayName"    Binding="{Binding DisplayName}"    Width="*"/>
+            <DataGridTextColumn Header="Display Name"   Binding="{Binding DisplayName}"    Width="*"/>
             <DataGridTextColumn Header="Publisher"      Binding="{Binding Publisher}"      Width="200"/>
-            <DataGridTextColumn Header="DisplayVersion" Binding="{Binding DisplayVersion}" Width="140"/>
+            <DataGridTextColumn Header="Display Version" Binding="{Binding DisplayVersion}" Width="140"/>
             <DataGridTextColumn Header="Architecture"   Binding="{Binding Architecture}"   Width="120"/>
             <DataGridTextColumn Header="Scope"          Binding="{Binding Scope}"          Width="90"/>
         </DataGrid.Columns>

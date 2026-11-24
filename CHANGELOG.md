@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Rename the Installed Applications headers DisplayName and DisplayVersion to Display Name and Display Version.
+- Check the case of every grid column header by a guard test and by a window test.
+
 ## [2026.11.22.0027] - 2026-11-22
 
 ## 1 shared module synchronized: no per-site data
