@@ -19,7 +19,7 @@ None.
 ### Browse the entries
 
 1. Select **Installed Applications** in the sidebar. The grid fills.
-2. Review the columns: **DisplayName**, **Publisher**, **DisplayVersion**, **Architecture** and **Scope**. The window shows the column headers in capital letters.
+2. Review the columns: **Display Name**, **Publisher**, **Display Version**, **Architecture** and **Scope**.
 
 ![The Installed Applications page](../images/installed-panel.png)
 
