@@ -70,9 +70,9 @@ BeforeAll {
         param([string]$Key, [int]$Depth = 0)
         if (-not $Key -or $Depth -gt 8 -or -not $script:Styles.ContainsKey($Key)) { return $false }
         $node = $script:Styles[$Key]
-        foreach ($setter in @($node.ChildNodes | Where-Object { $_.LocalName -eq 'Setter' -and $_.GetAttribute('Property') -eq 'ColumnHeaderStyle' })) {
-            if ((Get-KeyName $setter.GetAttribute('Value')) -eq 'GridHeaderStyle') { return $true }
-        }
+        # A setter of this style wins over the setter of the style it is based on: the local value decides.
+        $local = @($node.ChildNodes | Where-Object { $_.LocalName -eq 'Setter' -and $_.GetAttribute('Property') -eq 'ColumnHeaderStyle' })
+        if ($local.Count -gt 0) { return ((Get-KeyName $local[0].GetAttribute('Value')) -eq 'GridHeaderStyle') }
         Test-StyleGivesHeaderStyle -Key (Get-KeyName $node.GetAttribute('BasedOn')) -Depth ($Depth + 1)
     }
 }
@@ -110,9 +110,12 @@ Describe 'Grid column header casing' {
     It 'applies GridHeaderStyle to every grid of <Name>' -ForEach $script:GridCases {
         $x = Read-Xaml -Path $File
         $bad = foreach ($grid in $x.Doc.SelectNodes('//w:DataGrid', $x.Mgr)) {
-            $direct = Get-KeyName $grid.GetAttribute('ColumnHeaderStyle')
-            $viaStyle = Test-StyleGivesHeaderStyle -Key (Get-KeyName $grid.GetAttribute('Style'))
-            if ($direct -ne 'GridHeaderStyle' -and -not $viaStyle) { 'grid "{0}" has no GridHeaderStyle' -f $grid.GetAttribute('Name', $script:XNs) }
+            # A value on the grid itself wins over the style of the grid: when it is set, it alone must name GridHeaderStyle.
+            $gridName = $grid.GetAttribute('Name', $script:XNs)
+            if ($grid.HasAttribute('ColumnHeaderStyle')) {
+                if ((Get-KeyName $grid.GetAttribute('ColumnHeaderStyle')) -ne 'GridHeaderStyle') { 'grid "{0}" sets another ColumnHeaderStyle' -f $gridName }
+            }
+            elseif (-not (Test-StyleGivesHeaderStyle -Key (Get-KeyName $grid.GetAttribute('Style')))) { 'grid "{0}" has no GridHeaderStyle' -f $gridName }
         }
         @($bad) | Should -BeNullOrEmpty -Because (@($bad) -join '; ')
     }
@@ -133,6 +136,7 @@ Describe 'Grid column header casing' {
             $text = Get-Content -LiteralPath $path -Raw
             $text | Should -Not -Match 'DataGrid(Text|CheckBox|Template|ComboBox)Column' -Because $file
             $text | Should -Not -Match 'AutoGeneratingColumn|DataGridColumnHeader' -Because $file
+            $text | Should -Not -Match '\.Columns(\.Item)?\s*(\[[^\]]*\]|\([^)]*\))\s*\.Header\s*=' -Because ($file + ' sets the header of a grid column')
         }
     }
 }
